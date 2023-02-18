@@ -1,15 +1,15 @@
-﻿namespace Save_File_Manager
+﻿namespace SaveFileManager
 {
     /// <summary>
     /// Required responses for the <c>KeyAction</c> object when used in one of the the UI objects/functions.
     /// </summary>
-    public enum Key
+    public enum Key:int
     {
-        ESCAPE,
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT,
-        ENTER
+        ESCAPE = 0,
+        UP = 1,
+        DOWN = 2,
+        LEFT = 3,
+        RIGHT = 4,
+        ENTER = 5
     }
 }

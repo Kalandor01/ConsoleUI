@@ -1,4 +1,4 @@
-﻿namespace Save_File_Manager
+﻿namespace SaveFileManager
 {
     /// <summary>
     /// Modes for the <c>GetKey</c> function.

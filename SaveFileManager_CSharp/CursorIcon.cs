@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Save_File_Manager
+namespace SaveFileManager
 {
     public class CursorIcon
     {
