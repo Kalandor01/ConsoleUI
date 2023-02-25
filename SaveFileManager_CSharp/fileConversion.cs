@@ -13,9 +13,9 @@ namespace SaveFileManager
     {
         /// <param name="fileLine">The line that will be in the file.</param>
         /// <inheritdoc cref="EncodeFile(IEnumerable{string}, long, string, string, Encoding, int)"/>
-        public static void EncodeFile(string fileLine, long seed = 1, string filePath = "file", string fileExt = "sav", Encoding encoding = null, int version = 2)
+        public static void EncodeFile(string fileLine, long seed = 1, string filePath = "file", string fileExt = "sav", int version = 2, Encoding encoding = null)
         {
-            EncodeFile(new List<string> { fileLine }, seed, filePath, fileExt, encoding, version);
+            EncodeFile(new List<string> { fileLine }, seed, filePath, fileExt, version, encoding);
         }
 
         /// <summary>
@@ -30,13 +30,13 @@ namespace SaveFileManager
         /// <param name="seed">The seed for encoding the file.</param>
         /// <param name="filePath">The path and the name of the file without the extension, that will be created. If the path contains a *, it will be replaced with the seed.</param>
         /// <param name="fileExt">The extension of the file that will be created.</param>
-        /// <param name="encoding">The encoding of the input lines. By default it uses the default encoding.</param>
         /// <param name="version">The encription version.</param>
-        public static void EncodeFile(IEnumerable<string> fileLines, long seed = 1, string filePath = "file", string fileExt = "sav", Encoding encoding = null, int version = 2)
+        /// <param name="encoding">The encoding of the input lines. By default it uses the UTF8 encoding. You shouldn't need to change this.</param>
+        public static void EncodeFile(IEnumerable<string> fileLines, long seed = 1, string filePath = "file", string fileExt = "sav", int version=2, Encoding encoding = null)
         {
             if (encoding == null)
             {
-                encoding = Encoding.Default;
+                encoding = Encoding.UTF8;
             }
             var r = MakeRandom(MakeSeed(seed));
 
@@ -108,13 +108,13 @@ namespace SaveFileManager
         /// <param name="seed">The seed for decoding the file.</param>
         /// <param name="filePath">The path and the name of the file without the extension, that will loaded. If the path contains a *, it will be replaced with the seed.</param>
         /// <param name="fileExt">The extension of the file that will be decoded.</param>
-        /// <param name="encoding">The encoding of the output lines. By default it uses the default encoding.</param>
         /// <param name="decodeUntil">Controlls how many lines the function should decode(strarting from the beggining, with 1). If it is set to -1, it will decode all the lines in the file.</param>
-        public static IEnumerable<string> DecodeFile(long seed = 1, string filePath = "file", string fileExt = "sav", Encoding encoding = null, int decodeUntil = -1)
+        /// <param name="encoding">The encoding of the output lines. By default it uses the UTF8 encoding. You shouldn't need to change this.</param>
+        public static IEnumerable<string> DecodeFile(long seed = 1, string filePath = "file", string fileExt = "sav", int decodeUntil = -1, Encoding encoding = null)
         {
             if (encoding == null)
             {
-                encoding = Encoding.Default;
+                encoding = Encoding.UTF8;
             }
             //get lines
             var fileBytes = File.ReadAllBytes($"{filePath.Replace("*", seed.ToString())}.{fileExt}");
