@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <Version>0.3.2</Version>
+    <Authors>Kalandor01</Authors>
+    <Description>File encoding and console UI tools.</Description>
+    <Copyright>MIT</Copyright>
+    <PackageProjectUrl>https://github.com/Kalandor01/SaveFileManager_CSharp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Kalandor01/SaveFileManager_CSharp</RepositoryUrl>
+    <PackageTags>console</PackageTags>
+    <PackageReleaseNotes>Bugfixes</PackageReleaseNotes>
+    <PackageOutputPath></PackageOutputPath>
+    <NeutralLanguage>en-001</NeutralLanguage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NPrng" Version="1.0.0.1" />
+  </ItemGroup>
+
+</Project>

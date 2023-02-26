@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace SaveFileManager
 {
-    public static class utils
+    public static class Utils
     {
         /// <summary>
         /// ReadKey but only accepts whole numbers.
@@ -31,7 +28,7 @@ namespace SaveFileManager
 
         /// <param name="mode">The GetKeyMode to use.</param>
         /// <inheritdoc cref="GetKey(IEnumerable{GetKeyMode}, IEnumerable{KeyAction})"/>
-        public static object GetKey(GetKeyMode mode=GetKeyMode.NO_IGNORE, IEnumerable<KeyAction> keybinds=null)
+        public static object GetKey(GetKeyMode mode=GetKeyMode.NO_IGNORE, IEnumerable<KeyAction>? keybinds=null)
         {
             return GetKey(new List<GetKeyMode> { mode }, keybinds);
         }
@@ -43,7 +40,7 @@ namespace SaveFileManager
         /// <param name="modeList">The list of GetKeyMode to use.</param>
         /// <param name="keybinds">The list of KeyActions.</param>
         /// <returns>The <c>response</c> of the <c>KeyAction</c> object that maches the key the user pressed.</returns>
-        public static object GetKey(IEnumerable<GetKeyMode> modeList, IEnumerable<KeyAction> keybinds=null)
+        public static object GetKey(IEnumerable<GetKeyMode> modeList, IEnumerable<KeyAction>? keybinds=null)
         {
             if (keybinds is null)
             {

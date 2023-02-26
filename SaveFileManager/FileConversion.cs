@@ -1,19 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Text;
-using System;
+﻿using System.Text;
 using NPrng.Generators;
 using NPrng;
-using System.Linq;
-using System.IO;
 using System.Numerics;
 
 namespace SaveFileManager
 {
-    public static class fileConversion
+    public static class FileConversion
     {
         /// <param name="fileLine">The line that will be in the file.</param>
         /// <inheritdoc cref="EncodeFile(IEnumerable{string}, long, string, string, int, Encoding)"/>
-        public static void EncodeFile(string fileLine, long seed = 1, string filePath = "file", string fileExt = "sav", int version = 2, Encoding encoding = null)
+        public static void EncodeFile(string fileLine, long seed = 1, string filePath = "file", string fileExt = "sav", int version = 2, Encoding? encoding = null)
         {
             EncodeFile(new List<string> { fileLine }, seed, filePath, fileExt, version, encoding);
         }
@@ -32,7 +28,7 @@ namespace SaveFileManager
         /// <param name="fileExt">The extension of the file that will be created.</param>
         /// <param name="version">The encription version.</param>
         /// <param name="encoding">The encoding of the input lines. By default it uses the UTF8 encoding. You shouldn't need to change this.</param>
-        public static void EncodeFile(IEnumerable<string> fileLines, long seed = 1, string filePath = "file", string fileExt = "sav", int version=2, Encoding encoding = null)
+        public static void EncodeFile(IEnumerable<string> fileLines, long seed = 1, string filePath = "file", string fileExt = "sav", int version=2, Encoding? encoding = null)
         {
             if (encoding == null)
             {
@@ -50,7 +46,7 @@ namespace SaveFileManager
                     var rr = MakeRandom(MakeSeed(seed));
                     foreach (var line in fileLines)
                     {
-                        WriteLine(f, EncodeLine(line, r, encoding));
+                        WriteLine(f, EncodeLine(line, rr, encoding));
                     }
                 }
                 else
@@ -73,8 +69,8 @@ namespace SaveFileManager
                             pathNum *= by;
                             pathNum = int.Parse(pathNum.ToString().Replace("0", ""));
                         }
-                        var nowNum = (int.Parse(DateTime.Now.ToString().Replace(" ", "").Replace("-", "").Replace(".", "").Replace(":", "")) / MakeSeed(seed, 2, 0.587));
-                        seedNum = new BigInteger(double.Parse((pathNum * nowNum).ToString().Replace("0", "").Replace("E+", "")) * 15439813);
+                        var nowNum = decimal.Parse(DateTime.Now.ToString().Replace(" ", "").Replace("-", "").Replace(".", "").Replace(":", "")) / (decimal)MakeSeed(seed, 2, 0.587);
+                        seedNum = new BigInteger(decimal.Parse((pathNum * nowNum).ToString().Replace("0", "").Replace("E+", "")) * 15439813);
                     }
                     else
                     {
@@ -110,7 +106,7 @@ namespace SaveFileManager
         /// <param name="fileExt">The extension of the file that will be decoded.</param>
         /// <param name="decodeUntil">Controlls how many lines the function should decode(strarting from the beggining, with 1). If it is set to -1, it will decode all the lines in the file.</param>
         /// <param name="encoding">The encoding of the output lines. By default it uses the UTF8 encoding. You shouldn't need to change this.</param>
-        public static IEnumerable<string> DecodeFile(long seed = 1, string filePath = "file", string fileExt = "sav", int decodeUntil = -1, Encoding encoding = null)
+        public static IEnumerable<string> DecodeFile(long seed = 1, string filePath = "file", string fileExt = "sav", int decodeUntil = -1, Encoding? encoding = null)
         {
             if (encoding == null)
             {
@@ -236,7 +232,7 @@ namespace SaveFileManager
         {
             var seedA = new BigInteger(Math.Abs(seed));
             var pi = new BigInteger(Math.PI);
-            return utils.Sqrt(BigInteger.Pow(seedA * pi, powNum) * (new BigInteger(plusNum) + seedA * pi));
+            return Utils.Sqrt(BigInteger.Pow(seedA * pi, powNum) * (new BigInteger(plusNum) + seedA * pi));
         }
 
         private static readonly BigInteger MaxModuloValue = new BigInteger(ulong.MaxValue) + 1;
@@ -247,7 +243,7 @@ namespace SaveFileManager
         /// <param name="seed">The number to use to generate the random number generator.</param>
         private static AbstractPseudoRandomGenerator MakeRandom(BigInteger seed)
         {
-            return new SplittableRandom((ulong)(seed % MaxModuloValue));
+            return new SplittableRandom((ulong)(BigInteger.Abs(seed) % MaxModuloValue));
         }
     }
 }
