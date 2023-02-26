@@ -12,7 +12,7 @@ namespace SaveFileManager
     public static class fileConversion
     {
         /// <param name="fileLine">The line that will be in the file.</param>
-        /// <inheritdoc cref="EncodeFile(IEnumerable{string}, long, string, string, Encoding, int)"/>
+        /// <inheritdoc cref="EncodeFile(IEnumerable{string}, long, string, string, int, Encoding)"/>
         public static void EncodeFile(string fileLine, long seed = 1, string filePath = "file", string fileExt = "sav", int version = 2, Encoding encoding = null)
         {
             EncodeFile(new List<string> { fileLine }, seed, filePath, fileExt, version, encoding);

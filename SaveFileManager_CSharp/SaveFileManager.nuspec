@@ -2,14 +2,14 @@
 <package >
   <metadata>
     <id>SaveFileManager</id>
-    <version>0.3.1.1</version>
+    <version>0.3.1.2</version>
     <authors>Kalandor01</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
     <!-- <icon>icon.png</icon> -->
     <projectUrl>https://github.com/Kalandor01/SaveFileManager_CSharp</projectUrl>
     <description>File encoding and console UI tools.</description>
-    <releaseNotes></releaseNotes>
+    <releaseNotes>Fixed EncodeFile description.</releaseNotes>
     <copyright>$copyright$</copyright>
     <tags>console</tags>
     <dependencies>
