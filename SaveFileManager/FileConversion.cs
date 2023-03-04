@@ -7,6 +7,8 @@ namespace SaveFileManager
 {
     public static class FileConversion
     {
+        private static readonly string FILE_NAME_SEED_REPLACE_STRING = "*";
+
         /// <param name="fileLine">The line that will be in the file.</param>
         /// <inheritdoc cref="EncodeFile(IEnumerable{string}, long, string, string, int, Encoding)"/>
         public static void EncodeFile(string fileLine, long seed = 1, string filePath = "file", string fileExt = "sav", int version = 2, Encoding? encoding = null)
@@ -36,7 +38,7 @@ namespace SaveFileManager
             }
             var r = MakeRandom(MakeSeed(seed));
 
-            using (var f = File.Create($"{filePath.Replace("*", seed.ToString())}.{fileExt}"))
+            using (var f = File.Create($"{filePath.Replace(FILE_NAME_SEED_REPLACE_STRING, seed.ToString())}.{fileExt}"))
             {
                 // v1
                 if (version == 1)
@@ -61,7 +63,7 @@ namespace SaveFileManager
                     // v3-4
                     else if (version == 3 || version == 4)
                     {
-                        var path = AppContext.BaseDirectory + $"{filePath.Replace("*", seed.ToString())}.{fileExt}";
+                        var path = AppContext.BaseDirectory + $"{filePath.Replace(FILE_NAME_SEED_REPLACE_STRING, seed.ToString())}.{fileExt}";
                         var pathBytes = Encoding.UTF8.GetBytes(path);
                         var pathNum = 1;
                         foreach (var by in pathBytes)
@@ -102,18 +104,18 @@ namespace SaveFileManager
         /// Returns a list of strings, decoded fron the encoded file.<br/>
         /// </summary>
         /// <param name="seed">The seed for decoding the file.</param>
-        /// <param name="filePath">The path and the name of the file without the extension, that will loaded. If the path contains a *, it will be replaced with the seed.</param>
+        /// <param name="filePath">The path and the name of the file without the extension, that will be decoded. If the path contains a *, it will be replaced with the seed.</param>
         /// <param name="fileExt">The extension of the file that will be decoded.</param>
         /// <param name="decodeUntil">Controlls how many lines the function should decode(strarting from the beggining, with 1). If it is set to -1, it will decode all the lines in the file.</param>
         /// <param name="encoding">The encoding of the output lines. By default it uses the UTF8 encoding. You shouldn't need to change this.</param>
-        public static IEnumerable<string> DecodeFile(long seed = 1, string filePath = "file", string fileExt = "sav", int decodeUntil = -1, Encoding? encoding = null)
+        public static List<string> DecodeFile(long seed = 1, string filePath = "file", string fileExt = "sav", int decodeUntil = -1, Encoding? encoding = null)
         {
             if (encoding == null)
             {
                 encoding = Encoding.UTF8;
             }
             //get lines
-            var fileBytes = File.ReadAllBytes($"{filePath.Replace("*", seed.ToString())}.{fileExt}");
+            var fileBytes = File.ReadAllBytes($"{filePath.Replace(FILE_NAME_SEED_REPLACE_STRING, seed.ToString())}.{fileExt}");
 
             var byteLines = new List<IEnumerable<byte>>();
             var newL = new List<byte>();
