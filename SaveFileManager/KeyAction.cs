@@ -9,11 +9,13 @@
 
         /// <param name="key">The key that can be pressed to trigger this action.</param>
         /// <inheritdoc cref="KeyAction(object, IEnumerable{ConsoleKeyInfo}, GetKeyMode)"/>
-        public KeyAction(object response, ConsoleKeyInfo key, GetKeyMode ignoreMode): this(response, new List<ConsoleKeyInfo> { key }, ignoreMode) { }
+        public KeyAction(object response, ConsoleKeyInfo key, GetKeyMode ignoreMode):
+            this(response, new List<ConsoleKeyInfo> { key }, ignoreMode) { }
 
         /// <param name="ignoreMode">If the current <c>GetKeyMode</c> is the <c>ignoreMode</c> when calling <c>GetKey</c>, the keypress will be ignored.</param>
         /// <inheritdoc cref="KeyAction(object, IEnumerable{ConsoleKeyInfo}, IEnumerable{GetKeyMode})"/>
-        public KeyAction(object response, IEnumerable<ConsoleKeyInfo> keys, GetKeyMode ignoreMode): this(response, keys, new List<GetKeyMode> { ignoreMode }) {}
+        public KeyAction(object response, IEnumerable<ConsoleKeyInfo> keys, GetKeyMode ignoreMode):
+            this(response, keys, new List<GetKeyMode> { ignoreMode }) { }
 
         /// <summary>
         /// Object for <c>keybinds</c> for the <c>GetKey</c> function.<br/>
