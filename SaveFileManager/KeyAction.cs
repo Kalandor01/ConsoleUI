@@ -7,15 +7,15 @@
         public readonly IEnumerable<GetKeyMode> ignoreModes;
 
 
-        /// <param name="key">The key that can be pressed to trigger this action.</param>
-        /// <inheritdoc cref="KeyAction(object, IEnumerable{ConsoleKeyInfo}, GetKeyMode)"/>
+        ///<param name="ignoreMode">If the current <c>GetKeyMode</c> is the <c>ignoreMode</c> when calling <c>GetKey</c>, the keypress will be ignored.</param>
+        /// <inheritdoc cref="KeyAction(object, ConsoleKeyInfo, IEnumerable{GetKeyMode})"/>
         public KeyAction(object response, ConsoleKeyInfo key, GetKeyMode ignoreMode):
-            this(response, new List<ConsoleKeyInfo> { key }, ignoreMode) { }
+            this(response, key, new List<GetKeyMode> { ignoreMode }) { }
 
-        /// <param name="ignoreMode">If the current <c>GetKeyMode</c> is the <c>ignoreMode</c> when calling <c>GetKey</c>, the keypress will be ignored.</param>
+        /// <param name="key">The key that can be pressed to trigger this action.</param>
         /// <inheritdoc cref="KeyAction(object, IEnumerable{ConsoleKeyInfo}, IEnumerable{GetKeyMode})"/>
-        public KeyAction(object response, IEnumerable<ConsoleKeyInfo> keys, GetKeyMode ignoreMode):
-            this(response, keys, new List<GetKeyMode> { ignoreMode }) { }
+        public KeyAction(object response, ConsoleKeyInfo key, IEnumerable<GetKeyMode> ignoreModes):
+            this(response, new List<ConsoleKeyInfo> { key }, ignoreModes) { }
 
         /// <summary>
         /// Object for <c>keybinds</c> for the <c>GetKey</c> function.<br/>
@@ -29,6 +29,21 @@
             this.response = response ?? throw new ArgumentNullException(nameof(response));
             this.keys = keys ?? throw new ArgumentNullException(nameof(keys));
             this.ignoreModes = ignoreModes ?? throw new ArgumentNullException(nameof(ignoreModes));
+        }
+
+        /// <summary>
+        /// Returns the <c>keyResults</c> list for <c>UIList</c> and <c>OptionsUI</c> methods (the order of the items in the list matters).
+        /// </summary>
+        /// <param name="keybinds">The list of <c>KeyAction</c>s to use.</param>
+        /// <returns></returns>
+        public static IEnumerable<object> GetKeyResultsList(IEnumerable<KeyAction> keybinds)
+        {
+            var keyResults = new List<object>();
+            foreach (var action in keybinds)
+            {
+                keyResults.Add(action.response);
+            }
+            return keyResults;
         }
     }
 }

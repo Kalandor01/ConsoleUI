@@ -1,24 +1,23 @@
 ﻿using System.Collections;
-using System.Collections.ObjectModel;
 using System.Text;
 
 namespace SaveFileManager
 {
     public class UIList
     {
-        IEnumerable<string?> answers;
-        string question;
-        CursorIcon cursorIcon;
-        bool multiline;
-        bool canEscape;
-        IEnumerable<object?> actions;
-        bool excludeNulls;
-        bool modifyList;
+        public IEnumerable<string?> answers;
+        public string question;
+        public CursorIcon cursorIcon;
+        public bool multiline;
+        public bool canEscape;
+        public IEnumerable<object?> actions;
+        public bool excludeNulls;
+        public bool modifyList;
 
         /// <summary>
         /// Object for displaying a terminal UI using the <c>display</c> function.<br/>
         /// Prints the <c>question</c> and then the list of answers from that the user can cycle between with the selected keys (arrow keys by default) and select them.<br/>
-        /// Gives back a number acording to the index of the selcected element in the <c>answers</c> list (influenced by <c>excludeNulls</c>), or -1 if the user exited.<br/>
+        /// Returns a number acording to the index of the selcected element in the <c>answers</c> list (influenced by <c>excludeNulls</c>), or -1 if the user exited. (Or a list, if the action for thar answer was a specific function.)<br/>
         /// </summary>
         /// <param name="answers">A list of answers, the user ca select.<br/>
         /// If an element in the list is null the line will be blank and cannot be selected.</param>
@@ -26,13 +25,13 @@ namespace SaveFileManager
         /// <param name="cursorIcon">The cursor icon style to use.</param>
         /// <param name="multiline">Makes the "cursor" draw at every line if the text is multiline.</param>
         /// <param name="canEscape">Allows the user to press the key associated with escape, to exit the menu. In this case the <c>display</c> function returns -1.</param>
-        /// <param name="actions">If the list is not emptiy or null, each element coresponds to an element in the <c>answers</c> list, and if the value is a function (or a list with a function as the 1. element, and arguments as the 2-n.element, including 1 or more dictionaries as **kwargs), it will run that function.<br/>
+        /// <param name="actions">If the list is not emptiy or null, each element coresponds to an element in the <c>answers</c> list, and if the value is a function (or a list with a function as the 1. element, and arguments as the 2-n.element), it will run that function.<br/>
         /// - If the function returns -1 the <c>display</c> function will instantly exit.<br/>
         /// - If the function returns a list where the first element is -1 the <c>display</c> function will instantly return that list with the first element replaced by the selected answer's number.<br/>
         /// - If it is a <c>UIList</c> object, the object's <c>display</c> function will be automaticly called, allowing for nested menus.</param>
         /// <param name="excludeNulls">If true, the selected option will not see non-selectable elements as part of the list. This also makes it so you don't have to put a placeholder value in the <c>actions</c> list for every null value in the <c>answers</c> list.</param>
-        /// <param name="modifyList">If true, any function in the <c>actions</c> list will get a list containing the <c>answers</c> list and the <c>actions</c> list as it's first argument (and can modify it) when the function is called.</param>
-        public UIList(IEnumerable<string?> answers, string? question = null, CursorIcon? cursorIcon = null, bool multiline = false, bool canEscape = false, IEnumerable<object?>? actions = null, bool excludeNulls = false, bool modifyList = false)
+        /// <param name="modifiableUIList">If true, any function in the <c>actions</c> list will get the <c>UIList</c> as it's first argument (and can modify it) when the function is called.</param>
+        public UIList(IEnumerable<string?> answers, string? question = null, CursorIcon? cursorIcon = null, bool multiline = false, bool canEscape = false, IEnumerable<object?>? actions = null, bool excludeNulls = false, bool modifiableUIList = false)
         {
             this.answers = answers;
             this.question = question ?? "";
@@ -41,16 +40,8 @@ namespace SaveFileManager
             this.canEscape = canEscape;
             this.actions = actions ?? new List<object>();
             this.excludeNulls = excludeNulls;
-            this.modifyList = modifyList;
+            this.modifyList = modifiableUIList;
         }
-
-        /// <summary>
-        /// Short version of <c>UIList</c>.<br/>
-        /// UIList(answers, question, cursorIcon=null, multiline, canEscape, actions=null, excludeNulls, modifyList=false)
-        /// </summary>
-        /// <inheritdoc cref="UIList(IEnumerable{string?}, string?, CursorIcon?, bool, bool, IEnumerable{object?}?, bool, bool)"/>
-        public UIList(IEnumerable<string?> answers, string? question, bool multiline = false, bool canEscape = false, bool excludeNulls = false) :
-            this(answers, question, null, multiline, canEscape, null, excludeNulls, false) { }
 
         /// <summary>
         /// A version of <c>UIList</c> for use in <c>optionsUI</c>.<br/>
@@ -131,16 +122,16 @@ namespace SaveFileManager
         /// <param name="keyResults">The list of posible results returned by pressing a key.</param>
         private int MoveSelection(int selected, object keyResult, IEnumerable<object> keyResults)
         {
-            var moveAmount = keyResult == keyResults.ElementAt((int)Key.DOWN) ? 1 : -1;
-            if (keyResult != keyResults.ElementAt((int)Key.ENTER))
+            if (!keyResult.Equals(keyResults.ElementAt((int)Key.ENTER)))
             {
+                var moveAmount = keyResult.Equals(keyResults.ElementAt((int)Key.DOWN)) ? 1 : -1;
                 while (true)
                 {
                     selected += moveAmount;
                     selected %= answers.Count();
                     if (selected < 0)
                     {
-                        selected = 0;
+                        selected = answers.Count() - 1;
                     }
                     if (answers.ElementAt(selected) is not null)
                     {
@@ -151,133 +142,196 @@ namespace SaveFileManager
             return selected;
         }
 
-    //    /// <summary>
-    //    /// Handles what to return for the selected answer.
-    //    /// </summary>
-    //    /// <param name="selected">The selected answer's number.</param>
-    //    /// <param name="keybinds">The list of <c>KeyAction</c> objects to use, if the selected action is a <c>UIList</c>.</param>
-    //    /// <param name="keyResults">The list of posible results returned by pressing a key. Used, if the selected action is a <c>UIList</c>.</param>
-    //    /// <returns></returns>
-    //    private object HandleAction(int selected, IEnumerable<KeyAction>? keybinds = null, IEnumerable<object>? keyResults = null)
-    //    {
-    //        if (actions.Count() == 0 && selected < actions.Count() && actions.ElementAt(selected) is not null)
-    //        {
-    //            var selectedAction = actions.ElementAt(selected);
-    //            // list
-    //            if (selectedAction is not null && selectedAction.GetType() is IEnumerable && ((IEnumerable<object>)selectedAction).Count() >= 2)
-    //            {
-    //                var selectedActionList = (IEnumerable<object>)selectedAction;
-    //                var lis = new List<object>();
-    //                var dict = new Dictionary<string, object>();
-    //                foreach (var elem in selectedActionList)
-    //                {
-    //                    if (elem.GetType() is IDictionary)
-    //                    {
-    //                        dict.Add(elem);
-    //                    }
-    //                    else
-    //                    {
-    //                        lis.Add(elem);
-    //                    }
-    //                }
-    //                if self.modify_list:
-    //                    func_return = lis[0]([self.answer_list, self.action_list], *lis[1:], **dict)
-    //                else:
-    //                    func_return = lis[0](*lis[1:], **dict)
-    //                if func_return == -1:
-    //                    return selected
-    //                elif type(func_return) is list and func_return[0] == -1:
-    //                    func_return[0] = selected
-    //                    return func_return
-    //            }
-    //            // normal function
-    //            else if (callable(selected_action))
-    //            {
-    //                if self.modify_list:
-    //                    func_return = selected_action([self.answer_list, self.action_list])
-    //                else:
-    //                    func_return = selected_action()
-    //                if func_return == -1:
-    //                    return selected
-    //                elif type(func_return) is list and func_return[0] == -1:
-    //                    func_return[0] = selected
-    //                    return func_return
-    //            }
-    //            // ui
-    //            else if (isinstance(selected_action, UI_list))
-    //            {
-    //                selected_action.display(keybinds, allow_buffered_inputs, result_list);
-    //            }
-    //            else
-    //            {
-    //                Console.WriteLine("Option is not a UIList object!");
-    //                return selected;
-    //            }
-    //        }
-    //        else
-    //        {
-    //            return selected;
-    //        }
-    //    }
+        /// <summary>
+        /// Handles what to return for the selected answer.
+        /// </summary>
+        /// <param name="selected">The selected answer's number.</param>
+        /// <param name="keybinds">The list of <c>KeyAction</c> objects to use, if the selected action is a <c>UIList</c>.</param>
+        /// <param name="keyResults">The list of posible results returned by pressing a key. Used, if the selected action is a <c>UIList</c>.</param>
+        /// <returns></returns>
+        private object? HandleAction(int selected, IEnumerable<KeyAction>? keybinds = null, IEnumerable<object>? keyResults = null)
+        {
+            if (actions.Count() > 0 && selected < actions.Count() && actions.ElementAt(selected) is not null)
+            {
+                var selectedAction = actions.ElementAt(selected);
+                // list
+                if (selectedAction is not null &&
+                    typeof(IEnumerable).IsAssignableFrom(selectedAction.GetType()) &&
+                    ((IEnumerable<object>)selectedAction).Count() >= 2 &&
+                    ((IEnumerable<object>)selectedAction).ElementAt(0) is Delegate)
+                {
+                    var selectedActionList = (IEnumerable<object>)selectedAction;
+                    var function = (Delegate)selectedActionList.ElementAt(0);
+                    var paramNum = selectedActionList.Count() + (modifyList ? 0 : -1);
+                    var parameters = new object[paramNum];
+                    var index = 0;
+                    if (modifyList)
+                    {
+                        parameters[index] = this;
+                        index++;
+                    }
+                    for (var x = 1; x < selectedActionList.Count(); x++)
+                    {
+                        parameters[index] = selectedActionList.ElementAt(x);
+                        index++;
+                    }
+                    var funcReturn = function.DynamicInvoke(parameters);
+                    if (funcReturn is int && (int)funcReturn == -1)
+                    {
+                        return selected;
+                    }
+                    else if (
+                        funcReturn is not null &&
+                        typeof(IEnumerable).IsAssignableFrom(funcReturn.GetType()) &&
+                        ((IEnumerable<object>)funcReturn).Count() >= 1 &&
+                        ((IEnumerable<object>)funcReturn).ElementAt(0) is int &&
+                        (int)((IEnumerable<object>)funcReturn).ElementAt(0) == -1
+                    )
+                    {
+                        var funcRetList = ((IEnumerable<object>)funcReturn).ToList();
+                        funcRetList[0] = selected;
+                        return funcRetList;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                // normal function
+                else if (selectedAction is Delegate)
+                {
+                    var selectedFunc = (Delegate)selectedAction;
+                    object? funcReturn;
+                    if (modifyList)
+                    {
+                        funcReturn = selectedFunc.DynamicInvoke(this);
+                    }
+                    else
+                    {
+                        funcReturn = selectedFunc.DynamicInvoke();
+                    }
+                    if (funcReturn is int && (int)funcReturn == -1)
+                    {
+                        return selected;
+                    }
+                    else if (
+                        funcReturn is not null &&
+                        typeof(IEnumerable).IsAssignableFrom(funcReturn.GetType()) &&
+                        ((IEnumerable<object>)funcReturn).Count() >= 1 &&
+                        ((IEnumerable<object>)funcReturn).ElementAt(0) is int &&
+                        (int)((IEnumerable<object>)funcReturn).ElementAt(0) == -1
+                    )
+                    {
+                        var funcRetList = ((IEnumerable<object>)funcReturn).ToList();
+                        funcRetList[0] = selected;
+                        return funcRetList;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                // ui
+                else if (selectedAction is UIList)
+                {
+                    ((UIList)selectedAction).Display(keybinds, keyResults);
+                    return null;
+                }
+                else
+                {
+                    //Console.WriteLine("Option is not a UIList object!");
+                    return selected;
+                }
+            }
+            else
+            {
+                return selected;
+            }
+        }
 
+        /// <summary>
+        /// Returns a selected until it's not on an empty space.
+        /// </summary>
+        /// <param name="selected">The selected answer's number.</param>
+        /// <returns></returns>
+        private int SetupSelected(int selected)
+        {
+            if (selected > answers.Count() - 1)
+            {
+                selected = answers.Count() - 1;
+            }
+            while (answers.ElementAt(selected) is null)
+            {
+                selected++;
+                if (selected > answers.Count() - 1)
+                {
+                    selected = 0;
+                }
+            }
+            return selected;
+        }
 
-    //def _setup_selected(self, selected:int) :
-    //    """Returns a selected until it's not on an empty space."""
-    //    if selected > len(self.answer_list) - 1:
-    //        selected = len(self.answer_list) - 1
-    //    while self.answer_list[selected] is None:
-    //        selected += 1
-    //        if selected > len(self.answer_list) - 1:
-    //            selected = 0
-    //    return selected
+        /// <summary>
+        /// SEE OBJECT FOR A MORE DETAILED DOCUMENTATION!
+        /// Prints the <c>question</c> and then the list of answers from the <c>answers</c> list that the user can cycle between and select with the keys in the <c>keybinds</c>.<br/>
+        ///The order of the elements in the tuple should be:<br/>
+        /// - escape, up, down, left, right, enter<br/>
+        ///If it is null, the default value is either returned from the <c>keybinds</c> or:<br/>
+        /// - { Key.ESCAPE, Key.UP, Key.DOWN, Key.LEFT, Key.RIGHT, Key.ENTER }
+        /// </summary>
+        /// <param name="keybinds">The list of <c>KeyAction</c> objects to use, if the selected action is a <c>UIList</c>.</param>
+        /// <param name="keyResults">The list of posible results returned by pressing a key. Used, if the selected action is a <c>UIList</c>.</param>
+        /// <returns></returns>
+        public object Display(IEnumerable<KeyAction>? keybinds = null, IEnumerable<object>? keyResults = null)
+        {
+            if (keyResults is null)
+            {
+                if (keybinds is null)
+                {
+                    keyResults = new List<object> { Key.ESCAPE, Key.UP, Key.DOWN, Key.LEFT, Key.RIGHT, Key.ENTER };
+                }
+                else
+                {
+                    keyResults = KeyAction.GetKeyResultsList(keybinds);
+                }
+            }
 
-
-    //def display(self, keybinds:Keybinds|None= None, allow_buffered_inputs= False, result_list:tuple[Any, Any, Any, Any, Any, Any]|None= None) :
-    //    """
-    //    Prints the `question` and then the list of answers from the `answer_list` that the user can cycle between with the arrow keys and select with enter.\n
-    //    Gives back a number from 0-n acording to the size of the list that was passed in.\n
-    //    If `exclude_nones` is `True`, the selected option will not see non-selectable elements as part of the list. This also makes it so you don't have to put a placeholder value in the `action_list` for every `None` value in the `answer_list`.\n
-    //    if the answer is None the line will be blank and cannot be selected. \n
-    //    `multiline` makes the "cursor" draw at every line if the text is multiline.\n
-    //    `can_esc` allows the user to press esc to exit the menu. In this case the function returns -1.\n
-    //    If the `action_list` is not empty, each element coresponds to an element in the `answer_list`, and if the value is a function (or a list with a function as the 1. element, and arguments as the 2-n. element, including 1 or more dictionaries as **kwargs), it will run that function.\n
-    //    - If the function returns -1 the `display` function will instantly exit.\n
-    //    - If the function returns a list where the first element is -1 the `display` function will instantly return that list with the first element replaced by the selected element number of that `UI_list` object.\n
-    //    - If it is a `UI_list` object, the object's `display` function will be automaticly called, allowing for nested menus.\n
-    //    - If `modify_list` is `True`, any function (that is not a `UI_list` object) that is in the `action_list` will get a list containing the `answer_list` and the `action_list` as it's first argument (and can modify it) when the function is called.\n
-    //    If `allow_buffered_inputs` is `False`, if the user pressed some buttons before this function was called the function will not register those button presses.
-    //    If `result_list` is not None, it will use the values in that list to match with the return value of the `get_key_with_obj()`.\n
-    //    The order of the elements in the tuple should be:\n
-    //    \t(escape, up, down, left, right, enter)\n
-    //    If it is None, the default value is:\n
-    //    \t`(Keys.ESCAPE, Keys.UP, Keys.DOWN, Keys.LEFT, Keys.RIGHT, Keys.ENTER)`
-    //    """
-    //    if result_list is None:
-    //        result_list = (Keys.ESCAPE, Keys.UP, Keys.DOWN, Keys.LEFT, Keys.RIGHT, Keys.ENTER)
-
-    //    selected = self._setup_selected(0)
-    //    while True:
-    //        selected = self._setup_selected(selected)
-    //        key = Keys.ESCAPE
-    //        while key != Keys.ENTER:
-    //            # render
-    //            # clear screen
-    //            txt = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
-    //            if self.question is not None:
-    //                txt += self.question + "\n\n"
-    //            txt += self._make_text(selected)
-    //            print(txt)
-    //            # answer select
-    //            key = get_key_with_obj(Get_key_modes.IGNORE_HORIZONTAL, keybinds, allow_buffered_inputs)
-    //            if self.can_esc and key == Keys.ESCAPE:
-    //                return -1
-    //            while key == Keys.ESCAPE:
-    //                key = get_key_with_obj(Get_key_modes.IGNORE_HORIZONTAL, keybinds, allow_buffered_inputs)
-    //            selected = self._move_selection(selected, key, result_list)
-    //    // menu actions
-    //        selected = self._convert_selected(selected)
-    //        action = self._handle_action(selected, keybinds, allow_buffered_inputs, result_list)
-    //        if action is not None:
-    //            return action
+            var selected = SetupSelected(0);
+            while (true)
+            {
+                selected = SetupSelected(selected);
+                var key = keyResults.ElementAt((int)Key.ESCAPE);
+                while (!key.Equals(keyResults.ElementAt((int)Key.ENTER)))
+                {
+                    // render
+                    // clear screen
+                    var txt = new StringBuilder("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+                    if (question is not null)
+                    {
+                        txt.Append(question + "\n\n");
+                    }
+                    txt.Append(MakeText(selected));
+                    Console.WriteLine(txt);
+                    // answer select
+                    key = Utils.GetKey(GetKeyMode.IGNORE_HORIZONTAL, keybinds);
+                    if (canEscape && key.Equals(keyResults.ElementAt((int)Key.ESCAPE)))
+                    {
+                        return -1;
+                    }
+                    while (key.Equals(keyResults.ElementAt((int)Key.ESCAPE)))
+                    {
+                        key = Utils.GetKey(GetKeyMode.IGNORE_HORIZONTAL, keybinds);
+                    }
+                    selected = MoveSelection(selected, key, keyResults);
+                }
+                // menu actions
+                selected = ConvertSelected(selected);
+                var action = HandleAction(selected, keybinds, keyResults);
+                if (action is not null)
+                {
+                    return action;
+                }
+            }
+        }
     }
 }
