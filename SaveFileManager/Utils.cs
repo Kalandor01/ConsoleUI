@@ -76,6 +76,21 @@ namespace SaveFileManager
             }
         }
 
+        /// <summary>
+        /// Returns the <c>keyResults</c> for <c>UIList</c> or <c>OptionsUI</c> functions.
+        /// </summary>
+        /// <param name="keybinds">The list of <c>KeyAction</c> objects to use.</param>
+        /// <returns></returns>
+        public static IEnumerable<object> GetResultList(IEnumerable<KeyAction> keybinds)
+        {
+            var keyResults = new List<object>();
+            foreach (var action in keybinds)
+            {
+                keyResults.Add(action.response);
+            }
+            return keyResults;
+        }
+
         private static readonly BigInteger FastSqrtSmallNumber = 4503599761588223UL; // as static readonly = reduce compare overhead
 
         /// <summary>

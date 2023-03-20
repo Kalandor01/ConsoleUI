@@ -44,16 +44,6 @@ namespace SaveFileManager
         }
 
         /// <summary>
-        /// A version of <c>UIList</c> for use in <c>optionsUI</c>.<br/>
-        /// UIList(text, question=null, cursorIcon, multiline, canEscape=false, action, excludeNulls=false, modify)
-        /// </summary>
-        /// <param name="text">The text to display.</param>
-        /// <param name="action">The action when selecting the button.</param>
-        /// <inheritdoc cref="UIList(IEnumerable{string?}, string?, CursorIcon?, bool, bool, IEnumerable{object?}?, bool, bool)"/>
-        public UIList(string text, object? action, bool multiline = false, bool modify = false, CursorIcon? cursorIcon = null) :
-            this(new List<string> { text }, null, cursorIcon, multiline, false, action is null ? null : new List<object?> { action }, false, modify) { }
-
-        /// <summary>
         /// Returns the text that represents the UI of this object, without the question.
         /// </summary>
         /// <param name="selected">The index of the currently selected answer.</param>

@@ -43,7 +43,7 @@ namespace SaveFileManager
         }
 
         /// <inheritdoc cref="HandleAction(object, IEnumerable{object}, IEnumerable{KeyAction}?)"/>
-        protected bool HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null)
+        public bool HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null)
         {
             if (key.Equals(keyResults.ElementAt((int)Key.RIGHT)))
             {

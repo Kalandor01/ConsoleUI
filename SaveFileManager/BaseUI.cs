@@ -37,7 +37,7 @@ namespace SaveFileManager
         /// <param name="icon">The left icon string to use for this UI element.</param>
         /// <param name="iconR">The right icon string to use for this UI element.</param>
         /// <returns></returns>
-        protected string MakeText(string icon, string iconR)
+        public string MakeText(string icon, string iconR)
         {
             var txt = new StringBuilder();
             // current icon group
@@ -110,7 +110,7 @@ namespace SaveFileManager
         /// <param name="keyResults">The list of posible results returned by pressing a key.</param>
         /// <param name="keybinds">The list of <c>KeyAction</c> objects to use, if the selected action is a <c>UIList</c>.</param>
         /// <returns></returns>
-        protected bool HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null)
+        public bool HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null)
         {
             return true;
         }
