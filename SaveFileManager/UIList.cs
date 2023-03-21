@@ -27,8 +27,8 @@ namespace SaveFileManager
         /// <param name="canEscape">Allows the user to press the key associated with escape, to exit the menu. In this case the <c>display</c> function returns -1.</param>
         /// <param name="actions">If the list is not emptiy or null, each element coresponds to an element in the <c>answers</c> list, and if the value is a function (or a list with a function as the 1. element, and arguments as the 2-n.element), it will run that function.<br/>
         /// - If the function returns -1 the <c>display</c> function will instantly exit.<br/>
-        /// - If the function returns a list where the first element is -1 the <c>display</c> function will instantly return that list with the first element replaced by the selected answer's number.<br/>
-        /// - If it is a <c>UIList</c> object, the object's <c>display</c> function will be automaticly called, allowing for nested menus.</param>
+        /// - If the function returns a list where the first element is -1 the <c>Display</c> function will instantly return that list with the first element replaced by the selected answer's number.<br/>
+        /// - If it is a <c>UIList</c> object, the object's <c>Display</c> function will be automaticly called, allowing for nested menus.</param>
         /// <param name="excludeNulls">If true, the selected option will not see non-selectable elements as part of the list. This also makes it so you don't have to put a placeholder value in the <c>actions</c> list for every null value in the <c>answers</c> list.</param>
         /// <param name="modifiableUIList">If true, any function in the <c>actions</c> list will get the <c>UIList</c> as it's first argument (and can modify it) when the function is called.</param>
         public UIList(IEnumerable<string?> answers, string? question = null, CursorIcon? cursorIcon = null, bool multiline = false, bool canEscape = false, IEnumerable<object?>? actions = null, bool excludeNulls = false, bool modifiableUIList = false)
@@ -146,6 +146,7 @@ namespace SaveFileManager
                 var selectedAction = actions.ElementAt(selected);
                 // list
                 if (selectedAction is not null &&
+                    selectedAction.GetType() != typeof(string) &&
                     typeof(IEnumerable).IsAssignableFrom(selectedAction.GetType()) &&
                     ((IEnumerable<object>)selectedAction).Count() >= 2 &&
                     ((IEnumerable<object>)selectedAction).ElementAt(0) is Delegate)
@@ -172,6 +173,7 @@ namespace SaveFileManager
                     }
                     else if (
                         funcReturn is not null &&
+                        funcReturn.GetType() != typeof(string) &&
                         typeof(IEnumerable).IsAssignableFrom(funcReturn.GetType()) &&
                         ((IEnumerable<object>)funcReturn).Count() >= 1 &&
                         ((IEnumerable<object>)funcReturn).ElementAt(0) is int &&
@@ -206,6 +208,7 @@ namespace SaveFileManager
                     }
                     else if (
                         funcReturn is not null &&
+                        funcReturn.GetType() != typeof(string) &&
                         typeof(IEnumerable).IsAssignableFrom(funcReturn.GetType()) &&
                         ((IEnumerable<object>)funcReturn).Count() >= 1 &&
                         ((IEnumerable<object>)funcReturn).ElementAt(0) is int &&

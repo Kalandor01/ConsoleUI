@@ -4,7 +4,7 @@ namespace SaveFileManager
 {
     public abstract class BaseUI
     {
-        protected int value;
+        public int value;
         protected string preText;
         protected string preValue;
         protected bool displayValue;
@@ -37,7 +37,7 @@ namespace SaveFileManager
         /// <param name="icon">The left icon string to use for this UI element.</param>
         /// <param name="iconR">The right icon string to use for this UI element.</param>
         /// <returns></returns>
-        public string MakeText(string icon, string iconR)
+        public virtual string MakeText(string icon, string iconR)
         {
             var txt = new StringBuilder();
             // current icon group
@@ -88,7 +88,7 @@ namespace SaveFileManager
         /// </summary>
         /// <param name="icons">The icons string to place if <c>multiline</c> is true.</param>
         /// <returns></returns>
-        protected string MakeSpecial(string icons)
+        protected virtual string MakeSpecial(string icons)
         {
             return "";
         }
@@ -97,7 +97,7 @@ namespace SaveFileManager
         /// Returns the string representation of the value.
         /// </summary>
         /// <returns></returns>
-        protected string MakeValue()
+        protected virtual string MakeValue()
         {
             return value.ToString();
         }
@@ -110,7 +110,16 @@ namespace SaveFileManager
         /// <param name="keyResults">The list of posible results returned by pressing a key.</param>
         /// <param name="keybinds">The list of <c>KeyAction</c> objects to use, if the selected action is a <c>UIList</c>.</param>
         /// <returns></returns>
-        public bool HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null)
+        public virtual object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null)
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Returns if the element is selectable.
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool GetIsSelectable()
         {
             return true;
         }

@@ -11,7 +11,7 @@ namespace SaveFileManager
         protected string symbolEmpty;
 
         /// <summary>
-        /// Object for the options_ui method.<br/>
+        /// Object for the <c>OptionsUI</c> method.<br/>
         /// When used as input in the <c>OptionsUI</c> function, it draws a slider, with the section specifying it's characteristics.<br/>
         /// Structure: [preText][symbol and symbolEmpty][preValue][value][postValue]
         /// </summary>
@@ -32,10 +32,10 @@ namespace SaveFileManager
         }
 
         /// <inheritdoc cref="MakeSpecial(string)"/>
-        protected string MakeSpecial(string icons)
+        protected override string MakeSpecial(string icons)
         {
             var txt = new StringBuilder();
-            for (var x = minValue; x < maxValue / step; x += step)
+            for (var x = minValue; x < maxValue; x += step)
             {
                 txt.Append(x >= value ? symbolEmpty : symbol);
             }
@@ -43,7 +43,7 @@ namespace SaveFileManager
         }
 
         /// <inheritdoc cref="HandleAction(object, IEnumerable{object}, IEnumerable{KeyAction}?)"/>
-        public bool HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null)
+        public override object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null)
         {
             if (key.Equals(keyResults.ElementAt((int)Key.RIGHT)))
             {
@@ -56,7 +56,7 @@ namespace SaveFileManager
                     return false;
                 }
             }
-            else if (key.Equals(keyResults.ElementAt((int)Key.RIGHT)))
+            else if (key.Equals(keyResults.ElementAt((int)Key.LEFT)))
             {
                 if (value - step >= minValue)
                 {

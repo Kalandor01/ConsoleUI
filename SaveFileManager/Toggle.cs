@@ -6,7 +6,7 @@
         string symbolOff;
 
         /// <summary>
-        /// Object for the options_ui method.<br/>
+        /// Object for the <c>OptionsUI</c> method.<br/>
         /// When used as input in the <c>OptionsUI</c> function, it draws a field that is toggleable with the key associated with the enter action.<br/>
         /// Structure: [preText][symbol or symbolOff][postValue]
         /// </summary>
@@ -21,13 +21,13 @@
         }
 
         /// <inheritdoc cref="MakeSpecial(string)"/>
-        protected string MakeSpecial(string icons)
+        protected override string MakeSpecial(string icons)
         {
             return value == 1 ? symbol : symbolOff;
         }
 
         /// <inheritdoc cref="HandleAction(object, IEnumerable{object}, IEnumerable{KeyAction}?)"/>
-        public bool HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null)
+        public override object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null)
         {
             if (key.Equals(keyResults.ElementAt((int)Key.ENTER)))
             {

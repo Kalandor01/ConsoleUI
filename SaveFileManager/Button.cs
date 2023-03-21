@@ -10,17 +10,15 @@ namespace SaveFileManager
         object[]? actionParameters;
 
         /// <summary>
-        /// Object for the options_ui method<br/>
-        /// When used as input in the options_ui function, it text that is pressable with the enter key.<br/>
-        /// If `action` is a function(or a list with a function as the 1. element, and arguments as the 2-n.element, including 1 or more dictionaries as **kwargs), it will run that function, if the button is clicked.<br/>
-        /// - If the function returns False the screen will not rerender.<br/>
-        /// - If it is a `UI_list` object, the object's `display` function will be automaticly called, allowing for nested menus.<br/>
-        /// - If `modifyList` is `True`, the function (if it's not a `UI_list` object) will get a the `Button` object as it's first argument (and can modifyList it) when the function is called.<br/>
+        /// Object for the <c>OptionsUI</c> method<br/>
+        /// When used as input in the <c>OptionsUI</c> function, it text that is pressable with the enter key.<br/>
         /// Structure: [text]
         /// </summary>
-        /// <param name="text"></param>
-        /// <param name="action"></param>
-        /// <param name="modifyList"></param>
+        /// <param name="text">The text to write out.</param>
+        /// <param name="action">A function (or a list with a function as the 1. element, and arguments as the 2-n.element), that will run if the button is clicked.<br/>
+        /// - If the function returns false the UI will not update.<br/>
+        /// - If it is a <c>UIList</c> object, the object's <c>Display</c> function will be automaticly called, allowing for nested menus.</param>
+        /// <param name="modifyList">If it's true, the function will get a the <c>Button</c> object as it's first argument (and can modify it) when the function is called.</param>
         /// <inheritdoc cref="BaseUI(int, string, string, bool, string, bool)"/>
         public Button(string text = "", object? action = null, bool multiline = false, bool modifyList = false)
             : base(-1, text, "", false, "", multiline)
@@ -30,7 +28,7 @@ namespace SaveFileManager
         }
 
         /// <inheritdoc cref="HandleAction(object, IEnumerable{object}, IEnumerable{KeyAction}?)"/>
-        public bool HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null)
+        public override object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null)
         {
             if (key.Equals(keyResults.ElementAt((int)Key.ENTER)))
             {
@@ -52,7 +50,7 @@ namespace SaveFileManager
                     }
                     else
                     {
-                        return funcReturn.GetType() == typeof(bool) && (bool)funcReturn;
+                        return funcReturn;
                     }
                 }
                 // ui / else
@@ -83,6 +81,7 @@ namespace SaveFileManager
             actionParameters = null;
             // list
             if (action is not null &&
+                action.GetType() != typeof(string) &&
                 typeof(IEnumerable).IsAssignableFrom(action.GetType()) &&
                 ((IEnumerable<object>)action).Count() >= 2 &&
                 ((IEnumerable<object>)action).ElementAt(0) is Delegate)

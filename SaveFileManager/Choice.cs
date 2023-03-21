@@ -5,7 +5,7 @@
         IEnumerable<string> choices;
 
         /// <summary>
-        /// Object for the options_ui method.<br/>
+        /// Object for the <c>OptionsUI</c> method.<br/>
         /// When used as input in the <c>OptionsUI</c> function, it draws a multiple choice seletion, with the <c>choices</c> list specifying the choice names.<br/>
         /// Structure: [preText][choice name][preValue][value][postValue]
         /// </summary>
@@ -18,7 +18,7 @@
         }
 
         /// <inheritdoc cref="MakeSpecial(string)"/>
-        protected string MakeSpecial(string icons)
+        protected override string MakeSpecial(string icons)
         {
             if (multiline)
             {
@@ -31,13 +31,13 @@
         }
 
         /// <inheritdoc cref="MakeValue()"/>
-        protected string MakeValue()
+        protected override string MakeValue()
         {
             return $"{value + 1}/{choices.Count()}";
         }
 
         /// <inheritdoc cref="HandleAction(object, IEnumerable{object}, IEnumerable{KeyAction}?)"/>
-        public bool HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null)
+        public override object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null)
         {
             var ret = false;
             if (key.Equals(keyResults.ElementAt((int)Key.RIGHT)))
