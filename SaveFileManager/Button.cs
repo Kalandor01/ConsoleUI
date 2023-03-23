@@ -1,13 +1,23 @@
-﻿using System.Collections;
-
-namespace SaveFileManager
+﻿namespace SaveFileManager
 {
     public class Button : BaseUI
     {
         bool modifyList;
         UIList? actionUIList;
         Delegate? actionFunction;
-        object[]? actionParameters;
+        object?[]? actionParameters;
+
+        /// <inheritdoc cref="Button(UIList, Delegate, IEnumerable{object?}, bool, string, bool)"/>
+        public Button(UIList uiList, string text = "",  bool multiline = false)
+            : this(uiList, null, null, text:text, multiline:multiline) { }
+
+        /// <inheritdoc cref="Button(UIList, Delegate, IEnumerable{object?}, bool, string, bool)"/>
+        public Button(Delegate function, bool modifyList = false, string text = "", bool multiline = false)
+            : this(null, function, null, modifyList, text, multiline) { }
+
+        /// <inheritdoc cref="Button(UIList, Delegate, IEnumerable{object?}, bool, string, bool)"/>
+        public Button(Delegate function, IEnumerable<object?> args, bool modifyList = false, string text = "", bool multiline = false)
+            : this(null, function, args, modifyList, text, multiline) { }
 
         /// <summary>
         /// Object for the <c>OptionsUI</c> method<br/>
@@ -15,16 +25,18 @@ namespace SaveFileManager
         /// Structure: [text]
         /// </summary>
         /// <param name="text">The text to write out.</param>
-        /// <param name="action">A function (or a list with a function as the 1. element, and arguments as the 2-n.element), that will run if the button is clicked.<br/>
+        /// <param name="uiList">The UIList object to display when the button is pressed.</param>
+        /// <param name="function">The function to run when the button is pressed.<br/>
         /// - If the function returns false the UI will not update.<br/>
-        /// - If it is a <c>UIList</c> object, the object's <c>Display</c> function will be automaticly called, allowing for nested menus.</param>
+        /// - If it return anything other than a bool, the <c>OptionsUI</c> will instantly return that value.</param>
+        /// <param name="args">The list of arguments to run the function with.</param>
         /// <param name="modifyList">If it's true, the function will get a the <c>Button</c> object as it's first argument (and can modify it) when the function is called.</param>
         /// <inheritdoc cref="BaseUI(int, string, string, bool, string, bool)"/>
-        public Button(string text = "", object? action = null, bool multiline = false, bool modifyList = false)
+        private Button(UIList? uiList, Delegate? function, IEnumerable<object?>? args, bool modifyList = false, string text = "", bool multiline = false)
             : base(-1, text, "", false, "", multiline)
         {
             this.modifyList = modifyList;
-            SetAction(action);
+            SetAction(uiList, function, args);
         }
 
         /// <inheritdoc cref="HandleAction(object, IEnumerable{object}, IEnumerable{KeyAction}?)"/>
@@ -32,10 +44,11 @@ namespace SaveFileManager
         {
             if (key.Equals(keyResults.ElementAt((int)Key.ENTER)))
             {
-                // function (list)
+                // function
                 if (actionFunction is not null)
                 {
                     object? funcReturn;
+                    // args
                     if (actionParameters is not null)
                     {
                         funcReturn = actionFunction.DynamicInvoke(actionParameters);
@@ -74,47 +87,45 @@ namespace SaveFileManager
             }
         }
 
-        private void SetAction(object? action)
+        private void SetAction(UIList? uiList, Delegate? function, IEnumerable<object?>? args)
         {
             actionUIList = null;
             actionFunction = null;
             actionParameters = null;
             // list
-            if (action is not null &&
-                action.GetType() != typeof(string) &&
-                typeof(IEnumerable).IsAssignableFrom(action.GetType()) &&
-                ((IEnumerable<object>)action).Count() >= 2 &&
-                ((IEnumerable<object>)action).ElementAt(0) is Delegate)
+            if (function is not null)
             {
-                var actionList = (IEnumerable<object>)action;
-                actionFunction = (Delegate)actionList.ElementAt(0);
-                var paramNum = actionList.Count() + (modifyList ? 0 : -1);
-                actionParameters = new object[paramNum];
-                var index = 0;
-                if (modifyList)
+                actionFunction = function;
+                //function with args
+                if (args is not null)
                 {
-                    actionParameters[index] = this;
-                    index++;
+                    var paramNum = args.Count() + (modifyList ? 1 : 0);
+                    actionParameters = new object[paramNum];
+                    var index = 0;
+                    if (modifyList)
+                    {
+                        actionParameters[index] = this;
+                        index++;
+                    }
+                    for (var x = 1; x < args.Count(); x++)
+                    {
+                        actionParameters[index] = args.ElementAt(x);
+                        index++;
+                    }
                 }
-                for (var x = 1; x < actionList.Count(); x++)
+                //function
+                else
                 {
-                    actionParameters[index] = actionList.ElementAt(x);
-                    index++;
-                }
-            }
-            // normal function
-            else if (action is Delegate)
-            {
-                actionFunction = (Delegate)action;
-                if (modifyList)
-                {
-                    actionParameters = new object[] { this };
+                    if (modifyList)
+                    {
+                        actionParameters = new object[] { this };
+                    }
                 }
             }
             // ui
-            else if (action is not null && typeof(UIList).IsAssignableFrom(action.GetType()))
+            else if (uiList is not null)
             {
-                actionUIList = (UIList)action;
+                actionUIList = uiList;
             }
         }
     }

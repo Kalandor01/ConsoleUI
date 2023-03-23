@@ -21,7 +21,7 @@ namespace SaveFileManager
         /// <returns></returns>
         public override string MakeText(string icon, string iconR)
         {
-            return preText;
+            return preText + "\n";
         }
 
         /// <inheritdoc cref="HandleAction(object, IEnumerable{object}, IEnumerable{KeyAction}?)"/>
