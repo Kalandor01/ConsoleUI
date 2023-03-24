@@ -1,34 +1,11 @@
-﻿using System.IO;
-using System.Text.RegularExpressions;
-using System.Xml.Linq;
-using System;
+﻿using System.Text.RegularExpressions;
 using System.Text;
-using static System.Net.WebRequestMethods;
 
 namespace SaveFileManager
 {
     public class FileReader
     {
         private static readonly string FILE_NAME_SEED_REPLACE_STRING = "*";
-
-        /// <summary>
-        /// This exeption is raised if "fileName" and "seed" are both null in ReadFiles
-        /// </summary>
-        public class ReadFilesArgsError : Exception
-        {
-            /// <summary>
-            /// This exeption is raised if "fileName" and "seed" are both null or fileName doesn't contain the special character ("*") in ReadFiles.
-            /// </summary>
-            public ReadFilesArgsError()
-                : this($"\"fileName\" and \"seed\" can\'t both be null at the same time, and \"fileName\" must contain at least one \"{FILE_NAME_SEED_REPLACE_STRING}\"") { }
-
-            /// <summary>
-            /// This exeption is raised if "fileName" and "seed" are both null or fileName doesn't contain the special character ("*") in ReadFiles.
-            /// </summary>
-            /// <param name="message">The message to display.</param>
-            public ReadFilesArgsError(string message) : base(message) { }
-        }
-
 
         /// <summary>
         /// Gets data from all save files in a folder, and returns them in a format that save managers can read.<br/>
@@ -42,8 +19,8 @@ namespace SaveFileManager
         /// <param name="decodeUntil">How many lines the function should decode (strarting from the beggining, with 1).</param>
         /// <param name="seed">The seed that will be used to decode files.</param>
         /// <returns>A dictionary of file datas, where the key is eighter the seed, or the name of the file, and the data is a list os lines returned by the <c>DecodeFile</c> function or null.</returns>
-        /// <exception cref="ReadFilesArgsError"></exception>
-        private static Dictionary<string, List<string>?> ReadFilesPrivate(int maxFiles = 5, string? fileName = "file*", string fileExt = "sav", string? dirName = null, int decodeUntil = -1, long? seed = null)
+        /// <exception cref="ReadFilesArgsExeption"></exception>
+        private static Dictionary<string, List<string>?> ReadFilesPrivate(int maxFiles = -1, string? fileName = "file*", string fileExt = "sav", string? dirName = null, int decodeUntil = -1, long? seed = null)
         {
             if (dirName is null)
             {
@@ -119,14 +96,14 @@ namespace SaveFileManager
                 }
                 else
                 {
-                    throw new ReadFilesArgsError();
+                    throw new ReadFilesArgsExeption();
                 }
             }
-            validFiles.Sort();
+            var sortedValidFiles = Utils.NaturalSort(validFiles);
 
             // get file datas
             var filesData = new Dictionary<string, List<string>?>();
-            foreach (var file in validFiles)
+            foreach (var file in sortedValidFiles)
             {
                 List<string>? fileData = null;
                 try
@@ -145,7 +122,7 @@ namespace SaveFileManager
                     catch (Exception ex) when (ex is FormatException || ex is DecoderFallbackException) { }
                     filesData.Add(file, fileData);
                 }
-                catch (FileNotFoundException e) { }
+                catch (FileNotFoundException) { }
             }
             return filesData;
         }
@@ -161,7 +138,7 @@ namespace SaveFileManager
         /// <param name="dirName">The directory that will be searched for files. By default it uses the current working directory.</param>
         /// <param name="decodeUntil">How many lines the function should decode (strarting from the beggining, with 1).</param>
         /// <returns>A dictionary of file datas, where the key is the name of the file, and the data is a list os lines returned by the <c>DecodeFile</c> function or null.</returns>
-        public static Dictionary<string, List<string>?> ReadFiles(string fileName = "file*", string fileExt = "sav", string? dirName = null, int maxFiles = 5, int decodeUntil = -1)
+        public static Dictionary<string, List<string>?> ReadFiles(string fileName = "file*", string fileExt = "sav", string? dirName = null, int maxFiles = -1, int decodeUntil = -1)
         {
             return ReadFilesPrivate(maxFiles, fileName, fileExt, dirName, decodeUntil, null);
         }
@@ -177,21 +154,9 @@ namespace SaveFileManager
         /// <param name="decodeUntil">How many lines the function should decode (strarting from the beggining, with 1).</param>
         /// <param name="seed">The seed that will be used to decode files.</param>
         /// <returns>A dictionary of file datas, where the key is the seed, and the data is a list os lines returned by the <c>DecodeFile</c> function or null.</returns>
-        public static Dictionary<string, List<string>?> ReadFiles(long seed = 1, string fileExt = "sav", string? dirName = null, int maxFiles = 5, int decodeUntil = -1)
+        public static Dictionary<string, List<string>?> ReadFiles(long seed = 1, string fileExt = "sav", string? dirName = null, int maxFiles = -1, int decodeUntil = -1)
         {
             return ReadFilesPrivate(maxFiles, null, fileExt, dirName, decodeUntil, seed);
-        }
-
-        /// <inheritdoc cref="ReadFiles(string, string, string?, int, int)"/>
-        public static Dictionary<string, List<string>?> ReadFiles(string fileName = "file*", string? dirName = null, int decodeUntil = -1)
-        {
-            return ReadFiles(maxFiles:-1, fileName:fileName, dirName:dirName, decodeUntil:decodeUntil);
-        }
-
-        /// <inheritdoc cref="ReadFiles(long, string, string?, int, int)"/>
-        public static Dictionary<string, List<string>?> ReadFiles(long seed, string? dirName = null, int decodeUntil = -1)
-        {
-            return ReadFiles(maxFiles:-1, seed:seed, dirName:dirName, decodeUntil:decodeUntil);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace SaveFileManager
 {
@@ -25,6 +26,26 @@ namespace SaveFileManager
                     Console.WriteLine(errorText);
                 }
             }
+        }
+
+        /// <summary>
+        /// Writes out text, and then waits for a key press.
+        /// </summary>
+        /// <param name="text">The text to write out.</param>
+        public static void PressKey(string text)
+        {
+            Console.WriteLine(text);
+            Console.ReadKey();
+        }
+
+        /// <summary>
+        /// Writes out text, and then returns what the user inputed.
+        /// </summary>
+        /// <param name="text">The text to write out.</param>
+        public static string? Input(string text)
+        {
+            Console.WriteLine(text);
+            return Console.ReadLine();
         }
 
         /// <param name="mode">The GetKeyMode to use.</param>
@@ -156,6 +177,7 @@ namespace SaveFileManager
         /// <param name="cursorIcon">The cursor icon style to use.</param>
         /// <param name="keybinds">The list of <c>KeyAction</c> objects to use, if the selected action is a <c>UIList</c>.</param>
         /// <param name="keyResults">The list of posible results returned by pressing a pressedKey.</param>
+        /// <exception cref="UINoSelectablesExeption"></exception>
         /// <returns></returns>
         public static object? OptionsUI(IEnumerable<BaseUI?> elements, string? title = null, CursorIcon? cursorIcon = null, IEnumerable<KeyAction>? keybinds = null, IEnumerable<object>? keyResults = null)
         {
@@ -317,6 +339,28 @@ namespace SaveFileManager
             }
             while (!pressedKey.Equals(keyResults.ElementAt((int)Key.ESCAPE)));
             return null;
+        }
+
+        /// <summary>
+        /// Function to sort a list of strings, with numbers correctly.<br/>
+        /// by L.B <see href="https://stackoverflow.com/a/10000192">SOURCE</see>
+        /// </summary>
+        /// <param name="list">The list to sort</param>
+        /// <returns></returns>
+        public static IEnumerable<string> NaturalSort(IEnumerable<string> list)
+        {
+            int maxLen = list.Select(s => s.Length).Max();
+            Func<string, char> PaddingChar = s => char.IsDigit(s[0]) ? ' ' : char.MaxValue;
+
+            return list
+                .Select(s =>
+                    new
+                    {
+                        OrgStr = s,
+                        SortStr = Regex.Replace(s, @"(\d+)|(\D+)", m => m.Value.PadLeft(maxLen, PaddingChar(m.Value)))
+                    })
+                .OrderBy(x => x.SortStr)
+                .Select(x => x.OrgStr);
         }
     }
 }
