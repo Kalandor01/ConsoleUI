@@ -269,7 +269,7 @@ namespace SaveFileManager
         /// Prints the <c>question</c> and then the list of answers from the <c>answers</c> list that the user can cycle between and select with the keys in the <c>keybinds</c>.
         /// </summary>
         /// <param name="keybinds">The list of <c>KeyAction</c> objects to use, if the selected action is a <c>UIList</c>.</param>
-        /// <param name="keyResults">The list of posible results returned by pressing a key. Used, if the selected action is a <c>UIList</c>.<br/>
+        /// <param name="keyResults">The list of posible results returned by pressing a key.<br/>
         /// The order of the elements in the tuple should be:<br/>
         /// - escape, up, down, left, right, enter<br/>
         ///If it is null, the default value is either returned from the <c>keybinds</c> or:<br/>

@@ -19,7 +19,7 @@
             var manageExit = false;
             while (!manageExit)
             {
-                if (filesData.Count() > 0)
+                if (filesData.Count > 0)
                 {
                     // get file range
                     var maxFileNum = 0;
@@ -98,149 +98,300 @@
 
         /// <summary>
         /// Allows the user to pick between creating a new save, loading an old save and deleteing a save, with UI selection.<br/>
-        /// Reads in file data from a <c>FileReader</c> method.<br/>
+        /// Reads in a file data dictionary, where the first element is the file number/seed, and the second is the text to display for that file.<br/>
         /// Returns a tuple depending on what the user selected, containig what happenend, and in whitch slot (except exit).<br/>
         /// Can return: new, load, exit
         /// </summary>
-        /// <param name="filesData">The return value from a <c>FileReader</c> method.</param>
+        /// <param name="filesDataProcessed">A file data dictionary, where the first element is the file number/seed, and the second is the text to display for that file.</param>
         /// <param name="maxFiles">The maximum number of files that can exist. If the number of files go abowe this number, no new files can be created. -1 for no limit.</param>
         /// <param name="fileName">The name of the files without the extension. The a "*"-s in the name will be replaced with the file number.</param>
         /// <param name="fileExt">The extension of the files.</param>
         /// <param name="canExit">If the user can exit from this menu with he key assigned to the escape action.</param>
         /// <param name="keybinds">The list of <c>KeyAction</c> objects to use.</param>
+        /// <param name="keyResults">The list of posible results returned by pressing a key.</param>
         /// <returns></returns>
-        //    public (FileManagerOptions ManagerOption, int slotNumber) ManageFilesUI(Dictionary<string, List<string>?> filesData, int maxFiles = -1, string fileName = "file*", string fileExt = "sav", bool canExit = false, IEnumerable<KeyAction>? keybinds = null)
-        //    {
-        //        in_main_menu = True
-        //        while True:
-        //            if len(file_data) :
-        //                if in_main_menu:
-        //                    in_main_menu = False
-        //                    option = UI_list(["New save", "Load/Delete save"], " Main menu", can_esc = can_exit).display(keybinds = keybinds)
-        //                else:
-        //                    option = 1
-        //                // new file
-        //                if option == 0:
-        //                    new_slot = 1
-        //                    for data in file_data:
-        //                        if data[0] == new_slot:
-        //                            new_slot += 1
-        //                    if new_slot <= max_saves or max_saves< 0:
-        //                        return (1, new_slot)
-        //                    else:
-        //                        input(f"No empty save files! Delete a file to continue!")
-        //                elif option == -1:
-        //                    return (-1, -1)
-        //                // load / delete
-        //                else:
-        //                    // get data from file_data
-        //                    list_data = []
-        //                    for data in file_data:
-        //                        list_data.append(f"{data[0]}. {data[1]}")
-        //                    list_data.append(None)
-        //                    list_data.append("Delete file")
-        //                    list_data.append("Back")
-        //                    option = UI_list(list_data, " Level select", can_esc = True).display(keybinds)
-        //                    // load
-        //                    if option != -1 and option<len(file_data):
-        //                        return (0, file_data[option][0])
-        //                    // delete
-        //                    elif option == len(file_data) + 1:
-        //                        list_data.pop(len(list_data) - 2)
-        //                        delete_mode = True
-        //                        while delete_mode and len(file_data) > 0:
-        //                            option = UI_list(list_data, " Delete mode!", Cursor_icon("X ", "", "  "), multiline = False, can_esc = True).display(keybinds)
-        //                            if option != -1 and option != len(list_data) - 1:
-        //                                sure = UI_list(["No", "Yes"], f" Are you sure you want to remove Save file {file_data[option][0]}?", can_esc = True).display(keybinds)
-        //                                if sure == 1:
-        //                                    remove(f'{save_name.replace("*", str(file_data[option][0]))}.{save_ext}')
-        //                                    list_data.pop(option)
-        //                                    file_data.pop(option)
-        //                            else:
-        //                                delete_mode = False
-        //                    // back
-        //                    else:
-        //                        in_main_menu = True
-        //            else:
-        //                input(f"\n No save files detected!")
-        //                return (1, 1)
-        //    }
+        public static (FileManagerOptions ManagerOption, int slotNumber) ManageFilesUI(
+            Dictionary<int, string> filesDataProcessed,
+            int maxFiles = -1,
+            string fileName = "file*",
+            string fileExt = "sav",
+            bool canExit = false,
+            IEnumerable<KeyAction>? keybinds = null,
+            IEnumerable<object>? keyResults = null
+        )
+        {
+            var inMainMenu = true;
+            int option;
+            while (true)
+            {
+                if (filesDataProcessed.Count > 0)
+                {
+                    if (inMainMenu)
+                    {
+                        inMainMenu = false;
+                        option = (int)new UIList(new List<string?> { "New save", "Load/Delete save" }, " Main menu", canEscape:canExit).Display(keybinds, keyResults);
+                    }
+                    else
+                    {
+                        option = 1;
+                    }
+                    // new file
+                    if (option == 0)
+                    {
+                        var newSlot = 1;
+                        foreach (var fileNum in filesDataProcessed.Keys)
+                        {
+                            if (fileNum == newSlot)
+                            {
+                                newSlot++;
+                            }
+                        }
+                        if (maxFiles < 0 || newSlot <= maxFiles)
+                        {
+                            return (FileManagerOptions.NEW_FILE, newSlot);
+                        }
+                        else
+                        {
+                            Utils.PressKey("No empty save files! Delete a file to continue!");
+                        }
+                    }
+                    // exit
+                    else if (option == -1)
+                    {
+                        return (FileManagerOptions.EXIT, -1);
+                    }
+                    // load / delete
+                    else
+                    {
+                        // get data from file_data
+                        var listData = new List<string?>();
+                        foreach (var data in filesDataProcessed)
+                        {
+                            listData.Add(data.Value);
+                        }
+                        listData.Add(null);
+                        listData.Add("Delete file");
+                        listData.Add("Back");
+                        option = (int)new UIList(listData, " Level select", canEscape: true).Display(keybinds, keyResults);
+                        // load
+                        if (option != -1 && option < filesDataProcessed.Count)
+                        {
+                            return (FileManagerOptions.LOAD_FILE, filesDataProcessed.ElementAt(option).Key);
+                        }
+                        // delete
+                        else if (option == filesDataProcessed.Count + 1)
+                        {
+                            listData.RemoveAt(listData.Count - 2);
+                            var deleteMode = true;
+                            while (deleteMode && filesDataProcessed.Count > 0)
+                            {
+                                option = (int)new UIList(listData, " Delete mode!", new CursorIcon("X ", "", "  "), false, true).Display(keybinds, keyResults);
+                                if (option != -1 && option != listData.Count - 1)
+                                {
+                                    var sure = (int)new UIList(new List<string?> { "No", "Yes" }, $" Are you sure you want to remove Save file {filesDataProcessed.ElementAt(option).Key}?", canEscape: true).Display(keybinds, keyResults);
+                                    if (sure == 1)
+                                    {
+                                        File.Delete($"{fileName.Replace("*", filesDataProcessed.ElementAt(option).Key.ToString())}.{fileExt}");
+                                        listData.RemoveAt(option);
+                                        filesDataProcessed.Remove(filesDataProcessed.ElementAt(option).Key);
+                                    }
+                                }
+                                else
+                                {
+                                    deleteMode = false;
+                                }
+                            }
+                        }
+                        // back
+                        else
+                        {
+                            inMainMenu = true;
+                        }
+                    }
+                }
+                else
+                {
+                    Utils.PressKey("\n No save files detected!");
+                    return (FileManagerOptions.NEW_FILE, 1);
+                }
+            }
+        }
 
+        /// <summary>
+        /// Allows the user to pick between creating a new save, loading an old save and deleteing a save, with UI selection.<br/>
+        /// The <c>newFileFunction</c> and the <c>loadFileFunction</c> delegates run, when the user creates or loads a save file, and both WILL get the file number, that was refrenced as their first argument.<br/>
+        /// The <c>GetDataFunction</c> MUST return an IDictionary where the key is the number/seed of the file, and the value is the text to display for that file.
+        /// </summary>
+        /// <param name="newFileFunction">The function and it's arguments, called when the user creates a new file.</param>
+        /// <param name="loadFileFunction">The function and it's arguments, called when the user loads a file.</param>
+        /// <param name="getDataFunction">The function and it's arguments, used for getting all files in a folder.</param>
+        /// <param name="maxFiles">The maximum number of files that can exist. If the number of files go abowe this number, no new files can be created. -1 for no limit.</param>
+        /// <param name="fileName">The name of the files without the extension. The a "*"-s in the name will be replaced with the file number.</param>
+        /// <param name="fileExt">The extension of the files.</param>
+        /// <param name="canExit">If the user can exit from this menu with he key assigned to the escape action.</param>
+        /// <param name="keybinds">The list of <c>KeyAction</c> objects to use.</param>
+        /// <param name="keyResults">The list of posible results returned by pressing a key.</param>
+        public static void ManageFilesUIAdvanced(
+            (Delegate function, object?[]? args) newFileFunction,
+            (Delegate function, object?[]? args) loadFileFunction,
+            (Delegate function, object?[]? args) getDataFunction,
+            int maxFiles = -1,
+            string fileName = "file*",
+            string fileExt = "sav",
+            bool canExit = false,
+            IEnumerable<KeyAction>? keybinds = null,
+            IEnumerable<object>? keyResults = null
+        )
+        {
+            var getDataFunctionReturn = getDataFunction.function.Method.ReturnType;
+            if (
+                !(getDataFunctionReturn is not null &&
+                typeof(IDictionary<int, string>).IsAssignableFrom(getDataFunctionReturn))
+            )
+            {
+                throw new WrongReturnTypeExeption("The get data delegate's return type should be of type IDictionary<int, string>.");
+            }
 
-        //def manage_saves_ui_2(new_save_function:list[Callable | Any], load_save_function:list[Callable | Any], get_data_function:list[Callable | Any]|None= None, max_saves= -1, save_name= "save*", save_ext= "sav", can_exit= False, keybinds:Keybinds|None= None):
-        //    """
-        //    Allows the user to pick between creating a new save, loading an old save and deleteing a save, with UI selection.\n
-        //    The new_save_function and the load_save_function run, when the user preforms these actions, and both WILL get the file number, that was refrenced as their first argument.\n
-        //    The get_data_function should return a list with all of the save file data, similar to the file_redaer function.\n
-        //    The first element of all function lists should allways be the function. All other elements will be treated as arguments for that function.
-        //    """
+            while (true)
+            {
+                var filesData = (IDictionary<int, string>?)getDataFunction.function.DynamicInvoke(getDataFunction.args);
+                // main
+                if (filesData is not null && filesData.Count > 0)
+                {
+                    var option = (int)new UIList(new List<string> { "New save", "Load/Delete save" }, " Main menu", canEscape: canExit, actions: new List<object> {
+                        new List<object> { new NewFunctionDelegate(NewFilePreperation), getDataFunction, newFileFunction, maxFiles },
+                        new List<object> { new LoadFunctionDelegate(LoadOrDeleteMenu), getDataFunction, newFileFunction, loadFileFunction, keybinds, keyResults, fileName, fileExt }
+                    }).Display(keybinds, keyResults);
+                    if (option == -1)
+                    {
+                        return;
+                    }
+                }
+                else
+                {
+                    Utils.PressKey("\n No save files detected!");
+                    InvokeActionWithFileNum(newFileFunction, 1);
+                }
+            }
+        }
 
-        //    # get_fuction default
-        //    if get_data_function is None:
-        //        get_data_function = [file_reader, max_saves, save_name, save_ext]
+        private delegate Dictionary<string, List<string>?> DefGetDelegate(
+            string fileName = "file*",
+            string fileExt = "sav",
+            string? dirName = null,
+            int maxFiles = -1,
+            int decodeUntil = -1
+        );
+        private delegate void NewFunctionDelegate(
+            (Delegate function, object?[]? args) getFunction,
+            (Delegate function, object?[]? args) newFunction,
+            int maxFiles
+        );
+        private delegate void LoadFunctionDelegate(
+            (Delegate function, object?[]? args) getFunction,
+            (Delegate function, object?[]? args) newFileFunction,
+            (Delegate function, object?[]? args) loadFunction,
+            IEnumerable<KeyAction>? keybinds,
+            IEnumerable<object>? keyResults,
+            string fileName,
+            string fileExt
+        );
 
-        //    def new_save_pre(new_func):
-        //        if not callable(get_data_function[0]):
-        //            get_data_function[0] = file_reader
-        //        file_data = get_data_function[0](*get_data_function[1:])
-        //        new_slot = 1
-        //        for data in file_data:
-        //            if data[0] == new_slot:
-        //                new_slot += 1
-        //        if new_slot <= max_saves or max_saves< 0:
-        //            new_func[0](new_slot, * new_func[1:])
-        //        else:
-        //            input(f"No empty save files! Delete a file to continue!")
+        private static void NewFilePreperation((Delegate function, object?[]? args) getDataFunction, (Delegate function, object?[]? args) newFileFunction, int maxFiles)
+        {
+            var filesData = (IDictionary<int, string>?)getDataFunction.function.DynamicInvoke(getDataFunction.args);
+            var newSlot = 1;
+            foreach (var data in filesData)
+            {
+                if (data.Key == newSlot)
+                {
+                    newSlot++;
+                }
+            }
+            if (maxFiles < 0 || newSlot <= maxFiles)
+            {
+                InvokeActionWithFileNum(newFileFunction, newSlot);
+            }
+            else
+            {
+                Utils.PressKey("No empty save files! Delete a file to continue!");
+            }
+        }
 
-        //    def load_or_delete(load_func):
-        //        while True:
-        //            # get data from file_data
-        //            if not callable(get_data_function[0]):
-        //                get_data_function[0] = file_reader
-        //            file_data = get_data_function[0](*get_data_function[1:])
-        //            list_data = []
-        //            for data in file_data:
-        //                list_data.append(f"{data[0]}. {data[1]}")
-        //                list_data.append(None)
-        //            list_data.append("Delete file")
-        //            list_data.append("Back")
-        //            option = UI_list(list_data, " Level select", can_esc= True).display(keybinds)
-        //            # load
-        //            if option != -1 and option / 2 < len(file_data) :
-        //                load_func[0] (file_data[int(option / 2)][0], * load_func[1:])
-        //            # delete
-        //            elif option / 2 == len(file_data) :
-        //                list_data.pop(len(list_data) - 2)
-        //                delete_mode = True
-        //                while delete_mode and len(file_data) > 0:
-        //                    option = UI_list(list_data, " Delete mode!", Cursor_icon("X ", "", "  "), multiline=False, can_esc=True).display(keybinds)
-        //                    if option != -1 and option != len(list_data) - 1:
-        //                        option = int (option / 2)
-        //                        sure = UI_list(["No", "Yes"], f" Are you sure you want to remove Save file {file_data[option][0]}?", can_esc= True).display(keybinds)
-        //                        if sure == 1:
-        //                            remove(f'{save_name.replace("*", str(file_data[option][0]))}.{save_ext}')
-        //                            list_data.pop(option)
-        //                            list_data.pop(option)
-        //                            file_data.pop(option)
-        //                    else:
-        //                        delete_mode = False
-        //                if len(file_data) == 0:
-        //                    input(f"\n No save files detected!")
-        //                    new_save_function[0] (1, *new_save_function[1:])
-        //            else:
-        //                break
+        private static void LoadOrDeleteMenu(
+            (Delegate function, object?[]? args) getDataFunction,
+            (Delegate function, object?[]? args) newFileFunction,
+            (Delegate function, object?[]? args) loadFileFunction,
+            IEnumerable<KeyAction>? keybinds,
+            IEnumerable<object>? keyResults,
+            string fileName,
+            string fileExt
+        )
+        {
+            while (true)
+            {
+                // get data from filesData
+                var filesData = (IDictionary<int, string>?)getDataFunction.function.DynamicInvoke(getDataFunction.args);
+                var listData = new List<string?>();
+                foreach (var data in filesData.Values)
+                {
+                    listData.Add(data);
+                    listData.Add(null);
+                }
+                listData.Add("Delete file");
+                listData.Add("Back");
+                var option = (int)new UIList(listData, " Level select", canEscape: true).Display(keybinds, keyResults);
+                // load
+                if (option != -1 && option / 2 < filesData.Count)
+                {
+                    InvokeActionWithFileNum(loadFileFunction, filesData.ElementAt(option / 2).Key);
+                }
+                // delete
+                else if (option == filesData.Count * 2)
+                {
+                    listData.RemoveAt(listData.Count - 2);
+                    var deleteMode = true;
+                    while (deleteMode && filesData.Count > 0)
+                    {
+                        option = (int)new UIList(listData, " Delete mode!", new CursorIcon("X ", "", "  "), false, true).Display(keybinds, keyResults);
+                        if (option != -1 && option != listData.Count - 1)
+                        {
+                            option = option / 2;
+                            var sure = (int)new UIList(new List<string?> { "No", "Yes" }, $" Are you sure you want to remove Save file {filesData.ElementAt(option).Key}?", canEscape: true).Display(keybinds, keyResults);
+                            if (sure == 1)
+                            {
+                                File.Delete($"{fileName.Replace("*", filesData.ElementAt(option).Key.ToString())}.{fileExt}");
+                                listData.RemoveAt(option * 2);
+                                listData.RemoveAt(option * 2);
+                                filesData.Remove(filesData.ElementAt(option));
+                            }
+                        }
+                        else
+                        {
+                            deleteMode = false;
+                        }
+                    }
+                    if (filesData.Count == 0)
+                    {
+                        Utils.PressKey("\n No save files detected!");
+                        InvokeActionWithFileNum(newFileFunction, 1);
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
 
-        //    # actual function
-        //    if not callable(get_data_function[0]):
-        //        get_data_function[0] = file_reader
-        //    file_data = get_data_function[0](*get_data_function[1:])
-        //    # main
-        //    if len(file_data) :
-        //        option = UI_list(["New save", "Load/Delete save"], " Main menu", can_esc = can_exit, action_list = [[new_save_pre, new_save_function], [load_or_delete, load_save_function]]).display(keybinds)
-        //        if option == -1:
-        //            return -1
-        //    else:
-        //        input(f"\n No save files detected!")
-        //        new_save_function[0] (1, *new_save_function[1:])
+        private static void InvokeActionWithFileNum((Delegate function, object?[]? args) action, int fileNum)
+        {
+            var functionArgs = new List<object?> { fileNum };
+            if (action.args is not null)
+            {
+                functionArgs.AddRange(action.args);
+            }
+            action.function.DynamicInvoke(functionArgs.ToArray());
+        }
     }
 }
