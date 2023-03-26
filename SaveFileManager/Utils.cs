@@ -4,8 +4,23 @@ using System.Text.RegularExpressions;
 
 namespace SaveFileManager
 {
+    /// <summary>
+    /// Contains miscalenious functions.
+    /// </summary>
     public static class Utils
     {
+        #region Constants
+        /// <summary>
+        /// *
+        /// </summary>
+        internal static readonly string FILE_NAME_SEED_REPLACE_STRING = "*";
+        /// <summary>
+        /// Helper number for <c>Sqrt</c>.
+        /// </summary>
+        private static readonly BigInteger FastSqrtSmallNumber = 4503599761588223UL;
+        #endregion
+
+        #region Public functions
         /// <summary>
         /// ReadKey but only accepts whole numbers.
         /// </summary>
@@ -64,17 +79,14 @@ namespace SaveFileManager
         /// <returns>The <c>response</c> of the <c>KeyAction</c> object that maches the key the user pressed.</returns>
         public static object GetKey(IEnumerable<GetKeyMode> modeList, IEnumerable<KeyAction>? keybinds=null)
         {
-            if (keybinds is null)
-            {
-                keybinds = new List<KeyAction> {
+            keybinds ??= new List<KeyAction> {
                     new KeyAction(Key.ESCAPE, new ConsoleKeyInfo('\u001b', ConsoleKey.Escape, false, false, false), GetKeyMode.IGNORE_ESCAPE),
                     new KeyAction(Key.UP, new ConsoleKeyInfo('\u0000', ConsoleKey.UpArrow, false, false, false), GetKeyMode.IGNORE_VERTICAL),
                     new KeyAction(Key.DOWN, new ConsoleKeyInfo('\u0000', ConsoleKey.DownArrow, false, false, false), GetKeyMode.IGNORE_VERTICAL),
                     new KeyAction(Key.LEFT, new ConsoleKeyInfo('\u0000', ConsoleKey.LeftArrow, false, false, false), GetKeyMode.IGNORE_HORIZONTAL),
                     new KeyAction(Key.RIGHT, new ConsoleKeyInfo('\u0000', ConsoleKey.RightArrow, false, false, false), GetKeyMode.IGNORE_HORIZONTAL),
                     new KeyAction(Key.ENTER, new ConsoleKeyInfo('\r', ConsoleKey.Enter, false, false, false), GetKeyMode.IGNORE_ENTER),
-                };
-            }
+            };
 
             while (true)
             {
@@ -103,7 +115,7 @@ namespace SaveFileManager
         /// </summary>
         /// <param name="keybinds">The list of <c>KeyAction</c> objects to use.</param>
         /// <returns></returns>
-        public static IEnumerable<object> GetResultList(IEnumerable<KeyAction> keybinds)
+        public static IEnumerable<object> GetResultsList(IEnumerable<KeyAction> keybinds)
         {
             var keyResults = new List<object>();
             foreach (var action in keybinds)
@@ -113,7 +125,190 @@ namespace SaveFileManager
             return keyResults;
         }
 
-        private static readonly BigInteger FastSqrtSmallNumber = 4503599761588223UL; // as static readonly = reduce compare overhead
+        /// <summary>
+        /// Prints the title and then a list of elements that the user can cycle between with the up and down arrows, and adjust with either the left and right arrow keys or the enter pressedKey depending on the input object type, and exit with the pressedKey assigned to escape.<br/>
+        /// Accepts a list of objects(Slider, Choice, Toggle, Button).<br/>
+        /// if an element in the list is not one of these objects, the value will be printed, (or if its null, the line will be blank) and cannot be selected.<br/>
+        /// The order of the elements in the tuple should be:<br/>
+        /// - (escape, up, down, left, right, enter)<br/>
+        /// If it is None, the default value is:<br/>
+        /// - (Key.ESCAPE, Key.UP, Key.DOWN, Key.LEFT, Key.RIGHT, Key.ENTER)
+        /// </summary>
+        /// <param name="elements">The list of <c>BaseUI</c> objects to use.</param>
+        /// <param name="title">The string to print before the <c>elements</c>.</param>
+        /// <param name="cursorIcon">The cursor icon style to use.</param>
+        /// <param name="keybinds">The list of <c>KeyAction</c> objects to use, if the selected action is a <c>UIList</c>.</param>
+        /// <param name="keyResults">The list of posible results returned by pressing a pressedKey.</param>
+        /// <param name="canEscape">Allows the user to press the key associated with escape, to exit the menu.</param>
+        /// <exception cref="UINoSelectablesExeption"></exception>
+        /// <returns></returns>
+        public static object? OptionsUI(IEnumerable<BaseUI?> elements, string? title = null, CursorIcon? cursorIcon = null, bool canEscape = true, IEnumerable<KeyAction>? keybinds = null, IEnumerable<object>? keyResults = null)
+        {
+            if (elements.All(answer => answer is null || !answer.IsSelectable()))
+            {
+                throw new UINoSelectablesExeption();
+            }
+
+            if (keyResults is null)
+            {
+                if (keybinds is null)
+                {
+                    keyResults = new List<object> { Key.ESCAPE, Key.UP, Key.DOWN, Key.LEFT, Key.RIGHT, Key.ENTER };
+                }
+                else
+                {
+                    keyResults = GetResultsList(keybinds);
+                }
+            }
+            cursorIcon ??= new CursorIcon();
+
+            // is enter needed?
+            var noEnter = true;
+            foreach (var element in elements)
+            {
+                if (
+                    element is not null &&
+                    (
+                        typeof(Toggle).IsAssignableFrom(element.GetType()) ||
+                        typeof(Button).IsAssignableFrom(element.GetType())
+                    )
+                )
+                {
+                    noEnter = false;
+                    break;
+                }
+            }
+            // put selected on selectable
+            var selected = 0;
+            while (
+                elements.ElementAt(selected) is null ||
+                !elements.ElementAt(selected).IsSelectable()
+            )
+            {
+                selected++;
+            }
+            // render/getkey loop
+            object pressedKey;
+            do
+            {
+                // prevent infinite loop
+                if (elements.All(answer => answer is null || !answer.IsSelectable()))
+                {
+                    throw new UINoSelectablesExeption();
+                }
+                // render
+                // clear screen
+                var txt = new StringBuilder("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+                if (title is not null)
+                {
+                    txt.Append(title + "\n\n");
+                }
+                for (var x = 0; x < elements.Count(); x++)
+                {
+                    var element = elements.ElementAt(x);
+                    if (element is not null && typeof(BaseUI).IsAssignableFrom(element.GetType()))
+                    {
+                        txt.Append(element.MakeText(
+                            selected == x ? cursorIcon.sIcon : cursorIcon.icon,
+                            selected == x ? cursorIcon.sIconR : cursorIcon.iconR
+                        ));
+                    }
+                    else if (element is null)
+                    {
+                        txt.Append('\n');
+                    }
+                    else
+                    {
+                        txt.Append(element.ToString() + "\n");
+                    }
+                }
+                Console.WriteLine(txt.ToString());
+                // move selection/change value
+                var actualMove = false;
+                do
+                {
+                    // get pressedKey
+                    pressedKey = keyResults.ElementAt((int)Key.ENTER);
+                    var selectedElement = elements.ElementAt(selected);
+                    if (
+                        selectedElement is not null &&
+                        selectedElement.IsOnlyClickable()
+                    )
+                    {
+                        pressedKey = GetKey(GetKeyMode.IGNORE_HORIZONTAL, keybinds);
+                    }
+                    else
+                    {
+                        while (pressedKey.Equals(keyResults.ElementAt((int)Key.ENTER)))
+                        {
+                            pressedKey = GetKey(GetKeyMode.NO_IGNORE, keybinds);
+                            if (pressedKey.Equals(keyResults.ElementAt((int)Key.ENTER)) && noEnter)
+                            {
+                                pressedKey = keyResults.ElementAt((int)Key.ESCAPE);
+                            }
+                        }
+                    }
+                    // move selection
+                    if (
+                        pressedKey.Equals(keyResults.ElementAt((int)Key.UP)) ||
+                        pressedKey.Equals(keyResults.ElementAt((int)Key.DOWN))
+                    )
+                    {
+                        var prevSelected = selected;
+                        while (true)
+                        {
+                            selected += pressedKey.Equals(keyResults.ElementAt((int)Key.DOWN)) ? 1 : -1;
+                            selected %= elements.Count();
+                            if (selected < 0)
+                            {
+                                selected = elements.Count() - 1;
+                            }
+                            if (
+                                elements.ElementAt(selected) is not null &&
+                                elements.ElementAt(selected).IsSelectable()
+                            )
+                            {
+                                break;
+                            }
+                        }
+                        if (prevSelected != selected)
+                        {
+                            actualMove = true;
+                        }
+                    }
+                    // change value
+                    else if (
+                        selectedElement is not null &&
+                        selectedElement.IsSelectable() &&
+                        (
+                            pressedKey.Equals(keyResults.ElementAt((int)Key.LEFT)) ||
+                            pressedKey.Equals(keyResults.ElementAt((int)Key.RIGHT)) ||
+                            pressedKey.Equals(keyResults.ElementAt((int)Key.ENTER)))
+                        )
+                    {
+                        var returned = selectedElement.HandleAction(pressedKey, keyResults, keybinds);
+                        if (returned is not null)
+                        {
+                            if (returned.GetType() == typeof(bool))
+                            {
+                                actualMove = (bool)returned;
+                            }
+                            else
+                            {
+                                return returned;
+                            }
+                        }
+                    }
+                    else if (canEscape && pressedKey.Equals(keyResults.ElementAt((int)Key.ESCAPE)))
+                    {
+                        actualMove = true;
+                    }
+                }
+                while (!actualMove);
+            }
+            while (!canEscape || !pressedKey.Equals(keyResults.ElementAt((int)Key.ESCAPE)));
+            return null;
+        }
 
         /// <summary>
         /// Square root calculator for <c>BigInteger</c>s.<br/>
@@ -164,184 +359,6 @@ namespace SaveFileManager
         }
 
         /// <summary>
-        /// Prints the title and then a list of elements that the user can cycle between with the up and down arrows, and adjust with either the left and right arrow keys or the enter pressedKey depending on the input object type, and exit with the pressedKey assigned to escape.<br/>
-        /// Accepts a list of objects(Slider, Choice, Toggle, Button).<br/>
-        /// if an element in the list is not one of these objects, the value will be printed, (or if it's null, the line will be blank) and cannot be selected.<br/>
-        /// The order of the elements in the tuple should be:<br/>
-        /// - (escape, up, down, left, right, enter)<br/>
-        /// If it is None, the default value is:<br/>
-        /// - (Key.ESCAPE, Key.UP, Key.DOWN, Key.LEFT, Key.RIGHT, Key.ENTER)
-        /// </summary>
-        /// <param name="elements">The list of <c>BaseUI</c> objects to use.</param>
-        /// <param name="title">The string to print before the <c>elements</c>.</param>
-        /// <param name="cursorIcon">The cursor icon style to use.</param>
-        /// <param name="keybinds">The list of <c>KeyAction</c> objects to use, if the selected action is a <c>UIList</c>.</param>
-        /// <param name="keyResults">The list of posible results returned by pressing a pressedKey.</param>
-        /// <exception cref="UINoSelectablesExeption"></exception>
-        /// <returns></returns>
-        public static object? OptionsUI(IEnumerable<BaseUI?> elements, string? title = null, CursorIcon? cursorIcon = null, IEnumerable<KeyAction>? keybinds = null, IEnumerable<object>? keyResults = null)
-        {
-            if (keyResults is null)
-            {
-                if (keybinds is null)
-                {
-                    keyResults = new List<object> { Key.ESCAPE, Key.UP, Key.DOWN, Key.LEFT, Key.RIGHT, Key.ENTER };
-                }
-                else
-                {
-                    keyResults = GetResultList(keybinds);
-                }
-            }
-            if (cursorIcon is null)
-            {
-                cursorIcon = new CursorIcon();
-            }
-
-            // is enter needed?
-            var noEnter = true;
-            foreach (var element in elements)
-            {
-                if (
-                    element is not null &&
-                    (
-                        typeof(Toggle).IsAssignableFrom(element.GetType()) ||
-                        typeof(Button).IsAssignableFrom(element.GetType())
-                    )
-                )
-                {
-                    noEnter = false;
-                    break;
-                }
-            }
-            // put selected on selectable
-            var selected = 0;
-            while (
-                elements.ElementAt(selected) is null ||
-                !typeof(BaseUI).IsAssignableFrom(elements.ElementAt(selected).GetType())
-            )
-            {
-                selected++;
-                if (selected >= elements.Count())
-                {
-                    throw new UINoSelectablesExeption();
-                }
-            }
-            // render/getkey loop
-            object pressedKey;
-            do
-            {
-                // render
-                // clear screen
-                var txt = new StringBuilder("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-                if (title is not null)
-                {
-                    txt.Append(title + "\n\n");
-                }
-                for (var x = 0; x < elements.Count(); x++)
-                {
-                    var element = elements.ElementAt(x);
-                    if (element is not null && typeof(BaseUI).IsAssignableFrom(element.GetType()))
-                    {
-                        txt.Append(element.MakeText(
-                            selected == x ? cursorIcon.sIcon : cursorIcon.icon,
-                            selected == x ? cursorIcon.sIconR : cursorIcon.iconR
-                        ));
-                    }
-                    else if (element is null)
-                    {
-                        txt.Append('\n');
-                    }
-                    else
-                    {
-                        txt.Append(element.ToString() + "\n");
-                    }
-                }
-                Console.WriteLine(txt.ToString());
-                // move selection/change value
-                bool actualMove;
-                do
-                {
-                    // to prevent useless screen re-render
-                    actualMove = true;
-                    // get pressedKey
-                    pressedKey = keyResults.ElementAt((int)Key.ENTER);
-                    var selectedElement = elements.ElementAt(selected);
-                    if (
-                        selectedElement is not null &&
-                        (
-                            typeof(Toggle).IsAssignableFrom(selectedElement.GetType()) ||
-                            typeof(Button).IsAssignableFrom(selectedElement.GetType())
-                        )
-                    )
-                    {
-                        pressedKey = GetKey(GetKeyMode.IGNORE_HORIZONTAL, keybinds);
-                    }
-                    else
-                    {
-                        while (pressedKey.Equals(keyResults.ElementAt((int)Key.ENTER)))
-                        {
-                            pressedKey = GetKey(GetKeyMode.NO_IGNORE, keybinds);
-                            if (pressedKey.Equals(keyResults.ElementAt((int)Key.ENTER)) && noEnter)
-                            {
-                                pressedKey = keyResults.ElementAt((int)Key.ESCAPE);
-                            }
-                        }
-                    }
-                    // move selection
-                    if (
-                        pressedKey.Equals(keyResults.ElementAt((int)Key.UP)) ||
-                        pressedKey.Equals(keyResults.ElementAt((int)Key.DOWN))
-                    )
-                    {
-                        while (true)
-                        {
-                            selected += pressedKey.Equals(keyResults.ElementAt((int)Key.DOWN)) ? 1 : -1;
-                            selected %= elements.Count();
-                            if (selected < 0)
-                            {
-                                selected = elements.Count() - 1;
-                            }
-                            if (elements.ElementAt(selected) is not null &&
-                                typeof(BaseUI).IsAssignableFrom(elements.ElementAt(selected).GetType()) &&
-                                elements.ElementAt(selected).GetIsSelectable()
-                            )
-                            {
-                                break;
-                            }
-                        }
-                    }
-                    // change value Base_UI
-                    else if (
-                        selectedElement is not null &&
-                        typeof(BaseUI).IsAssignableFrom(selectedElement.GetType()) &&
-                        selectedElement.GetIsSelectable() &&
-                        (
-                            pressedKey.Equals(keyResults.ElementAt((int)Key.LEFT)) ||
-                            pressedKey.Equals(keyResults.ElementAt((int)Key.RIGHT)) ||
-                            pressedKey.Equals(keyResults.ElementAt((int)Key.ENTER)))
-                        )
-                    {
-                        var returned = selectedElement.HandleAction(pressedKey, keyResults, keybinds);
-                        if (returned is not null)
-                        {
-                            if (returned.GetType() == typeof(bool))
-                            {
-                                actualMove = (bool)returned;
-                            }
-                            else
-                            {
-                                return returned;
-                            }
-                        }
-                    }
-                }
-                while (!actualMove);
-            }
-            while (!pressedKey.Equals(keyResults.ElementAt((int)Key.ESCAPE)));
-            return null;
-        }
-
-        /// <summary>
         /// Function to sort a list of strings, with numbers correctly.<br/>
         /// by L.B <see href="https://stackoverflow.com/a/10000192">SOURCE</see>
         /// </summary>
@@ -362,5 +379,6 @@ namespace SaveFileManager
                 .OrderBy(x => x.SortStr)
                 .Select(x => x.OrgStr);
         }
+        #endregion
     }
 }

@@ -3,17 +3,19 @@ using System.Text;
 
 namespace SaveFileManager
 {
-    public class FileReader
+    /// <summary>
+    /// Contains functions for reading encoded files from a folder.
+    /// </summary>
+    public static class FileReader
     {
-        private static readonly string FILE_NAME_SEED_REPLACE_STRING = "*";
-
+        #region Private functions
         /// <summary>
         /// Gets data from all save files in a folder, and returns them in a format that save managers can read.<br/>
         /// If a file is corrupted, the data will be replaced with null.<br/>
-        /// If <c>fileName</c>  is null and <c>seed</c> is NOT null then the function will search for all files with the <c>fileExt</c> extension and tries to decode them with the  <c>seed</c>.
+        /// If <c>fileName</c> is null and <c>seed</c> is NOT null then the function will search for all files with the <c>fileExt</c> extension and tries to decode them with the  <c>seed</c>.
         /// </summary>
         /// <param name="maxFiles">The maximum amount of files to return / the range of seeds for the files that will be returned. -1 for no limit.</param>
-        /// <param name="fileName">The name of the file without the extension, that will be decoded, with the seed coming from the number that is in the place of "*"-s.</param>
+        /// <param name="fileName">The name of the file without the extension, that will be decoded, with the seed coming from the number that is in the place of "<inheritdoc cref="Utils.FILE_NAME_SEED_REPLACE_STRING" path="//summary"/>"-s.</param>
         /// <param name="fileExt">The extension of the files that will be decoded.</param>
         /// <param name="dirName">The directory that will be searched for files. By default it uses the current working directory.</param>
         /// <param name="decodeUntil">How many lines the function should decode (strarting from the beggining, with 1).</param>
@@ -22,19 +24,16 @@ namespace SaveFileManager
         /// <exception cref="ReadFilesArgsExeption"></exception>
         private static Dictionary<string, List<string>?> ReadFilesPrivate(int maxFiles = -1, string? fileName = "file*", string fileExt = "sav", string? dirName = null, int decodeUntil = -1, long? seed = null)
         {
-            if (dirName is null)
-            {
-                dirName = AppContext.BaseDirectory;
-            }
+            dirName ??= AppContext.BaseDirectory;
 
             // setup vars
             var regexStr = new StringBuilder("^");
             var fileCount = 0;
             var namingPatternSearch = false;
-            if (fileName is not null && fileName.IndexOf(FILE_NAME_SEED_REPLACE_STRING) != -1)
+            if (fileName is not null && fileName.IndexOf(Utils.FILE_NAME_SEED_REPLACE_STRING) != -1)
             {
                 namingPatternSearch = true;
-                var saveNameSplit = $"{fileName}.{fileExt}".Split(FILE_NAME_SEED_REPLACE_STRING);
+                var saveNameSplit = $"{fileName}.{fileExt}".Split(Utils.FILE_NAME_SEED_REPLACE_STRING);
                 for (int x = 0; x < saveNameSplit.Length; x++)
                 {
                     regexStr.Append(Regex.Escape(saveNameSplit[x]));
@@ -43,7 +42,7 @@ namespace SaveFileManager
                         regexStr.Append("(\\d+)");
                     }
                 }
-                regexStr.Append("$");
+                regexStr.Append('$');
             }
             // get existing file numbers
             var filePaths = Directory.GetFiles(dirName);
@@ -112,7 +111,7 @@ namespace SaveFileManager
                     {
                         if (fileName is not null)
                         {
-                            fileData = FileConversion.DecodeFile(int.Parse(file), Path.Join(dirName, fileName.Replace(FILE_NAME_SEED_REPLACE_STRING, file)), fileExt, decodeUntil);
+                            fileData = FileConversion.DecodeFile(int.Parse(file), Path.Join(dirName, fileName.Replace(Utils.FILE_NAME_SEED_REPLACE_STRING, file)), fileExt, decodeUntil);
                         }
                         else if (seed is not null)
                         {
@@ -126,14 +125,16 @@ namespace SaveFileManager
             }
             return filesData;
         }
+        #endregion
 
+        #region Public functions
         /// <summary>
         /// Gets data from all save files in a folder, and returns them in a format that save managers can read.<br/>
-        /// Search for all files with the <c>fileExt</c> extension and tries to decode them with the seed coming from the number that is in the place of "*"(-s) in <c>fileName</c>.<br/>
+        /// Search for all files with the <c>fileExt</c> extension and tries to decode them with the seed coming from the number that is in the place of "<inheritdoc cref="Utils.FILE_NAME_SEED_REPLACE_STRING"/>"(-s) in <c>fileName</c>.<br/>
         /// If a file is corrupted, the data will be replaced with null.
         /// </summary>
         /// <param name="maxFiles">The maximum amount of files to return. -1 for no limit.</param>
-        /// <param name="fileName">The name of the file without the extension, that will be decoded, with the seed coming from the number that is in the place of "*"-s.</param>
+        /// <param name="fileName">The name of the file without the extension, that will be decoded, with the seed coming from the number that is in the place of "<inheritdoc cref="Utils.FILE_NAME_SEED_REPLACE_STRING" path="//summary"/>"-s.</param>
         /// <param name="fileExt">The extension of the files that will be decoded.</param>
         /// <param name="dirName">The directory that will be searched for files. By default it uses the current working directory.</param>
         /// <param name="decodeUntil">How many lines the function should decode (strarting from the beggining, with 1).</param>
@@ -158,5 +159,6 @@ namespace SaveFileManager
         {
             return ReadFilesPrivate(maxFiles, null, fileExt, dirName, decodeUntil, seed);
         }
+        #endregion
     }
 }

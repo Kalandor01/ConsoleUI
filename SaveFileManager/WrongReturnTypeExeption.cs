@@ -5,14 +5,18 @@
     /// </summary>
     public class WrongReturnTypeExeption : Exception
     {
-        /// <inheritdoc cref="WrongReturnTypeExeption(string)"/>
+        #region Constructors
+        /// <summary>
+        /// <inheritdoc cref="WrongReturnTypeExeption"/>
+        /// </summary>
         public WrongReturnTypeExeption()
             : this("Delegate's return type in wrong.") { }
 
         /// <summary>
-        /// This exeption is raised if a delegate's return type is not what is should be.
+        /// <inheritdoc cref="UINoSelectablesExeption"/>
         /// </summary>
         /// <param name="message">The message to display.</param>
         public WrongReturnTypeExeption(string message) : base(message) { }
+        #endregion
     }
 }

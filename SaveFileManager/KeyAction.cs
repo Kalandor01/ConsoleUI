@@ -1,12 +1,26 @@
 ﻿namespace SaveFileManager
 {
+    /// <summary>
+    /// Object for <c>keybinds</c> for the <c>GetKey</c> function.
+    /// </summary>
     public class KeyAction
     {
+        #region Public fields
+        /// <summary>
+        /// The value that will be returned by the <c>GetKey</c> function, if one of the keys associated with this action is pressed.
+        /// </summary>
         public readonly object response;
+        /// <summary>
+        /// The keys that can be pressed to trigger this action.
+        /// </summary>
         public readonly IEnumerable<ConsoleKeyInfo> keys;
+        /// <summary>
+        /// If the current <c>GetKeyMode</c> is in this list when calling <c>GetKey</c>, the keypress will be ignored.
+        /// </summary>
         public readonly IEnumerable<GetKeyMode> ignoreModes;
+        #endregion
 
-
+        #region Constructors
         ///<param name="ignoreMode">If the current <c>GetKeyMode</c> is the <c>ignoreMode</c> when calling <c>GetKey</c>, the keypress will be ignored.</param>
         /// <inheritdoc cref="KeyAction(object, ConsoleKeyInfo, IEnumerable{GetKeyMode})"/>
         public KeyAction(object response, ConsoleKeyInfo key, GetKeyMode ignoreMode):
@@ -18,11 +32,11 @@
             this(response, new List<ConsoleKeyInfo> { key }, ignoreModes) { }
 
         /// <summary>
-        /// Object for <c>keybinds</c> for the <c>GetKey</c> function.<br/>
+        /// <inheritdoc cref="KeyAction"/>
         /// </summary>
-        /// <param name="response">The value that will be returned by the <c>GetKey</c> function, if one of the keys associated with this action is pressed.</param>
-        /// <param name="keys">The keys that can be pressed to trigger this action.</param>
-        /// <param name="ignoreModes">If the current <c>GetKeyMode</c> is in the <c>ignoreModes</c> list when calling <c>GetKey</c>, the keypress will be ignored.</param>
+        /// <param name="response"><inheritdoc cref="response" path="//summary"/></param>
+        /// <param name="keys"><inheritdoc cref="keys" path="//summary"/></param>
+        /// <param name="ignoreModes"><inheritdoc cref="ignoreModes" path="//summary"/></param>
         /// <exception cref="ArgumentNullException"></exception>
         public KeyAction(object response, IEnumerable<ConsoleKeyInfo> keys, IEnumerable<GetKeyMode> ignoreModes)
         {
@@ -30,20 +44,6 @@
             this.keys = keys ?? throw new ArgumentNullException(nameof(keys));
             this.ignoreModes = ignoreModes ?? throw new ArgumentNullException(nameof(ignoreModes));
         }
-
-        /// <summary>
-        /// Returns the <c>keyResults</c> list for <c>UIList</c> and <c>OptionsUI</c> methods (the order of the items in the list matters).
-        /// </summary>
-        /// <param name="keybinds">The list of <c>KeyAction</c>s to use.</param>
-        /// <returns></returns>
-        public static IEnumerable<object> GetKeyResultsList(IEnumerable<KeyAction> keybinds)
-        {
-            var keyResults = new List<object>();
-            foreach (var action in keybinds)
-            {
-                keyResults.Add(action.response);
-            }
-            return keyResults;
-        }
+        #endregion
     }
 }

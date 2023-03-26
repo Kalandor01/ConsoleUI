@@ -1,7 +1,11 @@
 ﻿namespace SaveFileManager
 {
+    /// <summary>
+    /// Contains functions for managing (creating, loading, deleting) files.
+    /// </summary>
     public static class FilesManager
     {
+        #region Public functions
         /// <summary>
         /// Allows the user to pick between creating a new save, loading an old save and deleteing a save.<br/>
         /// Reads in file data from a <c>FileReader</c> method.<br/>
@@ -10,7 +14,7 @@
         /// </summary>
         /// <param name="filesData">The return value from a <c>FileReader</c> method.</param>
         /// <param name="maxFiles">The maximum number of files that can exist. If the number of files go abowe this number, no new files can be created. -1 for no limit.</param>
-        /// <param name="fileName">The name of the files without the extension. The a "*"-s in the name will be replaced with the file number.</param>
+        /// <param name="fileName">The name of the files without the extension. The a "<inheritdoc cref="Utils.FILE_NAME_SEED_REPLACE_STRING" path="//summary"/>"-s in the name will be replaced with the file number.</param>
         /// <param name="fileExt">The extension of the files.</param>
         /// <returns></returns>
         public static (FileManagerOptions ManagerOption, int slotNumber) ManageFiles(Dictionary<string, List<string>?> filesData, int maxFiles = -1, string fileName = "file*", string fileExt = "sav")
@@ -48,7 +52,7 @@
                             var sure = Utils.Input($"Are you sure you want to remove Save file {option}?(Y/N): ");
                             if (sure is not null && sure.ToUpper() == "Y")
                             {
-                                File.Delete($"{fileName.Replace("*", option.ToString())}.{fileExt}");
+                                File.Delete($"{fileName.Replace(Utils.FILE_NAME_SEED_REPLACE_STRING, option.ToString())}.{fileExt}");
                                 manageExit = true;
                             }
                         }
@@ -104,7 +108,7 @@
         /// </summary>
         /// <param name="filesDataProcessed">A file data dictionary, where the first element is the file number/seed, and the second is the text to display for that file.</param>
         /// <param name="maxFiles">The maximum number of files that can exist. If the number of files go abowe this number, no new files can be created. -1 for no limit.</param>
-        /// <param name="fileName">The name of the files without the extension. The a "*"-s in the name will be replaced with the file number.</param>
+        /// <param name="fileName">The name of the files without the extension. The a "<inheritdoc cref="Utils.FILE_NAME_SEED_REPLACE_STRING" path="//summary"/>"-s in the name will be replaced with the file number.</param>
         /// <param name="fileExt">The extension of the files.</param>
         /// <param name="canExit">If the user can exit from this menu with he key assigned to the escape action.</param>
         /// <param name="keybinds">The list of <c>KeyAction</c> objects to use.</param>
@@ -191,7 +195,7 @@
                                     var sure = (int)new UIList(new List<string?> { "No", "Yes" }, $" Are you sure you want to remove Save file {filesDataProcessed.ElementAt(option).Key}?", canEscape: true).Display(keybinds, keyResults);
                                     if (sure == 1)
                                     {
-                                        File.Delete($"{fileName.Replace("*", filesDataProcessed.ElementAt(option).Key.ToString())}.{fileExt}");
+                                        File.Delete($"{fileName.Replace(Utils.FILE_NAME_SEED_REPLACE_STRING, filesDataProcessed.ElementAt(option).Key.ToString())}.{fileExt}");
                                         listData.RemoveAt(option);
                                         filesDataProcessed.Remove(filesDataProcessed.ElementAt(option).Key);
                                     }
@@ -222,11 +226,11 @@
         /// The <c>newFileFunction</c> and the <c>loadFileFunction</c> delegates run, when the user creates or loads a save file, and both WILL get the file number, that was refrenced as their first argument.<br/>
         /// The <c>GetDataFunction</c> MUST return an IDictionary where the key is the number/seed of the file, and the value is the text to display for that file.
         /// </summary>
-        /// <param name="newFileFunction">The function and it's arguments, called when the user creates a new file.</param>
-        /// <param name="loadFileFunction">The function and it's arguments, called when the user loads a file.</param>
-        /// <param name="getDataFunction">The function and it's arguments, used for getting all files in a folder.</param>
+        /// <param name="newFileFunction">The function and its arguments, called when the user creates a new file.</param>
+        /// <param name="loadFileFunction">The function and its arguments, called when the user loads a file.</param>
+        /// <param name="getDataFunction">The function and its arguments, used for getting all files in a folder.</param>
         /// <param name="maxFiles">The maximum number of files that can exist. If the number of files go abowe this number, no new files can be created. -1 for no limit.</param>
-        /// <param name="fileName">The name of the files without the extension. The a "*"-s in the name will be replaced with the file number.</param>
+        /// <param name="fileName">The name of the files without the extension. The a "<inheritdoc cref="Utils.FILE_NAME_SEED_REPLACE_STRING" path="//summary"/>"-s in the name will be replaced with the file number.</param>
         /// <param name="fileExt">The extension of the files.</param>
         /// <param name="canExit">If the user can exit from this menu with he key assigned to the escape action.</param>
         /// <param name="keybinds">The list of <c>KeyAction</c> objects to use.</param>
@@ -258,9 +262,9 @@
                 // main
                 if (filesData is not null && filesData.Count > 0)
                 {
-                    var option = (int)new UIList(new List<string> { "New save", "Load/Delete save" }, " Main menu", canEscape: canExit, actions: new List<object> {
-                        new List<object> { new NewFunctionDelegate(NewFilePreperation), getDataFunction, newFileFunction, maxFiles },
-                        new List<object> { new LoadFunctionDelegate(LoadOrDeleteMenu), getDataFunction, newFileFunction, loadFileFunction, keybinds, keyResults, fileName, fileExt }
+                    var option = (int)new UIList(new List<string> { "New save", "Load/Delete save" }, " Main menu", canEscape: canExit, actions: new List<UIAction> {
+                        new UIAction(new NewFunctionDelegate(NewFilePreperation), new List<object> { getDataFunction, newFileFunction, maxFiles }),
+                        new UIAction(new LoadDeleteFunctionDelegate(LoadOrDeleteMenu), new List<object?> { getDataFunction, newFileFunction, loadFileFunction, keybinds, keyResults, fileName, fileExt })
                     }).Display(keybinds, keyResults);
                     if (option == -1)
                     {
@@ -274,30 +278,18 @@
                 }
             }
         }
+        #endregion
 
-        private delegate Dictionary<string, List<string>?> DefGetDelegate(
-            string fileName = "file*",
-            string fileExt = "sav",
-            string? dirName = null,
-            int maxFiles = -1,
-            int decodeUntil = -1
-        );
-        private delegate void NewFunctionDelegate(
-            (Delegate function, object?[]? args) getFunction,
-            (Delegate function, object?[]? args) newFunction,
-            int maxFiles
-        );
-        private delegate void LoadFunctionDelegate(
-            (Delegate function, object?[]? args) getFunction,
+        #region Private functions
+        /// <summary>
+        /// Method invoked when the user clicks on the new save button.
+        /// </summary>
+        /// <inheritdoc cref="ManageFilesUIAdvanced"/>
+        private static void NewFilePreperation(
+            (Delegate function, object?[]? args) getDataFunction,
             (Delegate function, object?[]? args) newFileFunction,
-            (Delegate function, object?[]? args) loadFunction,
-            IEnumerable<KeyAction>? keybinds,
-            IEnumerable<object>? keyResults,
-            string fileName,
-            string fileExt
-        );
-
-        private static void NewFilePreperation((Delegate function, object?[]? args) getDataFunction, (Delegate function, object?[]? args) newFileFunction, int maxFiles)
+            int maxFiles
+        )
         {
             var filesData = (IDictionary<int, string>?)getDataFunction.function.DynamicInvoke(getDataFunction.args);
             var newSlot = 1;
@@ -318,6 +310,10 @@
             }
         }
 
+        /// <summary>
+        /// Method invoked when the user clicks on the load/delete button.
+        /// </summary>
+        /// <inheritdoc cref="ManageFilesUIAdvanced"/>
         private static void LoadOrDeleteMenu(
             (Delegate function, object?[]? args) getDataFunction,
             (Delegate function, object?[]? args) newFileFunction,
@@ -356,11 +352,11 @@
                         option = (int)new UIList(listData, " Delete mode!", new CursorIcon("X ", "", "  "), false, true).Display(keybinds, keyResults);
                         if (option != -1 && option != listData.Count - 1)
                         {
-                            option = option / 2;
+                            option /= 2;
                             var sure = (int)new UIList(new List<string?> { "No", "Yes" }, $" Are you sure you want to remove Save file {filesData.ElementAt(option).Key}?", canEscape: true).Display(keybinds, keyResults);
                             if (sure == 1)
                             {
-                                File.Delete($"{fileName.Replace("*", filesData.ElementAt(option).Key.ToString())}.{fileExt}");
+                                File.Delete($"{fileName.Replace(Utils.FILE_NAME_SEED_REPLACE_STRING, filesData.ElementAt(option).Key.ToString())}.{fileExt}");
                                 listData.RemoveAt(option * 2);
                                 listData.RemoveAt(option * 2);
                                 filesData.Remove(filesData.ElementAt(option));
@@ -384,6 +380,11 @@
             }
         }
 
+        /// <summary>
+        /// Helper function, used to invoke a delegate, with its arguments, with an added file number as its first argument.
+        /// </summary>
+        /// <param name="action">The delegate and its arguments.</param>
+        /// <param name="fileNum">The file number.</param>
         private static void InvokeActionWithFileNum((Delegate function, object?[]? args) action, int fileNum)
         {
             var functionArgs = new List<object?> { fileNum };
@@ -393,5 +394,32 @@
             }
             action.function.DynamicInvoke(functionArgs.ToArray());
         }
+        #endregion
+
+        #region Private delegates
+        /// <summary>
+        /// Helper delegate for when the user clicks the new save buitton.
+        /// </summary>
+        /// <inheritdoc cref="ManageFilesUIAdvanced"/>
+        private delegate void NewFunctionDelegate(
+            (Delegate function, object?[]? args) getDataFunction,
+            (Delegate function, object?[]? args) newFileFunction,
+            int maxFiles
+        );
+
+        /// <summary>
+        /// Helper delegate for when the user clicks the new load/delete.
+        /// </summary>
+        /// <inheritdoc cref="ManageFilesUIAdvanced"/>
+        private delegate void LoadDeleteFunctionDelegate(
+            (Delegate function, object?[]? args) getDataFunction,
+            (Delegate function, object?[]? args) newFileFunction,
+            (Delegate function, object?[]? args) loadFileFunction,
+            IEnumerable<KeyAction>? keybinds,
+            IEnumerable<object>? keyResults,
+            string fileName,
+            string fileExt
+        );
+        #endregion
     }
 }

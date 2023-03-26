@@ -6,9 +6,14 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <Version>1.0</Version>
+    <Version>1.1</Version>
     <Authors>Kalandor01</Authors>
-    <Description>File encoding and console UI tools.</Description>
+    <Description>- added/fixed documentation
+- added regions
+- merged Buton and UIList actions into one object
+- simplified/reworked a lot of methods
+- put a constant into Utils
+- removed the redundant GetKeyResultsList() from KeyAction</Description>
     <Copyright>MIT</Copyright>
     <PackageProjectUrl>https://github.com/Kalandor01/SaveFileManager_CSharp</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Kalandor01/SaveFileManager_CSharp</RepositoryUrl>

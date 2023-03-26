@@ -1,23 +1,34 @@
 ﻿namespace SaveFileManager
 {
+    /// <summary>
+    /// Object for the <c>OptionsUI</c> method.<br/>
+    /// When used as input in the <c>OptionsUI</c> function, it draws a multiple choice seletion, with the <c>choices</c> list specifying the choice names.<br/>
+    /// Structure: [<c>preText</c>][<c>choice name</c>][<c>preValue</c>][<c>value</c>][<c>postValue</c>]
+    /// </summary>
     public class Choice : BaseUI
     {
-        IEnumerable<string> choices;
-
+        #region Private fields
         /// <summary>
-        /// Object for the <c>OptionsUI</c> method.<br/>
-        /// When used as input in the <c>OptionsUI</c> function, it draws a multiple choice seletion, with the <c>choices</c> list specifying the choice names.<br/>
-        /// Structure: [preText][choice name][preValue][value][postValue]
+        /// The list of options the user can choose from.
         /// </summary>
-        /// <param name="choices">The list of options the user can choose from.</param>
+        readonly IEnumerable<string> choices;
+        #endregion
+
+        #region Constructors
+        /// <summary>
+        /// <inheritdoc cref="Choice"/>
+        /// </summary>
+        /// <param name="choices"><inheritdoc cref="choices"  path="//summary"/></param>
         /// <inheritdoc cref="BaseUI(int, string, string, bool, string, bool)"/>
         public Choice(IEnumerable<string> choices, int value = 0, string preText = "", string preValue = "", bool displayValue = false, string postValue = "", bool multiline = false)
             : base(Math.Clamp(value, 0, choices.Count() - 1), preText, preValue, displayValue, postValue, multiline)
         {
             this.choices = choices;
         }
+        #endregion
 
-        /// <inheritdoc cref="MakeSpecial(string)"/>
+        #region Override methods
+        /// <inheritdoc cref="BaseUI.MakeSpecial"/>
         protected override string MakeSpecial(string icons)
         {
             if (multiline)
@@ -30,27 +41,25 @@
             }
         }
 
-        /// <inheritdoc cref="MakeValue()"/>
+        /// <inheritdoc cref="BaseUI.MakeValue"/>
         protected override string MakeValue()
         {
             return $"{value + 1}/{choices.Count()}";
         }
 
-        /// <inheritdoc cref="HandleAction(object, IEnumerable{object}, IEnumerable{KeyAction}?)"/>
+        /// <inheritdoc cref="BaseUI.HandleAction"/>
         public override object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null)
         {
-            var ret = false;
-            if (key.Equals(keyResults.ElementAt((int)Key.RIGHT)))
+            var returnValue = false;
+            if (
+                key.Equals(keyResults.ElementAt((int)Key.RIGHT)) ||
+                key.Equals(keyResults.ElementAt((int)Key.LEFT))
+            )
             {
-                value++;
-                ret = true;
+                returnValue = true;
+                value += key.Equals(keyResults.ElementAt((int)Key.RIGHT)) ? 1 : -1;
             }
-            else if (key.Equals(keyResults.ElementAt((int)Key.LEFT)))
-            {
-                value--;
-                ret = true;
-            }
-            if (ret)
+            if (returnValue)
             {
                 value %= choices.Count();
                 if (value < 0)
@@ -58,7 +67,8 @@
                     value = choices.Count() - 1;
                 }
             }
-            return ret;
+            return returnValue;
         }
+        #endregion
     }
 }

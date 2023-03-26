@@ -2,25 +2,52 @@
 
 namespace SaveFileManager
 {
+    /// <summary>
+    /// Abstract class for all classes used in the <c>OptionsUI</c> method.<br/>
+    /// General structure: [<c>preText</c>][#####][<c>preValue</c>][<c>value</c>][<c>postValue</c>]
+    /// </summary>
     public abstract class BaseUI
     {
-        public int value;
-        protected string preText;
-        protected string preValue;
-        protected bool displayValue;
-        protected string postValue;
-        protected bool multiline;
-
+        #region Public fields
         /// <summary>
-        /// Base class for all classes used in the <c>OptionsUI</c> method.<br/>
-        /// General structure: [preText][#####][preValue][value][postValue]
+        /// The current value of the object.
         /// </summary>
-        /// <param name="value">The current value of the object.</param>
-        /// <param name="preText">The text to display before the class specific text (which might be nothing).</param>
-        /// <param name="preValue">The text to display after the <c>value</c>.</param>
-        /// <param name="displayValue">Whether to display the <c>value</c> or not.</param>
-        /// <param name="postValue">The text to display after the <c>value</c>.</param>
-        /// <param name="multiline">Makes the "cursor" draw at every line if the text is multiline.</param>
+        public int value;
+        #endregion
+
+        #region Protected fields
+        /// <summary>
+        /// The text to display before the class specific text (which might be nothing).
+        /// </summary>
+        protected string preText;
+        /// <summary>
+        /// The text to display before the <c>value</c>.
+        /// </summary>
+        protected string preValue;
+        /// <summary>
+        /// Whether to display the <c>value</c> or not.
+        /// </summary>
+        protected bool displayValue;
+        /// <summary>
+        /// The text to display after the <c>value</c>.
+        /// </summary>
+        protected string postValue;
+        /// <summary>
+        /// Makes the "cursor" draw at every line if the text is multiline.
+        /// </summary>
+        protected bool multiline;
+        #endregion
+
+        #region Constructors
+        /// <summary>
+        /// <inheritdoc cref="BaseUI"/>
+        /// </summary>
+        /// <param name="value"><inheritdoc cref="value" path="//summary"/></param>
+        /// <param name="preText"><inheritdoc cref="preText" path="//summary"/></param>
+        /// <param name="preValue"><inheritdoc cref="preValue" path="//summary"/></param>
+        /// <param name="displayValue"><inheritdoc cref="displayValue" path="//summary"/></param>
+        /// <param name="postValue"><inheritdoc cref="postValue" path="//summary"/></param>
+        /// <param name="multiline"><inheritdoc cref="multiline" path="//summary"/></param>
         public BaseUI(int value = 0, string preText = "", string preValue = "", bool displayValue = false, string postValue = "", bool multiline = false)
         {
             this.value = value;
@@ -30,7 +57,9 @@ namespace SaveFileManager
             this.postValue = postValue;
             this.multiline = multiline;
         }
+        #endregion
 
+        #region Virtual methods
         /// <summary>
         /// Returns the text representation of the UI element.
         /// </summary>
@@ -119,9 +148,19 @@ namespace SaveFileManager
         /// Returns if the element is selectable.
         /// </summary>
         /// <returns></returns>
-        public virtual bool GetIsSelectable()
+        public virtual bool IsSelectable()
         {
             return true;
         }
+
+        /// <summary>
+        /// Returns if the element can only be clicked.
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool IsOnlyClickable()
+        {
+            return false;
+        }
+        #endregion
     }
 }

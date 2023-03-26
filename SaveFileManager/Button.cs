@@ -1,85 +1,54 @@
 ﻿namespace SaveFileManager
 {
+    /// <summary>
+    /// Object for the <c>OptionsUI</c> method.<br/>
+    /// When used as input in the <c>OptionsUI</c> function, it text that is pressable with the enter key.<br/>
+    /// Structure: [<c>text</c>]
+    /// </summary>
     public class Button : BaseUI
     {
-        bool modifyList;
-        UIList? actionUIList;
-        Delegate? actionFunction;
-        object?[]? actionParameters;
-
-        /// <inheritdoc cref="Button(UIList, Delegate, IEnumerable{object?}, bool, string, bool)"/>
-        public Button(UIList uiList, string text = "",  bool multiline = false)
-            : this(uiList, null, null, text:text, multiline:multiline) { }
-
-        /// <inheritdoc cref="Button(UIList, Delegate, IEnumerable{object?}, bool, string, bool)"/>
-        public Button(Delegate function, bool modifyList = false, string text = "", bool multiline = false)
-            : this(null, function, null, modifyList, text, multiline) { }
-
-        /// <inheritdoc cref="Button(UIList, Delegate, IEnumerable{object?}, bool, string, bool)"/>
-        public Button(Delegate function, IEnumerable<object?> args, bool modifyList = false, string text = "", bool multiline = false)
-            : this(null, function, args, modifyList, text, multiline) { }
-
+        #region Private fields
         /// <summary>
-        /// Object for the <c>OptionsUI</c> method<br/>
-        /// When used as input in the <c>OptionsUI</c> function, it text that is pressable with the enter key.<br/>
-        /// Structure: [text]
+        /// If its true, and the action invokes a function, it will get a the <c>Button</c> object as its first argument (and can modify it) when the function is called.
+        /// </summary>
+        readonly bool modifyList;
+        /// <summary>
+        /// The action to invoke when the button is pressed.<br/>
+        /// - If the action invokes a function, and returns false the UI will not update.<br/>
+        /// - If the function returns anything other than a bool, the <c>OptionsUI</c> will instantly return that value.
+        /// </summary>
+        readonly UIAction action;
+        #endregion
+
+        #region Constructors
+        /// <summary>
+        /// <inheritdoc cref="Button"/>
         /// </summary>
         /// <param name="text">The text to write out.</param>
-        /// <param name="uiList">The UIList object to display when the button is pressed.</param>
-        /// <param name="function">The function to run when the button is pressed.<br/>
-        /// - If the function returns false the UI will not update.<br/>
-        /// - If it return anything other than a bool, the <c>OptionsUI</c> will instantly return that value.</param>
-        /// <param name="args">The list of arguments to run the function with.</param>
-        /// <param name="modifyList">If it's true, the function will get a the <c>Button</c> object as it's first argument (and can modify it) when the function is called.</param>
+        /// <param name="action"><inheritdoc cref="action" path="//summary"/></param>
+        /// <param name="modifyList"><inheritdoc cref="modifyList" path="//summary"/></param>
         /// <inheritdoc cref="BaseUI(int, string, string, bool, string, bool)"/>
-        private Button(UIList? uiList, Delegate? function, IEnumerable<object?>? args, bool modifyList = false, string text = "", bool multiline = false)
+        public Button(UIAction action, bool modifyList = false, string text = "", bool multiline = false)
             : base(-1, text, "", false, "", multiline)
         {
             this.modifyList = modifyList;
-            SetAction(uiList, function, args);
+            this.action = action;
         }
+        #endregion
 
-        /// <inheritdoc cref="HandleAction(object, IEnumerable{object}, IEnumerable{KeyAction}?)"/>
+        #region Override methods
+        /// <inheritdoc cref="BaseUI.HandleAction"/>
         public override object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null)
         {
             if (key.Equals(keyResults.ElementAt((int)Key.ENTER)))
             {
+                var (actionType, returned) = action.InvokeAction(modifyList ? this : null, keybinds, keyResults);
                 // function
-                if (actionFunction is not null)
+                if (actionType is UIActionType.FUNCTION)
                 {
-                    object? funcReturn;
-                    // args
-                    if (actionParameters is not null)
-                    {
-                        funcReturn = actionFunction.DynamicInvoke(actionParameters);
-                    }
-                    else
-                    {
-                        funcReturn = actionFunction.DynamicInvoke();
-                    }
-                    if (funcReturn is null)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return funcReturn;
-                    }
+                    return returned is null ? true : returned;
                 }
-                // ui / else
-                else
-                {
-                    // display function
-                    if (actionUIList is not null)
-                    {
-                        actionUIList.Display(keybinds, keyResults);
-                    }
-                    //else
-                    //{
-                    //    Console.WriteLine("Option is not a UI_list object!");
-                    //}
-                    return true;
-                }
+                return true;
             }
             else
             {
@@ -87,46 +56,11 @@
             }
         }
 
-        private void SetAction(UIList? uiList, Delegate? function, IEnumerable<object?>? args)
+        /// <inheritdoc cref="BaseUI.IsOnlyClickable"/>
+        public override bool IsOnlyClickable()
         {
-            actionUIList = null;
-            actionFunction = null;
-            actionParameters = null;
-            // list
-            if (function is not null)
-            {
-                actionFunction = function;
-                //function with args
-                if (args is not null)
-                {
-                    var paramNum = args.Count() + (modifyList ? 1 : 0);
-                    actionParameters = new object[paramNum];
-                    var index = 0;
-                    if (modifyList)
-                    {
-                        actionParameters[index] = this;
-                        index++;
-                    }
-                    for (var x = 1; x < args.Count(); x++)
-                    {
-                        actionParameters[index] = args.ElementAt(x);
-                        index++;
-                    }
-                }
-                //function
-                else
-                {
-                    if (modifyList)
-                    {
-                        actionParameters = new object[] { this };
-                    }
-                }
-            }
-            // ui
-            else if (uiList is not null)
-            {
-                actionUIList = uiList;
-            }
+            return true;
         }
+        #endregion
     }
 }

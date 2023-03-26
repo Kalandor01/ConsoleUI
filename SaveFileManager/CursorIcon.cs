@@ -1,25 +1,44 @@
 ﻿namespace SaveFileManager
 {
+    /// <summary>
+    /// Cursor icon object for UI objects.
+    /// </summary>
     public class CursorIcon
     {
-        public readonly string sIcon;
-        public readonly string sIconR;
-        public readonly string icon;
-        public readonly string iconR;
-
+        #region Public fields
         /// <summary>
-        /// Cursor icon object for UI objects.
+        /// Icon displayed on the left of the option when it is selected in the UI.
         /// </summary>
-        /// <param name="selectedIcon">Icon displayed on the left of the option when it is selected in the UI.</param>
-        /// <param name="selectedIconRight">Icon displayed on the right of the option when it is selected in the UI.</param>
-        /// <param name="notSelectedIcon">Icon displayed on the left of the option when it is not selected in the UI.</param>
-        /// <param name="notSelectedIconRight">Icon displayed on the right of the option when it is not selected in the UI.</param>
+        public readonly string sIcon;
+        /// <summary>
+        /// Icon displayed on the right of the option when it is selected in the UI.
+        /// </summary>
+        public readonly string sIconR;
+        /// <summary>
+        /// Icon displayed on the left of the option when it is not selected in the UI.
+        /// </summary>
+        public readonly string icon;
+        /// <summary>
+        /// Icon displayed on the right of the option when it is not selected in the UI.
+        /// </summary>
+        public readonly string iconR;
+        #endregion
+
+        #region Constructors
+        /// <summary>
+        /// <inheritdoc cref="CursorIcon"/>
+        /// </summary>
+        /// <param name="selectedIcon"><inheritdoc cref="sIcon" path="//summary"/></param>
+        /// <param name="selectedIconRight"><inheritdoc cref="sIconR" path="//summary"/></param>
+        /// <param name="notSelectedIcon"><inheritdoc cref="icon" path="//summary"/></param>
+        /// <param name="notSelectedIconRight"><inheritdoc cref="iconR" path="//summary"/></param>
         public CursorIcon(string selectedIcon=">", string selectedIconRight="", string notSelectedIcon=" ", string notSelectedIconRight="")
         {
-            this.sIcon = selectedIcon ?? throw new ArgumentNullException(nameof(selectedIcon));
-            this.sIconR = selectedIconRight ?? throw new ArgumentNullException(nameof(selectedIconRight));
-            this.icon = notSelectedIcon ?? throw new ArgumentNullException(nameof(notSelectedIcon));
-            this.iconR = notSelectedIconRight ?? throw new ArgumentNullException(nameof(notSelectedIconRight));
+            sIcon = selectedIcon ?? throw new ArgumentNullException(nameof(selectedIcon));
+            sIconR = selectedIconRight ?? throw new ArgumentNullException(nameof(selectedIconRight));
+            icon = notSelectedIcon ?? throw new ArgumentNullException(nameof(notSelectedIcon));
+            iconR = notSelectedIconRight ?? throw new ArgumentNullException(nameof(notSelectedIconRight));
         }
+        #endregion
     }
 }
