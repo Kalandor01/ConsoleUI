@@ -6,14 +6,9 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <Version>1.1</Version>
+    <Version>1.1.1</Version>
     <Authors>Kalandor01</Authors>
-    <Description>- added/fixed documentation
-- added regions
-- merged Buton and UIList actions into one object
-- simplified/reworked a lot of methods
-- put a constant into Utils
-- removed the redundant GetKeyResultsList() from KeyAction</Description>
+    <Description>- package info fix</Description>
     <Copyright>MIT</Copyright>
     <PackageProjectUrl>https://github.com/Kalandor01/SaveFileManager_CSharp</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Kalandor01/SaveFileManager_CSharp</RepositoryUrl>
@@ -21,7 +16,16 @@
     <PackageReleaseNotes>Bugfixes</PackageReleaseNotes>
     <PackageOutputPath></PackageOutputPath>
     <NeutralLanguage>en-001</NeutralLanguage>
+    <Title>Save file manager</Title>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="NPrng" Version="1.0.0.1" />
