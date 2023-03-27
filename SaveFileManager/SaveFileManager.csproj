@@ -6,9 +6,9 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <Version>1.1.1</Version>
+    <Version>1.1.2</Version>
     <Authors>Kalandor01</Authors>
-    <Description>- package info fix</Description>
+    <Description>- beginning</Description>
     <Copyright>MIT</Copyright>
     <PackageProjectUrl>https://github.com/Kalandor01/SaveFileManager_CSharp</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Kalandor01/SaveFileManager_CSharp</RepositoryUrl>

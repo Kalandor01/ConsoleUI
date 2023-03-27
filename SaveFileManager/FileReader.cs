@@ -18,7 +18,7 @@ namespace SaveFileManager
         /// <param name="fileName">The name of the file without the extension, that will be decoded, with the seed coming from the number that is in the place of "<inheritdoc cref="Utils.FILE_NAME_SEED_REPLACE_STRING" path="//summary"/>"-s.</param>
         /// <param name="fileExt">The extension of the files that will be decoded.</param>
         /// <param name="dirName">The directory that will be searched for files. By default it uses the current working directory.</param>
-        /// <param name="decodeUntil">How many lines the function should decode (strarting from the beggining, with 1).</param>
+        /// <param name="decodeUntil">How many lines the function should decode (strarting from the beginning, with 1).</param>
         /// <param name="seed">The seed that will be used to decode files.</param>
         /// <returns>A dictionary of file datas, where the key is eighter the seed, or the name of the file, and the data is a list os lines returned by the <c>DecodeFile</c> function or null.</returns>
         /// <exception cref="ReadFilesArgsExeption"></exception>
@@ -137,7 +137,7 @@ namespace SaveFileManager
         /// <param name="fileName">The name of the file without the extension, that will be decoded, with the seed coming from the number that is in the place of "<inheritdoc cref="Utils.FILE_NAME_SEED_REPLACE_STRING" path="//summary"/>"-s.</param>
         /// <param name="fileExt">The extension of the files that will be decoded.</param>
         /// <param name="dirName">The directory that will be searched for files. By default it uses the current working directory.</param>
-        /// <param name="decodeUntil">How many lines the function should decode (strarting from the beggining, with 1).</param>
+        /// <param name="decodeUntil">How many lines the function should decode (strarting from the beginning, with 1).</param>
         /// <returns>A dictionary of file datas, where the key is the name of the file, and the data is a list os lines returned by the <c>DecodeFile</c> function or null.</returns>
         public static Dictionary<string, List<string>?> ReadFiles(string fileName = "file*", string fileExt = "sav", string? dirName = null, int maxFiles = -1, int decodeUntil = -1)
         {
@@ -152,7 +152,7 @@ namespace SaveFileManager
         /// <param name="maxFiles">The range of seeds for the files that will be returned. -1 for no limit.</param>
         /// <param name="fileExt">The extension of the files that will be decoded.</param>
         /// <param name="dirName">The directory that will be searched for files. By default it uses the current working directory.</param>
-        /// <param name="decodeUntil">How many lines the function should decode (strarting from the beggining, with 1).</param>
+        /// <param name="decodeUntil">How many lines the function should decode (strarting from the beginning, with 1).</param>
         /// <param name="seed">The seed that will be used to decode files.</param>
         /// <returns>A dictionary of file datas, where the key is the seed, and the data is a list os lines returned by the <c>DecodeFile</c> function or null.</returns>
         public static Dictionary<string, List<string>?> ReadFiles(long seed = 1, string fileExt = "sav", string? dirName = null, int maxFiles = -1, int decodeUntil = -1)

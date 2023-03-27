@@ -53,7 +53,7 @@
         /// - if the action invokes a function, it gets called, with arguments, and an optional extra parameter as the first argument.<br/>
         /// - if the action invokes a <c>UIList</c>, the object's <c>Display</c> function gets called.
         /// </summary>
-        /// <param name="extraParameter">Extra parameter to put at the beggining of the arguments list.</param>
+        /// <param name="extraParameter">Extra parameter to put at the beginning of the arguments list.</param>
         /// <param name="keybinds">The list of <c>KeyAction</c> objects to use, for the <c>UIList</c> type.</param>
         /// <param name="keyResults">The list of posible results for the <c>UIList</c> type.<br/>
         /// The order of the elements in the tuple should be:<br/>

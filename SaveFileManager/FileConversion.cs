@@ -101,7 +101,7 @@ namespace SaveFileManager
         /// <param name="seed">The seed for decoding the file.</param>
         /// <param name="filePath">The path and the name of the file without the extension, that will be decoded. If the path contains a <inheritdoc cref="Utils.FILE_NAME_SEED_REPLACE_STRING" path="//summary"/>, it will be replaced with the seed.</param>
         /// <param name="fileExt">The extension of the file that will be decoded.</param>
-        /// <param name="decodeUntil">Controlls how many lines the function should decode(strarting from the beggining, with 1). If it is set to -1, it will decode all the lines in the file.</param>
+        /// <param name="decodeUntil">Controlls how many lines the function should decode(strarting from the beginning, with 1). If it is set to -1, it will decode all the lines in the file.</param>
         /// <param name="encoding">The encoding of the output lines. By default it uses the UTF8 encoding. You shouldn't need to change this.</param>
         public static List<string> DecodeFile(long seed = 1, string filePath = "file*", string fileExt = "sav", int decodeUntil = -1, Encoding? encoding = null)
         {
