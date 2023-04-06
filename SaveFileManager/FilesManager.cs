@@ -14,7 +14,7 @@
         /// </summary>
         /// <param name="filesData">The return value from a <c>FileReader</c> method.</param>
         /// <param name="maxFiles">The maximum number of files that can exist. If the number of files go abowe this number, no new files can be created. -1 for no limit.</param>
-        /// <param name="fileName">The name of the files without the extension. The a "<inheritdoc cref="Utils.FILE_NAME_SEED_REPLACE_STRING" path="//summary"/>"-s in the name will be replaced with the file number.</param>
+        /// <param name="fileName">The name of the files without the extension. The a "*"-s in the name will be replaced with the file number.</param>
         /// <param name="fileExt">The extension of the files.</param>
         /// <returns></returns>
         public static (FileManagerOptions ManagerOption, int slotNumber) ManageFiles(Dictionary<string, List<string>?> filesData, int maxFiles = -1, string fileName = "file*", string fileExt = "sav")
@@ -108,7 +108,7 @@
         /// </summary>
         /// <param name="filesDataProcessed">A file data dictionary, where the first element is the file number/seed, and the second is the text to display for that file.</param>
         /// <param name="maxFiles">The maximum number of files that can exist. If the number of files go abowe this number, no new files can be created. -1 for no limit.</param>
-        /// <param name="fileName">The name of the files without the extension. The a "<inheritdoc cref="Utils.FILE_NAME_SEED_REPLACE_STRING" path="//summary"/>"-s in the name will be replaced with the file number.</param>
+        /// <param name="fileName">The name of the files without the extension. The a "*"-s in the name will be replaced with the file number.</param>
         /// <param name="fileExt">The extension of the files.</param>
         /// <param name="canExit">If the user can exit from this menu with he key assigned to the escape action.</param>
         /// <param name="keybinds">The list of <c>KeyAction</c> objects to use.</param>
@@ -230,7 +230,7 @@
         /// <param name="loadFileFunction">The function and its arguments, called when the user loads a file.</param>
         /// <param name="getDataFunction">The function and its arguments, used for getting all files in a folder.</param>
         /// <param name="maxFiles">The maximum number of files that can exist. If the number of files go abowe this number, no new files can be created. -1 for no limit.</param>
-        /// <param name="fileName">The name of the files without the extension. The a "<inheritdoc cref="Utils.FILE_NAME_SEED_REPLACE_STRING" path="//summary"/>"-s in the name will be replaced with the file number.</param>
+        /// <param name="fileName">The name of the files without the extension. The a "*"-s in the name will be replaced with the file number.</param>
         /// <param name="fileExt">The extension of the files.</param>
         /// <param name="canExit">If the user can exit from this menu with he key assigned to the escape action.</param>
         /// <param name="keybinds">The list of <c>KeyAction</c> objects to use.</param>

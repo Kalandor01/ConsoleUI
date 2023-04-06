@@ -15,7 +15,7 @@ namespace SaveFileManager
         /// If <c>fileName</c> is null and <c>seed</c> is NOT null then the function will search for all files with the <c>fileExt</c> extension and tries to decode them with the  <c>seed</c>.
         /// </summary>
         /// <param name="maxFiles">The maximum amount of files to return / the range of seeds for the files that will be returned. -1 for no limit.</param>
-        /// <param name="fileName">The name of the file without the extension, that will be decoded, with the seed coming from the number that is in the place of "<inheritdoc cref="Utils.FILE_NAME_SEED_REPLACE_STRING" path="//summary"/>"-s.</param>
+        /// <param name="fileName">The name of the file without the extension, that will be decoded, with the seed coming from the number that is in the place of "*"-s.</param>
         /// <param name="fileExt">The extension of the files that will be decoded.</param>
         /// <param name="dirName">The directory that will be searched for files. By default it uses the current working directory.</param>
         /// <param name="decodeUntil">How many lines the function should decode (strarting from the beginning, with 1).</param>
@@ -130,11 +130,11 @@ namespace SaveFileManager
         #region Public functions
         /// <summary>
         /// Gets data from all save files in a folder, and returns them in a format that save managers can read.<br/>
-        /// Search for all files with the <c>fileExt</c> extension and tries to decode them with the seed coming from the number that is in the place of "<inheritdoc cref="Utils.FILE_NAME_SEED_REPLACE_STRING"/>"(-s) in <c>fileName</c>.<br/>
+        /// Search for all files with the <c>fileExt</c> extension and tries to decode them with the seed coming from the number that is in the place of "*"(-s) in <c>fileName</c>.<br/>
         /// If a file is corrupted, the data will be replaced with null.
         /// </summary>
         /// <param name="maxFiles">The maximum amount of files to return. -1 for no limit.</param>
-        /// <param name="fileName">The name of the file without the extension, that will be decoded, with the seed coming from the number that is in the place of "<inheritdoc cref="Utils.FILE_NAME_SEED_REPLACE_STRING" path="//summary"/>"-s.</param>
+        /// <param name="fileName">The name of the file without the extension, that will be decoded, with the seed coming from the number that is in the place of "*"-s.</param>
         /// <param name="fileExt">The extension of the files that will be decoded.</param>
         /// <param name="dirName">The directory that will be searched for files. By default it uses the current working directory.</param>
         /// <param name="decodeUntil">How many lines the function should decode (strarting from the beginning, with 1).</param>

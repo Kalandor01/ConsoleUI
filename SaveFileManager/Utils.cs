@@ -10,9 +10,6 @@ namespace SaveFileManager
     public static class Utils
     {
         #region Constants
-        /// <summary>
-        /// *
-        /// </summary>
         internal static readonly string FILE_NAME_SEED_REPLACE_STRING = "*";
         /// <summary>
         /// Helper number for <c>Sqrt</c>.
@@ -50,7 +47,7 @@ namespace SaveFileManager
         public static void PressKey(string text)
         {
             Console.WriteLine(text);
-            Console.ReadKey();
+            Console.ReadKey(true);
         }
 
         /// <summary>
@@ -367,7 +364,8 @@ namespace SaveFileManager
         public static IEnumerable<string> NaturalSort(IEnumerable<string> list)
         {
             int maxLen = list.Select(s => s.Length).Max();
-            Func<string, char> PaddingChar = s => char.IsDigit(s[0]) ? ' ' : char.MaxValue;
+
+            static char PaddingChar(string s) => char.IsDigit(s[0]) ? ' ' : char.MaxValue;
 
             return list
                 .Select(s =>

@@ -1,7 +1,7 @@
 ﻿namespace SaveFileManager
 {
     /// <summary>
-    /// This exeption is raised if "fileName" and "seed" are both null or fileName doesn't contain the special character ("<inheritdoc cref="Utils.FILE_NAME_SEED_REPLACE_STRING"/>") in ReadFiles.
+    /// This exeption is raised if "fileName" and "seed" are both null or fileName doesn't contain the special character ("*") in ReadFiles.
     /// </summary>
     public class ReadFilesArgsExeption : Exception
     {
