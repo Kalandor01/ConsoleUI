@@ -11,13 +11,29 @@
         /// </summary>
         public readonly object response;
         /// <summary>
-        /// The keys that can be pressed to trigger this action.
-        /// </summary>
-        public readonly IEnumerable<ConsoleKeyInfo> keys;
-        /// <summary>
         /// If the current <c>GetKeyMode</c> is in this list when calling <c>GetKey</c>, the keypress will be ignored.
         /// </summary>
         public readonly IEnumerable<GetKeyMode> ignoreModes;
+        #endregion
+
+        #region Private fields
+        /// <summary>
+        /// The keys that can be pressed to trigger this action.
+        /// </summary>
+        private IEnumerable<ConsoleKeyInfo> keys;
+        #endregion
+
+        #region Public properties
+        /// <summary>
+        /// The keys that can be pressed to trigger this action.
+        /// </summary>
+        public IEnumerable<ConsoleKeyInfo> Keys {
+            get { return keys; }
+            protected set
+            {
+                keys = value;
+            }
+        }
         #endregion
 
         #region Constructors

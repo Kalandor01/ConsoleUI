@@ -19,7 +19,7 @@ namespace SaveFileManager
 
         #region Public functions
         /// <summary>
-        /// ReadKey but only accepts whole numbers.
+        /// ReadLine, but only accepts whole numbers.
         /// </summary>
         /// <param name="text">Text to write out when requesting the number.</param>
         /// <param name="errorText">Text to write out when the user inputs a wrong value.</param>
@@ -99,7 +99,7 @@ namespace SaveFileManager
                             break;
                         }
                     }
-                    if (!ignore && action.keys.Contains(key))
+                    if (!ignore && action.Keys.Contains(key))
                     {
                         return action.response;
                     }
