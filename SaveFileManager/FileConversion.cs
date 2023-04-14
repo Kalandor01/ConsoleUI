@@ -17,7 +17,7 @@ namespace SaveFileManager
         #region Public functions
         /// <param name="fileLine">The line that will be in the file.</param>
         /// <inheritdoc cref="EncodeFile(IEnumerable{string}, long, string, string, int, Encoding)"/>
-        public static void EncodeFile(string fileLine, long seed = 1, string filePath = "file*", string fileExt = "sav", int version = 2, Encoding? encoding = null)
+        public static void EncodeFile(string fileLine, long seed = 1, string filePath = "file*", string fileExt = "savc", int version = 2, Encoding? encoding = null)
         {
             EncodeFile(new List<string> { fileLine }, seed, filePath, fileExt, version, encoding);
         }
@@ -36,7 +36,7 @@ namespace SaveFileManager
         /// <param name="fileExt">The extension of the file that will be created.</param>
         /// <param name="version">The encription version.</param>
         /// <param name="encoding">The encoding of the input lines. By default it uses the UTF8 encoding. You shouldn't need to change this.</param>
-        public static void EncodeFile(IEnumerable<string> fileLines, long seed = 1, string filePath = "file*", string fileExt = "sav", int version=2, Encoding? encoding = null)
+        public static void EncodeFile(IEnumerable<string> fileLines, long seed = 1, string filePath = "file*", string fileExt = "savc", int version=2, Encoding? encoding = null)
         {
             encoding ??= Encoding.UTF8;
             var r = MakeRandom(MakeSeed(seed));
@@ -103,7 +103,7 @@ namespace SaveFileManager
         /// <param name="fileExt">The extension of the file that will be decoded.</param>
         /// <param name="decodeUntil">Controlls how many lines the function should decode(strarting from the beginning, with 1). If it is set to -1, it will decode all the lines in the file.</param>
         /// <param name="encoding">The encoding of the output lines. By default it uses the UTF8 encoding. You shouldn't need to change this.</param>
-        public static List<string> DecodeFile(long seed = 1, string filePath = "file*", string fileExt = "sav", int decodeUntil = -1, Encoding? encoding = null)
+        public static List<string> DecodeFile(long seed = 1, string filePath = "file*", string fileExt = "savc", int decodeUntil = -1, Encoding? encoding = null)
         {
             encoding ??= Encoding.UTF8;
             //get lines

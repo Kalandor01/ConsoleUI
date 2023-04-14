@@ -17,7 +17,7 @@
         /// <param name="fileName">The name of the files without the extension. The a "*"-s in the name will be replaced with the file number.</param>
         /// <param name="fileExt">The extension of the files.</param>
         /// <returns></returns>
-        public static (FileManagerOptions ManagerOption, int slotNumber) ManageFiles(Dictionary<string, List<string>?> filesData, int maxFiles = -1, string fileName = "file*", string fileExt = "sav")
+        public static (FileManagerOptions ManagerOption, int slotNumber) ManageFiles(Dictionary<string, List<string>?> filesData, int maxFiles = -1, string fileName = "file*", string fileExt = "savc")
         {
             var option = 1;
             var manageExit = false;
@@ -118,7 +118,7 @@
             Dictionary<int, string> filesDataProcessed,
             int maxFiles = -1,
             string fileName = "file*",
-            string fileExt = "sav",
+            string fileExt = "savc",
             bool canExit = false,
             IEnumerable<KeyAction>? keybinds = null,
             IEnumerable<object>? keyResults = null
@@ -241,7 +241,7 @@
             (Delegate function, object?[]? args) getDataFunction,
             int maxFiles = -1,
             string fileName = "file*",
-            string fileExt = "sav",
+            string fileExt = "savc",
             bool canExit = false,
             IEnumerable<KeyAction>? keybinds = null,
             IEnumerable<object>? keyResults = null

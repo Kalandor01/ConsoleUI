@@ -22,7 +22,7 @@ namespace SaveFileManager
         /// <param name="seed">The seed that will be used to decode files.</param>
         /// <returns>A dictionary of file datas, where the key is eighter the seed, or the name of the file, and the data is a list os lines returned by the <c>DecodeFile</c> function or null.</returns>
         /// <exception cref="ReadFilesArgsExeption"></exception>
-        private static Dictionary<string, List<string>?> ReadFilesPrivate(int maxFiles = -1, string? fileName = "file*", string fileExt = "sav", string? dirName = null, int decodeUntil = -1, long? seed = null)
+        private static Dictionary<string, List<string>?> ReadFilesPrivate(int maxFiles = -1, string? fileName = "file*", string fileExt = "savc", string? dirName = null, int decodeUntil = -1, long? seed = null)
         {
             dirName ??= AppContext.BaseDirectory;
 
@@ -139,7 +139,7 @@ namespace SaveFileManager
         /// <param name="dirName">The directory that will be searched for files. By default it uses the current working directory.</param>
         /// <param name="decodeUntil">How many lines the function should decode (strarting from the beginning, with 1).</param>
         /// <returns>A dictionary of file datas, where the key is the name of the file, and the data is a list os lines returned by the <c>DecodeFile</c> function or null.</returns>
-        public static Dictionary<string, List<string>?> ReadFiles(string fileName = "file*", string fileExt = "sav", string? dirName = null, int maxFiles = -1, int decodeUntil = -1)
+        public static Dictionary<string, List<string>?> ReadFiles(string fileName = "file*", string fileExt = "savc", string? dirName = null, int maxFiles = -1, int decodeUntil = -1)
         {
             return ReadFilesPrivate(maxFiles, fileName, fileExt, dirName, decodeUntil, null);
         }
@@ -155,7 +155,7 @@ namespace SaveFileManager
         /// <param name="decodeUntil">How many lines the function should decode (strarting from the beginning, with 1).</param>
         /// <param name="seed">The seed that will be used to decode files.</param>
         /// <returns>A dictionary of file datas, where the key is the seed, and the data is a list os lines returned by the <c>DecodeFile</c> function or null.</returns>
-        public static Dictionary<string, List<string>?> ReadFiles(long seed = 1, string fileExt = "sav", string? dirName = null, int maxFiles = -1, int decodeUntil = -1)
+        public static Dictionary<string, List<string>?> ReadFiles(long seed = 1, string fileExt = "savc", string? dirName = null, int maxFiles = -1, int decodeUntil = -1)
         {
             return ReadFilesPrivate(maxFiles, null, fileExt, dirName, decodeUntil, seed);
         }
