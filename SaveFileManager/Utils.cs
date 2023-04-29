@@ -46,8 +46,9 @@ namespace SaveFileManager
         /// <param name="text">The text to write out.</param>
         public static void PressKey(string text)
         {
-            Console.WriteLine(text);
+            Console.Write(text);
             Console.ReadKey(true);
+            Console.WriteLine();
         }
 
         /// <summary>
@@ -56,7 +57,7 @@ namespace SaveFileManager
         /// <param name="text">The text to write out.</param>
         public static string? Input(string text)
         {
-            Console.WriteLine(text);
+            Console.Write(text);
             return Console.ReadLine();
         }
 
