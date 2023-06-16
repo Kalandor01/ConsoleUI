@@ -147,7 +147,7 @@ namespace SaveFileManager
                 throw new UINoSelectablesExeption();
             }
 
-            if (keyResults is null)
+            if (keyResults is null || keyResults.Count() < 6)
             {
                 if (keybinds is null)
                 {

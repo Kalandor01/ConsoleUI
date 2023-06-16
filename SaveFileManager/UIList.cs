@@ -291,7 +291,7 @@ namespace SaveFileManager
         /// <returns></returns>
         private int SetupSelected(int selected)
         {
-            Math.Clamp(selected, 0, answers.Count() - 1);
+            selected = Math.Clamp(selected, 0, answers.Count() - 1);
             while (answers.ElementAt(selected) is null)
             {
                 selected = (selected + 1) % answers.Count();
