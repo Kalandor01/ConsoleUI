@@ -9,6 +9,10 @@
     {
         #region Private fields
         /// <summary>
+        /// The current value of the object.
+        /// </summary>
+        new bool value;
+        /// <summary>
         /// The text displayed when the toggle is on.
         /// </summary>
         string symbol;
@@ -22,12 +26,14 @@
         /// <summary>
         /// <inheritdoc cref="Toggle"/>
         /// </summary>
+        /// <param name="value"><inheritdoc cref="value" path="//summary"/></param>
         /// <param name="symbol"><inheritdoc cref="symbol" path="//summary"/></param>
         /// <param name="symbolOff"><inheritdoc cref="symbolOff" path="//summary"/></param>
         /// <inheritdoc cref="BaseUI(int, string, string, bool, string, bool)"/>
-        public Toggle(int value = 0, string preText = "", string symbol = "on", string symbolOff = "off", string postValue = "", bool multiline = false)
-            : base(Math.Clamp(value, 0, 1), preText, "", false, postValue, multiline)
+        public Toggle(bool value = false, string preText = "", string symbol = "on", string symbolOff = "off", string postValue = "", bool multiline = false)
+            : base(Math.Clamp(-1, 0, 1), preText, "", false, postValue, multiline)
         {
+            this.value = value;
             this.symbol = symbol;
             this.symbolOff = symbolOff;
         }
@@ -35,17 +41,17 @@
 
         #region Override methods
         /// <inheritdoc cref="BaseUI.MakeSpecial"/>
-        protected override string MakeSpecial(string icons)
+        protected override string MakeSpecial(string icons, IEnumerable<BaseUI?>? elementList = null)
         {
-            return value == 1 ? symbol : symbolOff;
+            return value ? symbol : symbolOff;
         }
 
         /// <inheritdoc cref="BaseUI.HandleAction"/>
-        public override object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null)
+        public override object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null, IEnumerable<BaseUI?>? elementList = null)
         {
             if (key.Equals(keyResults.ElementAt((int)Key.ENTER)))
             {
-                value = !(value == 1) ? 1 : 0;
+                value = !value;
             }
             return true;
         }

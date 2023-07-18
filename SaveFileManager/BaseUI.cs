@@ -65,8 +65,8 @@ namespace SaveFileManager
         /// </summary>
         /// <param name="icon">The left icon string to use for this UI element.</param>
         /// <param name="iconR">The right icon string to use for this UI element.</param>
-        /// <returns></returns>
-        public virtual string MakeText(string icon, string iconR)
+        /// <param name="elementList">The list of elements passed into <c>OptionsUI</c>.</param>
+        public virtual string MakeText(string icon, string iconR, IEnumerable<BaseUI?>? elementList = null)
         {
             var txt = new StringBuilder();
             // current icon group
@@ -83,7 +83,7 @@ namespace SaveFileManager
                 txt.Append(preText);
             }
             // special
-            txt.Append(MakeSpecial(icons));
+            txt.Append(MakeSpecial(icons, elementList));
             // pre value
             if (multiline)
             {
@@ -96,7 +96,7 @@ namespace SaveFileManager
             // value
             if (displayValue)
             {
-                txt.Append(MakeValue());
+                txt.Append(MakeValue(elementList));
             }
             // post value
             if (multiline)
@@ -116,8 +116,8 @@ namespace SaveFileManager
         /// Returns the string representation of the cpecial varable.
         /// </summary>
         /// <param name="icons">The icons string to place if <c>multiline</c> is true.</param>
-        /// <returns></returns>
-        protected virtual string MakeSpecial(string icons)
+        /// <param name="elementList">The list of elements passed into <c>OptionsUI</c>.</param>
+        protected virtual string MakeSpecial(string icons, IEnumerable<BaseUI?>? elementList = null)
         {
             return "";
         }
@@ -125,8 +125,8 @@ namespace SaveFileManager
         /// <summary>
         /// Returns the string representation of the value.
         /// </summary>
-        /// <returns></returns>
-        protected virtual string MakeValue()
+        /// <param name="elementList">The list of elements passed into <c>OptionsUI</c>.</param>
+        protected virtual string MakeValue(IEnumerable<BaseUI?>? elementList = null)
         {
             return value.ToString();
         }
@@ -138,8 +138,8 @@ namespace SaveFileManager
         /// <param name="key">The result object retrned from the key the user pressed.</param>
         /// <param name="keyResults">The list of posible results returned by pressing a key.</param>
         /// <param name="keybinds">The list of <c>KeyAction</c> objects to use, if the selected action is a <c>UIList</c>.</param>
-        /// <returns></returns>
-        public virtual object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null)
+        /// <param name="elementList">The list of elements passed into <c>OptionsUI</c>.</param>
+        public virtual object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null, IEnumerable<BaseUI?>? elementList = null)
         {
             return true;
         }
@@ -147,7 +147,6 @@ namespace SaveFileManager
         /// <summary>
         /// Returns if the element is selectable.
         /// </summary>
-        /// <returns></returns>
         public virtual bool IsSelectable()
         {
             return true;
@@ -156,7 +155,6 @@ namespace SaveFileManager
         /// <summary>
         /// Returns if the element can only be clicked.
         /// </summary>
-        /// <returns></returns>
         public virtual bool IsOnlyClickable()
         {
             return false;

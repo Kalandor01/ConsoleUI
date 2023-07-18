@@ -208,7 +208,8 @@ namespace SaveFileManager
                     {
                         txt.Append(element.MakeText(
                             selected == x ? cursorIcon.sIcon : cursorIcon.icon,
-                            selected == x ? cursorIcon.sIconR : cursorIcon.iconR
+                            selected == x ? cursorIcon.sIconR : cursorIcon.iconR,
+                            elements
                         ));
                     }
                     else if (element is null)
@@ -284,7 +285,7 @@ namespace SaveFileManager
                             pressedKey.Equals(keyResults.ElementAt((int)Key.ENTER)))
                         )
                     {
-                        var returned = selectedElement.HandleAction(pressedKey, keyResults, keybinds);
+                        var returned = selectedElement.HandleAction(pressedKey, keyResults, keybinds, elements);
                         if (returned is not null)
                         {
                             if (returned.GetType() == typeof(bool))

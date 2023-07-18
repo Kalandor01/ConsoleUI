@@ -55,7 +55,7 @@ namespace SaveFileManager
 
         #region Override methods
         /// <inheritdoc cref="BaseUI.MakeSpecial"/>
-        protected override string MakeSpecial(string icons)
+        protected override string MakeSpecial(string icons, IEnumerable<BaseUI?>? elementList = null)
         {
             var txt = new StringBuilder();
             for (var x = minValue; x < maxValue; x += step)
@@ -66,7 +66,7 @@ namespace SaveFileManager
         }
 
         /// <inheritdoc cref="BaseUI.HandleAction"/>
-        public override object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null)
+        public override object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null, IEnumerable<BaseUI?>? elementList = null)
         {
             if (key.Equals(keyResults.ElementAt((int)Key.RIGHT)))
             {

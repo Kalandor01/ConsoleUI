@@ -18,13 +18,13 @@
 
         #region Override methods
         /// <inheritdoc cref="BaseUI.MakeText"/>
-        public override string MakeText(string icon, string iconR)
+        public override string MakeText(string icon, string iconR, IEnumerable<BaseUI?>? elementList = null)
         {
             return preText + "\n";
         }
 
         /// <inheritdoc cref="BaseUI.HandleAction"/>
-        public override object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null)
+        public override object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null, IEnumerable<BaseUI?>? elementList = null)
         {
             return false;
         }
