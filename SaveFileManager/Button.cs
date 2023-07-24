@@ -38,7 +38,7 @@
 
         #region Override methods
         /// <inheritdoc cref="BaseUI.HandleAction"/>
-        public override object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null, IEnumerable<BaseUI?>? elementList = null)
+        public virtual object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null, OptionsUI? optionsUI = null)
         {
             if (key.Equals(keyResults.ElementAt((int)Key.ENTER)))
             {

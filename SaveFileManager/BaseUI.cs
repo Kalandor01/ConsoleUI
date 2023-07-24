@@ -138,8 +138,8 @@ namespace SaveFileManager
         /// <param name="key">The result object retrned from the key the user pressed.</param>
         /// <param name="keyResults">The list of posible results returned by pressing a key.</param>
         /// <param name="keybinds">The list of <c>KeyAction</c> objects to use, if the selected action is a <c>UIList</c>.</param>
-        /// <param name="elementList">The list of elements passed into <c>OptionsUI</c>.</param>
-        public virtual object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null, IEnumerable<BaseUI?>? elementList = null)
+        /// <param name="optionsUI">The <c>OptionsUI</c> containing this object.</param>
+        public virtual object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null, OptionsUI? optionsUI = null)
         {
             return true;
         }

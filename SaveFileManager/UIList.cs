@@ -19,7 +19,7 @@ namespace SaveFileManager
         /// <summary>
         /// The string to print before the answers.
         /// </summary>
-        public string question;
+        public string? question;
         /// <summary>
         /// The <c>CursorIcon</c> to use.
         /// </summary>
@@ -68,7 +68,7 @@ namespace SaveFileManager
                 throw new UINoSelectablesExeption();
             }
             this.answers = answers;
-            this.question = question ?? "";
+            this.question = question;
             this.cursorIcon = cursorIcon ?? new CursorIcon();
             this.multiline = multiline;
             this.canEscape = canEscape;
@@ -85,11 +85,10 @@ namespace SaveFileManager
         /// </summary>
         /// <param name="keybinds">The list of <c>KeyAction</c> objects to use, if the selected action is a <c>UIList</c>.</param>
         /// <param name="keyResults">The list of posible results returned by pressing a key.<br/>
-        /// The order of the elements in the tuple should be:<br/>
+        /// The order of the elements in the list should be:<br/>
         /// - escape, up, down, left, right, enter<br/>
         ///If it is null, the default value is either returned from the <c>keybinds</c> or:<br/>
         /// - { Key.ESCAPE, Key.UP, Key.DOWN, Key.LEFT, Key.RIGHT, Key.ENTER }</param>
-        /// <returns></returns>
         public object Display(IEnumerable<KeyAction>? keybinds = null, IEnumerable<object>? keyResults = null)
         {
             if (keyResults is null || keyResults.Count() < 6)
