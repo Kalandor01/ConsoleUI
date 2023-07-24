@@ -41,7 +41,7 @@
 
         #region Override methods
         /// <inheritdoc cref="BaseUI.MakeSpecial"/>
-        protected override string MakeSpecial(string icons, IEnumerable<BaseUI?>? elementList = null)
+        protected override string MakeSpecial(string icons, OptionsUI? optionsUI = null)
         {
             return value ? symbol : symbolOff;
         }

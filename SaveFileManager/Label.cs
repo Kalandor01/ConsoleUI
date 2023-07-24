@@ -18,7 +18,7 @@
 
         #region Override methods
         /// <inheritdoc cref="BaseUI.MakeText"/>
-        public override string MakeText(string icon, string iconR, IEnumerable<BaseUI?>? elementList = null)
+        public override string MakeText(string icon, string iconR, OptionsUI? optionsUI = null)
         {
             return preText + "\n";
         }

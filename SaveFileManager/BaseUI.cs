@@ -65,8 +65,8 @@ namespace SaveFileManager
         /// </summary>
         /// <param name="icon">The left icon string to use for this UI element.</param>
         /// <param name="iconR">The right icon string to use for this UI element.</param>
-        /// <param name="elementList">The list of elements passed into <c>OptionsUI</c>.</param>
-        public virtual string MakeText(string icon, string iconR, IEnumerable<BaseUI?>? elementList = null)
+        /// <param name="optionsUI">The <c>OptionsUI</c> containing this object.</param>
+        public virtual string MakeText(string icon, string iconR, OptionsUI? optionsUI = null)
         {
             var txt = new StringBuilder();
             // current icon group
@@ -83,7 +83,7 @@ namespace SaveFileManager
                 txt.Append(preText);
             }
             // special
-            txt.Append(MakeSpecial(icons, elementList));
+            txt.Append(MakeSpecial(icons, optionsUI));
             // pre value
             if (multiline)
             {
@@ -96,7 +96,7 @@ namespace SaveFileManager
             // value
             if (displayValue)
             {
-                txt.Append(MakeValue(elementList));
+                txt.Append(MakeValue(optionsUI));
             }
             // post value
             if (multiline)
@@ -116,8 +116,8 @@ namespace SaveFileManager
         /// Returns the string representation of the cpecial varable.
         /// </summary>
         /// <param name="icons">The icons string to place if <c>multiline</c> is true.</param>
-        /// <param name="elementList">The list of elements passed into <c>OptionsUI</c>.</param>
-        protected virtual string MakeSpecial(string icons, IEnumerable<BaseUI?>? elementList = null)
+        /// <param name="optionsUI">The <c>OptionsUI</c> containing this object.</param>
+        protected virtual string MakeSpecial(string icons, OptionsUI? optionsUI = null)
         {
             return "";
         }
@@ -125,8 +125,8 @@ namespace SaveFileManager
         /// <summary>
         /// Returns the string representation of the value.
         /// </summary>
-        /// <param name="elementList">The list of elements passed into <c>OptionsUI</c>.</param>
-        protected virtual string MakeValue(IEnumerable<BaseUI?>? elementList = null)
+        /// <param name="optionsUI">The <c>OptionsUI</c> containing this object.</param>
+        protected virtual string MakeValue(OptionsUI? optionsUI = null)
         {
             return value.ToString();
         }

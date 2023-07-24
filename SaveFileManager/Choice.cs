@@ -29,7 +29,7 @@
 
         #region Override methods
         /// <inheritdoc cref="BaseUI.MakeSpecial"/>
-        protected override string MakeSpecial(string icons, IEnumerable<BaseUI?>? elementList = null)
+        protected override string MakeSpecial(string icons, OptionsUI? optionsUI = null)
         {
             if (multiline)
             {
@@ -42,7 +42,7 @@
         }
 
         /// <inheritdoc cref="BaseUI.MakeValue"/>
-        protected override string MakeValue(IEnumerable<BaseUI?>? elementList = null)
+        protected override string MakeValue(OptionsUI? optionsUI = null)
         {
             return $"{value + 1}/{choices.Count()}";
         }

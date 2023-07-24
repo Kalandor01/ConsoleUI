@@ -134,7 +134,7 @@ namespace SaveFileManager
                         txt.Append(element.MakeText(
                             selected == x ? cursorIcon.sIcon : cursorIcon.icon,
                             selected == x ? cursorIcon.sIconR : cursorIcon.iconR,
-                            elements
+                            this
                         ));
                     }
                     else if (element is null)
