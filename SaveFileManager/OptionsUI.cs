@@ -68,7 +68,7 @@ namespace SaveFileManager
         /// <exception cref="UINoSelectablesExeption">Exceptions thrown, if there are no selectable UI elements in the list.</exception>
         public object? Display(IEnumerable<KeyAction>? keybinds = null, IEnumerable<object>? keyResults = null)
         {
-            if (elements.All(answer => answer is null || !answer.IsSelectable()))
+            if (elements.All(element => element is null || !element.IsSelectable()))
             {
                 throw new UINoSelectablesExeption();
             }
@@ -87,21 +87,7 @@ namespace SaveFileManager
             cursorIcon ??= new CursorIcon();
 
             // is enter needed?
-            var noEnter = true;
-            foreach (var element in elements)
-            {
-                if (
-                    element is not null &&
-                    (
-                        typeof(Toggle).IsAssignableFrom(element.GetType()) ||
-                        typeof(Button).IsAssignableFrom(element.GetType())
-                    )
-                )
-                {
-                    noEnter = false;
-                    break;
-                }
-            }
+            var enterKeyNeeded = elements.Any(element => element is not null && element.IsClickable());
             // put selected on selectable
             var selected = 0;
             while (
@@ -119,17 +105,21 @@ namespace SaveFileManager
                 {
                     throw new UINoSelectablesExeption();
                 }
-                // render
-                // clear screen
+
+                // clear screen + render
                 var txt = new StringBuilder("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+
+                // title
                 if (title is not null)
                 {
                     txt.Append(title + "\n\n");
                 }
+
+                // elements
                 for (var x = 0; x < elements.Count(); x++)
                 {
                     var element = elements.ElementAt(x);
-                    if (element is not null && typeof(BaseUI).IsAssignableFrom(element.GetType()))
+                    if (element is not null)
                     {
                         txt.Append(element.MakeText(
                             selected == x ? cursorIcon.sIcon : cursorIcon.icon,
@@ -137,16 +127,14 @@ namespace SaveFileManager
                             this
                         ));
                     }
-                    else if (element is null)
+                    else
                     {
                         txt.Append('\n');
                     }
-                    else
-                    {
-                        txt.Append(element.ToString() + "\n");
-                    }
                 }
-                Console.WriteLine(txt.ToString());
+
+                Console.WriteLine(txt);
+
                 // move selection/change value
                 var actualMove = false;
                 do
@@ -156,6 +144,7 @@ namespace SaveFileManager
                     var selectedElement = elements.ElementAt(selected);
                     if (
                         selectedElement is not null &&
+                        selectedElement.IsClickable() &&
                         selectedElement.IsOnlyClickable()
                     )
                     {
@@ -166,7 +155,7 @@ namespace SaveFileManager
                         while (pressedKey.Equals(keyResults.ElementAt((int)Key.ENTER)))
                         {
                             pressedKey = Utils.GetKey(GetKeyMode.NO_IGNORE, keybinds);
-                            if (pressedKey.Equals(keyResults.ElementAt((int)Key.ENTER)) && noEnter)
+                            if (pressedKey.Equals(keyResults.ElementAt((int)Key.ENTER)) && !enterKeyNeeded)
                             {
                                 pressedKey = keyResults.ElementAt((int)Key.ESCAPE);
                             }

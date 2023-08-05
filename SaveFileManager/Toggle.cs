@@ -56,6 +56,12 @@
             return true;
         }
 
+        /// <inheritdoc cref="BaseUI.IsClickable"/>
+        public override bool IsClickable()
+        {
+            return true;
+        }
+
         /// <inheritdoc cref="BaseUI.IsOnlyClickable"/>
         public override bool IsOnlyClickable()
         {

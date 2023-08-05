@@ -110,15 +110,20 @@ namespace SaveFileManager
                 var key = keyResults.ElementAt((int)Key.ESCAPE);
                 while (!key.Equals(keyResults.ElementAt((int)Key.ENTER)))
                 {
-                    // render
-                    // clear screen
+                    // clear screen + render
                     var txt = new StringBuilder("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+
+                    // question
                     if (question is not null)
                     {
                         txt.Append(question + "\n\n");
                     }
+
+                    // answers
                     txt.Append(MakeText(selected));
+
                     Console.WriteLine(txt);
+
                     // answer select
                     key = Utils.GetKey(GetKeyMode.IGNORE_HORIZONTAL, keybinds);
                     if (canEscape && key.Equals(keyResults.ElementAt((int)Key.ESCAPE)))

@@ -153,6 +153,14 @@ namespace SaveFileManager
         }
 
         /// <summary>
+        /// Returns if the element can be clicked.
+        /// </summary>
+        public virtual bool IsClickable()
+        {
+            return false;
+        }
+
+        /// <summary>
         /// Returns if the element can only be clicked.
         /// </summary>
         public virtual bool IsOnlyClickable()
