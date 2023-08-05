@@ -26,7 +26,7 @@ namespace SaveFileManager
         /// </summary>
         public bool canEscape;
         /// <summary>
-        /// Whether to pass in the object into the element's <c>HandleAction</c> function.
+        /// Whether to pass in the object into the element's functions.
         /// </summary>
         public bool passInObject;
         #endregion
@@ -124,7 +124,7 @@ namespace SaveFileManager
                         txt.Append(element.MakeText(
                             selected == x ? cursorIcon.sIcon : cursorIcon.icon,
                             selected == x ? cursorIcon.sIconR : cursorIcon.iconR,
-                            this
+                            passInObject ? this : null
                         ));
                     }
                     else
@@ -200,7 +200,7 @@ namespace SaveFileManager
                             pressedKey.Equals(keyResults.ElementAt((int)Key.ENTER)))
                         )
                     {
-                        var returned = selectedElement.HandleAction(pressedKey, keyResults, keybinds, this);
+                        var returned = selectedElement.HandleAction(pressedKey, keyResults, keybinds, passInObject ? this : null);
                         if (returned is not null)
                         {
                             if (returned.GetType() == typeof(bool))
