@@ -60,7 +60,7 @@ namespace SaveFileManager
             var txt = new StringBuilder();
             for (var x = minValue; x < maxValue; x += step)
             {
-                txt.Append(x >= value ? symbolEmpty : symbol);
+                txt.Append(x >= Value ? symbolEmpty : symbol);
             }
             return txt.ToString();
         }
@@ -70,9 +70,9 @@ namespace SaveFileManager
         {
             if (key.Equals(keyResults.ElementAt((int)Key.RIGHT)))
             {
-                if (value + step <= maxValue)
+                if (Value + step <= maxValue)
                 {
-                    value += step;
+                    Value += step;
                 }
                 else
                 {
@@ -81,9 +81,9 @@ namespace SaveFileManager
             }
             else if (key.Equals(keyResults.ElementAt((int)Key.LEFT)))
             {
-                if (value - step >= minValue)
+                if (Value - step >= minValue)
                 {
-                    value -= step;
+                    Value -= step;
                 }
                 else
                 {

@@ -109,7 +109,7 @@ namespace SaveFileManager
             //get lines
             var fileBytes = File.ReadAllBytes($"{filePath.Replace(Utils.FILE_NAME_SEED_REPLACE_STRING, seed.ToString())}.{fileExt}");
 
-            var byteLines = new List<IEnumerable<byte>>();
+            var byteLines = new List<List<byte>>();
             var newL = new List<byte>();
             foreach (var by in fileBytes)
             {
@@ -132,7 +132,7 @@ namespace SaveFileManager
                 if (version == 4)
                 {
                     var now = DateTime.Now;
-                    seedNum *= (now.Year + now.Month + now.Day);
+                    seedNum *= now.Year + now.Month + now.Day;
                 }
                 else if (version < 2 || version > 4)
                 {

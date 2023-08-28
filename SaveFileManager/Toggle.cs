@@ -11,7 +11,7 @@
         /// <summary>
         /// The current value of the object.
         /// </summary>
-        new bool value;
+        public bool Value { get; set; }
         /// <summary>
         /// The text displayed when the toggle is on.
         /// </summary>
@@ -31,9 +31,9 @@
         /// <param name="symbolOff"><inheritdoc cref="symbolOff" path="//summary"/></param>
         /// <inheritdoc cref="BaseUI(int, string, string, bool, string, bool)"/>
         public Toggle(bool value = false, string preText = "", string symbol = "on", string symbolOff = "off", string postValue = "", bool multiline = false)
-            : base(Math.Clamp(-1, 0, 1), preText, "", false, postValue, multiline)
+            : base(value ? 1 : 0, preText, "", false, postValue, multiline)
         {
-            this.value = value;
+            Value = value;
             this.symbol = symbol;
             this.symbolOff = symbolOff;
         }
@@ -43,7 +43,7 @@
         /// <inheritdoc cref="BaseUI.MakeSpecial"/>
         protected override string MakeSpecial(string icons, OptionsUI? optionsUI = null)
         {
-            return value ? symbol : symbolOff;
+            return Value ? symbol : symbolOff;
         }
 
         /// <inheritdoc cref="BaseUI.HandleAction"/>
@@ -51,7 +51,8 @@
         {
             if (key.Equals(keyResults.ElementAt((int)Key.ENTER)))
             {
-                value = !value;
+                Value = !Value;
+                base.Value = Value ? 1 : 0;
             }
             return true;
         }

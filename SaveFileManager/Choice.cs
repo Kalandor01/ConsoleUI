@@ -33,18 +33,18 @@
         {
             if (multiline)
             {
-                return choices.ElementAt(value).Replace("\n", icons);
+                return choices.ElementAt(Value).Replace("\n", icons);
             }
             else
             {
-                return choices.ElementAt(value);
+                return choices.ElementAt(Value);
             }
         }
 
         /// <inheritdoc cref="BaseUI.MakeValue"/>
         protected override string MakeValue(OptionsUI? optionsUI = null)
         {
-            return $"{value + 1}/{choices.Count()}";
+            return $"{Value + 1}/{choices.Count()}";
         }
 
         /// <inheritdoc cref="BaseUI.HandleAction"/>
@@ -57,14 +57,14 @@
             )
             {
                 returnValue = true;
-                value += key.Equals(keyResults.ElementAt((int)Key.RIGHT)) ? 1 : -1;
+                Value += key.Equals(keyResults.ElementAt((int)Key.RIGHT)) ? 1 : -1;
             }
             if (returnValue)
             {
-                value %= choices.Count();
-                if (value < 0)
+                Value %= choices.Count();
+                if (Value < 0)
                 {
-                    value = choices.Count() - 1;
+                    Value = choices.Count() - 1;
                 }
             }
             return returnValue;

@@ -12,7 +12,7 @@ namespace SaveFileManager
         /// <summary>
         /// The current value of the object.
         /// </summary>
-        public int value;
+        public virtual int Value { get; set; }
         #endregion
 
         #region Protected fields
@@ -50,7 +50,7 @@ namespace SaveFileManager
         /// <param name="multiline"><inheritdoc cref="multiline" path="//summary"/></param>
         public BaseUI(int value = 0, string preText = "", string preValue = "", bool displayValue = false, string postValue = "", bool multiline = false)
         {
-            this.value = value;
+            Value = value;
             this.preText = preText;
             this.preValue = preValue;
             this.displayValue = displayValue;
@@ -128,7 +128,7 @@ namespace SaveFileManager
         /// <param name="optionsUI">The <c>OptionsUI</c> containing this object.</param>
         protected virtual string MakeValue(OptionsUI? optionsUI = null)
         {
-            return value.ToString();
+            return Value.ToString();
         }
 
         /// <summary>
