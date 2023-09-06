@@ -24,10 +24,10 @@
         /// <summary>
         /// <inheritdoc cref="Button"/>
         /// </summary>
+        /// <param name="multiline"><inheritdoc cref="BaseUI.multiline" path="//summary"/></param>
         /// <param name="text">The text to write out.</param>
         /// <param name="action"><inheritdoc cref="action" path="//summary"/></param>
         /// <param name="modifyList"><inheritdoc cref="modifyList" path="//summary"/></param>
-        /// <inheritdoc cref="BaseUI(int, string, string, bool, string, bool)"/>
         public Button(UIAction action, bool modifyList = false, string text = "", bool multiline = false)
             : base(-1, text, "", false, "", multiline)
         {

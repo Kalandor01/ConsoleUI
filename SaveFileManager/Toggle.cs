@@ -11,7 +11,7 @@
         /// <summary>
         /// The current value of the object.
         /// </summary>
-        public bool Value { get; set; }
+        public new bool Value { get; set; }
         /// <summary>
         /// The text displayed when the toggle is on.
         /// </summary>
@@ -26,7 +26,10 @@
         /// <summary>
         /// <inheritdoc cref="Toggle"/>
         /// </summary>
-        /// <param name="value"><inheritdoc cref="value" path="//summary"/></param>
+        /// <param name="value"><inheritdoc cref="Value" path="//summary"/></param>
+        /// <param name="preText"><inheritdoc cref="BaseUI.preText" path="//summary"/></param>
+        /// <param name="postValue"><inheritdoc cref="BaseUI.postValue" path="//summary"/></param>
+        /// <param name="multiline"><inheritdoc cref="BaseUI.multiline" path="//summary"/></param>
         /// <param name="symbol"><inheritdoc cref="symbol" path="//summary"/></param>
         /// <param name="symbolOff"><inheritdoc cref="symbolOff" path="//summary"/></param>
         /// <inheritdoc cref="BaseUI(int, string, string, bool, string, bool)"/>

@@ -42,7 +42,7 @@ namespace SaveFileManager
         /// <summary>
         /// <inheritdoc cref="BaseUI"/>
         /// </summary>
-        /// <param name="value"><inheritdoc cref="value" path="//summary"/></param>
+        /// <param name="value"><inheritdoc cref="Value" path="//summary"/></param>
         /// <param name="preText"><inheritdoc cref="preText" path="//summary"/></param>
         /// <param name="preValue"><inheritdoc cref="preValue" path="//summary"/></param>
         /// <param name="displayValue"><inheritdoc cref="displayValue" path="//summary"/></param>

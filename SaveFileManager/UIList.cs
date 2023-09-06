@@ -46,6 +46,18 @@ namespace SaveFileManager
         /// If true, any function in the <c>actions</c> list will get the <c>UIList</c> as its first argument (and can modify it) when the function is called.
         /// </summary>
         public bool modifyList;
+        /// <summary>
+        /// The settings for the scrolling of UI elements.
+        /// </summary>
+        public ScrollSettings scrollSettings;
+        /// <summary>
+        /// The index of the currently selected answer in the list.
+        /// </summary>
+        public int selected;
+        /// <summary>
+        /// The start index of the currently displayed section of the answers list.
+        /// </summary>
+        public int startIndex;
         #endregion
 
         #region Constructors
@@ -61,7 +73,7 @@ namespace SaveFileManager
         /// <param name="excludeNulls"><inheritdoc cref="excludeNulls" path="//summary"/></param>
         /// <param name="modifiableUIList"><inheritdoc cref="modifyList" path="//summary"/></param>
         /// <exception cref="UINoSelectablesExeption"></exception>
-        public UIList(IEnumerable<string?> answers, string? question = null, CursorIcon? cursorIcon = null, bool multiline = false, bool canEscape = false, IEnumerable<UIAction?>? actions = null, bool excludeNulls = false, bool modifiableUIList = false)
+        public UIList(IEnumerable<string?> answers, string? question = null, CursorIcon? cursorIcon = null, bool multiline = false, bool canEscape = false, IEnumerable<UIAction?>? actions = null, bool excludeNulls = false, bool modifiableUIList = false, ScrollSettings? scrollSettings = null)
         {
             if (!answers.Any() || answers.All(answer => answer is null))
             {
@@ -74,7 +86,8 @@ namespace SaveFileManager
             this.canEscape = canEscape;
             this.actions = actions ?? new List<UIAction?>();
             this.excludeNulls = excludeNulls;
-            this.modifyList = modifiableUIList;
+            modifyList = modifiableUIList;
+            this.scrollSettings = scrollSettings ?? new ScrollSettings();
         }
         #endregion
 
@@ -103,7 +116,9 @@ namespace SaveFileManager
                 }
             }
 
-            var selected = SetupSelected(0);
+            selected = SetupSelected(0);
+            startIndex = Math.Clamp(0, selected - scrollSettings.scrollUpMargin, answers.Count() - 1);
+
             while (true)
             {
                 selected = SetupSelected(selected);
@@ -120,7 +135,7 @@ namespace SaveFileManager
                     }
 
                     // answers
-                    txt.Append(MakeText(selected));
+                    txt.Append(MakeText());
 
                     Console.WriteLine(txt);
 
@@ -151,36 +166,47 @@ namespace SaveFileManager
         /// <summary>
         /// Returns the text that represents the UI of this object, without the question.
         /// </summary>
-        /// <param name="selected">The index of the currently selected answer.</param>
-        /// <returns></returns>
-        private string MakeText(int selected)
+        private StringBuilder MakeText()
         {
+            int endIndex;
+            if (scrollSettings.maxElements == -1 || scrollSettings.maxElements >= answers.Count())
+            {
+                startIndex = 0;
+                endIndex = answers.Count();
+            }
+            else
+            {
+                if (startIndex > selected - scrollSettings.scrollUpMargin)
+                {
+                    startIndex = selected - scrollSettings.scrollUpMargin;
+                }
+                if (startIndex + scrollSettings.maxElements - 1 < selected + scrollSettings.scrollDownMargin)
+                {
+                    startIndex = selected + scrollSettings.scrollDownMargin - (scrollSettings.maxElements - 1);
+                }
+
+                startIndex = Math.Clamp(startIndex, 0, answers.Count() - 1);
+                endIndex = Math.Clamp(startIndex + scrollSettings.maxElements, 0, answers.Count());
+                startIndex = Math.Clamp(endIndex - scrollSettings.maxElements, 0, answers.Count() - 1);
+            }
+
             var text = new StringBuilder();
-            for (var x = 0; x < answers.Count(); x++)
+            text.Append(startIndex == 0 ? scrollSettings.scrollIcon.topEndIndicator : scrollSettings.scrollIcon.topContinueIndicator);
+            for (var x = startIndex; x < endIndex; x++)
             {
                 var answer = answers.ElementAt(x);
-                if (answer is not null)
+                if (answer is null)
                 {
-                    string currIcon;
-                    string currIconR;
-                    if (selected == x)
-                    {
-                        currIcon = cursorIcon.sIcon;
-                        currIconR = cursorIcon.sIconR;
-                    }
-                    else
-                    {
-                        currIcon = cursorIcon.icon;
-                        currIconR = cursorIcon.iconR;
-                    }
-                    text.Append(currIcon + (multiline ? answer.Replace("\n", $"{currIconR}\n{currIcon}") : answer) + $"{currIconR}\n");
+                    text.AppendLine();
+                    continue;
                 }
-                else
-                {
-                    text.Append('\n');
-                }
+
+                var currIcon = selected == x ? cursorIcon.sIcon : cursorIcon.icon;
+                var currIconR = selected == x ? cursorIcon.sIconR : cursorIcon.iconR;
+                text.Append(currIcon + (multiline ? answer.Replace("\n", $"{currIconR}\n{currIcon}") : answer) + $"{currIconR}\n");
             }
-            return text.ToString();
+            text.Append(endIndex == answers.Count() ? scrollSettings.scrollIcon.bottomEndIndicator : scrollSettings.scrollIcon.bottomContinueIndicator);
+            return text;
         }
 
         /// <summary>
@@ -247,45 +273,40 @@ namespace SaveFileManager
         private object? HandleAction(int selected, IEnumerable<KeyAction>? keybinds = null, IEnumerable<object>? keyResults = null)
         {
             if (
-                actions.Any() &&
-                selected < actions.Count() &&
-                actions.ElementAt(selected) is not null)
-            {
-                var selectedAction = actions.ElementAt(selected);
-                var (actionType, returned) = selectedAction.InvokeAction(modifyList ? this : null, keybinds, keyResults);
-                if (actionType == UIActionType.UILIST)
-                {
-                    return null;
-                }
-                else
-                {
-                    if (returned is int funcInt && funcInt == -1)
-                    {
-                        return selected;
-                    }
-                    else if (
-                        returned is not null &&
-                        returned.GetType() != typeof(string) &&
-                        typeof(IEnumerable).IsAssignableFrom(returned.GetType()) &&
-                        ((IEnumerable<object>)returned).Any() &&
-                        ((IEnumerable<object>)returned).ElementAt(0) is int funcArgsInt &&
-                        funcArgsInt == -1
-                    )
-                    {
-                        var funcRetList = ((IEnumerable<object>)returned).ToList();
-                        funcRetList[0] = selected;
-                        return funcRetList;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
-            }
-            else
+                !actions.Any() ||
+                selected >= actions.Count() ||
+                actions.ElementAt(selected) is not UIAction selectedAction
+            )
             {
                 return selected;
             }
+
+            var (actionType, returned) = selectedAction.InvokeAction(modifyList ? this : null, keybinds, keyResults);
+            if (actionType == UIActionType.UILIST)
+            {
+                return null;
+            }
+
+            if (returned is int funcInt && funcInt == -1)
+            {
+                return selected;
+            }
+
+            if (
+                returned is null ||
+                returned.GetType() == typeof(string) ||
+                !typeof(IEnumerable).IsAssignableFrom(returned.GetType()) ||
+                !((IEnumerable<object>)returned).Any() ||
+                ((IEnumerable<object>)returned).ElementAt(0) is not int funcArgsInt ||
+                funcArgsInt != -1
+            )
+            {
+                return null;
+            }
+
+            var funcRetList = ((IEnumerable<object>)returned).ToList();
+            funcRetList[0] = selected;
+            return funcRetList;
         }
 
         /// <summary>

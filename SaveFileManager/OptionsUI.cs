@@ -29,6 +29,18 @@ namespace SaveFileManager
         /// Whether to pass in the object into the element's functions.
         /// </summary>
         public bool passInObject;
+        /// <summary>
+        /// The settings for the scrolling of UI elements.
+        /// </summary>
+        public ScrollSettings scrollSettings;
+        /// <summary>
+        /// The index of the currently selected element in the list.
+        /// </summary>
+        public int selected;
+        /// <summary>
+        /// The start index of the currently displayed section of the elements list.
+        /// </summary>
+        public int startIndex;
         #endregion
 
         #region Public constructors
@@ -40,8 +52,9 @@ namespace SaveFileManager
         /// <param name="cursorIcon"><inheritdoc cref="cursorIcon" path="//summary"/></param>
         /// <param name="canEscape"><inheritdoc cref="canEscape" path="//summary"/></param>
         /// <param name="passInObject"><inheritdoc cref="passInObject" path="//summary"/></param>
+        /// <param name="scrollSettings"><inheritdoc cref="scrollSettings" path="//summary"/></param>
         /// <exception cref="UINoSelectablesExeption">Exceptions thrown, if there are no selectable UI elements in the list.</exception>
-        public OptionsUI(IEnumerable<BaseUI?> elements, string? title = null, CursorIcon? cursorIcon = null, bool canEscape = true, bool passInObject = true)
+        public OptionsUI(IEnumerable<BaseUI?> elements, string? title = null, CursorIcon? cursorIcon = null, bool canEscape = true, bool passInObject = true, ScrollSettings? scrollSettings = null)
         {
             if (elements.All(answer => answer is null || !answer.IsSelectable()))
             {
@@ -52,6 +65,7 @@ namespace SaveFileManager
             this.cursorIcon = cursorIcon ?? new CursorIcon();
             this.canEscape = canEscape;
             this.passInObject = passInObject;
+            this.scrollSettings = scrollSettings ?? new ScrollSettings();
         }
         #endregion
 
@@ -68,11 +82,13 @@ namespace SaveFileManager
         /// <exception cref="UINoSelectablesExeption">Exceptions thrown, if there are no selectable UI elements in the list.</exception>
         public object? Display(IEnumerable<KeyAction>? keybinds = null, IEnumerable<object>? keyResults = null)
         {
+            // no selectable element
             if (elements.All(element => element is null || !element.IsSelectable()))
             {
                 throw new UINoSelectablesExeption();
             }
 
+            // keybinds
             if (keyResults is null || keyResults.Count() < 6)
             {
                 if (keybinds is null)
@@ -89,13 +105,17 @@ namespace SaveFileManager
             // is enter needed?
             var enterKeyNeeded = elements.Any(element => element is not null && element.IsClickable());
             // put selected on selectable
-            var selected = 0;
+            selected = 0;
             while (
                 elements.ElementAt(selected)?.IsSelectable() != true
             )
             {
                 selected++;
             }
+
+            startIndex = Math.Clamp(0, selected - scrollSettings.scrollUpMargin, elements.Count() - 1);
+            int endIndex;
+
             // render/getkey loop
             object pressedKey;
             do
@@ -116,22 +136,39 @@ namespace SaveFileManager
                 }
 
                 // elements
-                for (var x = 0; x < elements.Count(); x++)
+                if (scrollSettings.maxElements == -1 || scrollSettings.maxElements >= elements.Count())
+                {
+                    startIndex = 0;
+                    endIndex = elements.Count();
+                }
+                else
+                {
+                    if (startIndex > selected - scrollSettings.scrollUpMargin)
+                    {
+                        startIndex = selected - scrollSettings.scrollUpMargin;
+                    }
+                    if (startIndex + scrollSettings.maxElements - 1 < selected + scrollSettings.scrollDownMargin)
+                    {
+                        startIndex = selected + scrollSettings.scrollDownMargin - (scrollSettings.maxElements - 1);
+                    }
+
+                    startIndex = Math.Clamp(startIndex, 0, elements.Count() - 1);
+                    endIndex = Math.Clamp(startIndex + scrollSettings.maxElements, 0, elements.Count());
+                    startIndex = Math.Clamp(endIndex - scrollSettings.maxElements, 0, elements.Count() - 1);
+                }
+
+                txt.Append(startIndex == 0 ? scrollSettings.scrollIcon.topEndIndicator : scrollSettings.scrollIcon.topContinueIndicator);
+                for (var x = startIndex; x < endIndex; x++)
                 {
                     var element = elements.ElementAt(x);
-                    if (element is not null)
-                    {
-                        txt.Append(element.MakeText(
+                    txt.Append(element?.MakeText(
                             selected == x ? cursorIcon.sIcon : cursorIcon.icon,
                             selected == x ? cursorIcon.sIconR : cursorIcon.iconR,
                             passInObject ? this : null
-                        ));
-                    }
-                    else
-                    {
-                        txt.Append('\n');
-                    }
+                        ) ??
+                        "\n");
                 }
+                txt.Append(endIndex == elements.Count() ? scrollSettings.scrollIcon.bottomEndIndicator : scrollSettings.scrollIcon.bottomContinueIndicator);
 
                 Console.WriteLine(txt);
 

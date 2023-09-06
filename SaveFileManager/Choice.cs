@@ -18,8 +18,13 @@
         /// <summary>
         /// <inheritdoc cref="Choice"/>
         /// </summary>
-        /// <param name="choices"><inheritdoc cref="choices"  path="//summary"/></param>
-        /// <inheritdoc cref="BaseUI(int, string, string, bool, string, bool)"/>
+        /// <param name="value"><inheritdoc cref="BaseUI.Value" path="//summary"/></param>
+        /// <param name="displayValue"><inheritdoc cref="BaseUI.displayValue" path="//summary"/></param>
+        /// <param name="preText"><inheritdoc cref="BaseUI.preText" path="//summary"/></param>
+        /// <param name="preValue"><inheritdoc cref="BaseUI.preValue" path="//summary"/></param>
+        /// <param name="postValue"><inheritdoc cref="BaseUI.postValue" path="//summary"/></param>
+        /// <param name="multiline"><inheritdoc cref="BaseUI.multiline" path="//summary"/></param>
+        /// <param name="choices"><inheritdoc cref="choices" path="//summary"/></param>
         public Choice(IEnumerable<string> choices, int value = 0, string preText = "", string preValue = "", bool displayValue = false, string postValue = "", bool multiline = false)
             : base(Math.Clamp(value, 0, choices.Count() - 1), preText, preValue, displayValue, postValue, multiline)
         {

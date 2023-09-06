@@ -1,7 +1,7 @@
 ﻿namespace SaveFileManager
 {
     /// <summary>
-    /// Cursor icon object for UI objects.
+    /// Object for storing the cursor icon for UI objects.
     /// </summary>
     public class CursorIcon
     {
