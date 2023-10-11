@@ -41,6 +41,10 @@ namespace SaveFileManager
         /// The start index of the currently displayed section of the elements list.
         /// </summary>
         public int startIndex;
+        /// <summary>
+        /// The text to display, to clear the screen.
+        /// </summary>
+        public string clearScreenText;
         #endregion
 
         #region Public constructors
@@ -53,8 +57,17 @@ namespace SaveFileManager
         /// <param name="canEscape"><inheritdoc cref="canEscape" path="//summary"/></param>
         /// <param name="passInObject"><inheritdoc cref="passInObject" path="//summary"/></param>
         /// <param name="scrollSettings"><inheritdoc cref="scrollSettings" path="//summary"/></param>
+        /// <param name="clearScreenText"><inheritdoc cref="clearScreenText" path="//summary"/><br/>
+        /// By default, it's 70 newlines (faster than actualy clearing the screen).</param>
         /// <exception cref="UINoSelectablesExeption">Exceptions thrown, if there are no selectable UI elements in the list.</exception>
-        public OptionsUI(IEnumerable<BaseUI?> elements, string? title = null, CursorIcon? cursorIcon = null, bool canEscape = true, bool passInObject = true, ScrollSettings? scrollSettings = null)
+        public OptionsUI(
+            IEnumerable<BaseUI?> elements,
+            string? title = null,
+            CursorIcon? cursorIcon = null,
+            bool canEscape = true,
+            bool passInObject = true,
+            ScrollSettings? scrollSettings = null,
+            string? clearScreenText = null)
         {
             if (elements.All(answer => answer is null || !answer.IsSelectable()))
             {
@@ -66,6 +79,7 @@ namespace SaveFileManager
             this.canEscape = canEscape;
             this.passInObject = passInObject;
             this.scrollSettings = scrollSettings ?? new ScrollSettings();
+            this.clearScreenText = clearScreenText ?? "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
         }
         #endregion
 
@@ -127,7 +141,7 @@ namespace SaveFileManager
                 }
 
                 // clear screen + render
-                var txt = new StringBuilder("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+                var txt = new StringBuilder(clearScreenText);
 
                 // title
                 if (title is not null)

@@ -58,6 +58,10 @@ namespace SaveFileManager
         /// The start index of the currently displayed section of the answers list.
         /// </summary>
         public int startIndex;
+        /// <summary>
+        /// The text to display, to clear the screen.
+        /// </summary>
+        public string clearScreenText;
         #endregion
 
         #region Constructors
@@ -72,8 +76,21 @@ namespace SaveFileManager
         /// <param name="actions"><inheritdoc cref="actions" path="//summary"/></param>
         /// <param name="excludeNulls"><inheritdoc cref="excludeNulls" path="//summary"/></param>
         /// <param name="modifiableUIList"><inheritdoc cref="modifyList" path="//summary"/></param>
+        /// <param name="scrollSettings"><inheritdoc cref="scrollSettings" path="//summary"/></param>
+        /// <param name="clearScreenText"><inheritdoc cref="clearScreenText" path="//summary"/><br/>
+        /// By default, it's 70 newlines (faster than actualy clearing the screen).</param>
         /// <exception cref="UINoSelectablesExeption"></exception>
-        public UIList(IEnumerable<string?> answers, string? question = null, CursorIcon? cursorIcon = null, bool multiline = false, bool canEscape = false, IEnumerable<UIAction?>? actions = null, bool excludeNulls = false, bool modifiableUIList = false, ScrollSettings? scrollSettings = null)
+        public UIList(
+            IEnumerable<string?> answers,
+            string? question = null,
+            CursorIcon? cursorIcon = null,
+            bool multiline = false,
+            bool canEscape = false,
+            IEnumerable<UIAction?>? actions = null,
+            bool excludeNulls = false,
+            bool modifiableUIList = false,
+            ScrollSettings? scrollSettings = null,
+            string? clearScreenText = null)
         {
             if (!answers.Any() || answers.All(answer => answer is null))
             {
@@ -88,6 +105,7 @@ namespace SaveFileManager
             this.excludeNulls = excludeNulls;
             modifyList = modifiableUIList;
             this.scrollSettings = scrollSettings ?? new ScrollSettings();
+            this.clearScreenText = clearScreenText ?? "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
         }
         #endregion
 
@@ -126,7 +144,7 @@ namespace SaveFileManager
                 while (!key.Equals(keyResults.ElementAt((int)Key.ENTER)))
                 {
                     // clear screen + render
-                    var txt = new StringBuilder("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+                    var txt = new StringBuilder(clearScreenText);
 
                     // question
                     if (question is not null)
