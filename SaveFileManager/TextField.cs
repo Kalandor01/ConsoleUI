@@ -79,7 +79,8 @@ namespace SaveFileManager
         /// </summary>
         /// <param name="currentValue">The currently tiped valur (not including the current key).</param>
         /// <param name="inputKey">The key that the user inputed.</param>
-        public delegate bool KeyValidatorDelegate(StringBuilder currentValue, ConsoleKeyInfo inputKey);
+        /// <param name="cursorPosition">The position of the cursor before the inputKey was inserted.</param>
+        public delegate bool KeyValidatorDelegate(StringBuilder currentValue, ConsoleKeyInfo inputKey, int cursorPosition);
         #endregion
 
         #region Constructors
@@ -327,7 +328,7 @@ namespace SaveFileManager
 
                 var key = Console.ReadKey(true);
                 Console.SetCursorPosition(Left, Top);
-                if (overrideDefaultKeyValidatorFunction && keyValidatorFunction is not null && !keyValidatorFunction(newValue, key))
+                if (overrideDefaultKeyValidatorFunction && keyValidatorFunction is not null && !keyValidatorFunction(newValue, key, cursorPos))
                 {
                     continue;
                 }
@@ -384,7 +385,7 @@ namespace SaveFileManager
                         maxLength < 0 ||
                         (lengthAsDisplayLength ? Utils.GetDisplayLen(newValue.ToString() + key.KeyChar, xOffset) : newValue.Length + 1) <= maxLength
                     ) &&
-                    (overrideDefaultKeyValidatorFunction || keyValidatorFunction is null || keyValidatorFunction(newValue, key))
+                    (overrideDefaultKeyValidatorFunction || keyValidatorFunction is null || keyValidatorFunction(newValue, key, cursorPos))
                 )
                 {
                     newValue.Insert(cursorPos, key.KeyChar);
