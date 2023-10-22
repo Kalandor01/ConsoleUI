@@ -35,6 +35,11 @@ namespace SaveFileManager
         /// The function to run at every keypress.
         /// </summary>
         public KeyValidatorDelegate? keyValidatorFunction;
+        /// <summary>
+        /// Whether to run the the default key validator function, before the one passed in as a parameter, or not.<br/>
+        /// (true = don't run the default validator)
+        /// </summary>
+        public bool overrideDefaultKeyValidatorFunction;
         #endregion
 
         #region Public Properties
@@ -90,7 +95,19 @@ namespace SaveFileManager
         /// <param name="lengthAsDisplayLength"><inheritdoc cref="lengthAsDisplayLength" path="//summary"/></param>
         /// <param name="textValidatorFunction"><inheritdoc cref="textValidatorFunction" path="//summary"/></param>
         /// <param name="keyValidatorFunction"><inheritdoc cref="keyValidatorFunction" path="//summary"/></param>
-        public TextField(string value, string preText = "", string postValue = "", bool multiline = false, bool oldValueAsStartingValue = false, int? maxInputLength = null, bool lengthAsDisplayLength = true, TextValidatorDelegate? textValidatorFunction = null, KeyValidatorDelegate? keyValidatorFunction = null)
+        /// <param name="overrideDefaultKeyValidatorFunction"><inheritdoc cref="overrideDefaultKeyValidatorFunction" path="//summary"/></param>
+        public TextField(
+            string value,
+            string preText = "",
+            string postValue = "",
+            bool multiline = false,
+            bool oldValueAsStartingValue = false,
+            int? maxInputLength = null,
+            bool lengthAsDisplayLength = true,
+            TextValidatorDelegate? textValidatorFunction = null,
+            KeyValidatorDelegate? keyValidatorFunction = null,
+            bool overrideDefaultKeyValidatorFunction = true
+        )
             : base(-1, preText, "", false, postValue, multiline)
         {
             this.preText = preText;
@@ -102,6 +119,7 @@ namespace SaveFileManager
             this.lengthAsDisplayLength = lengthAsDisplayLength;
             this.textValidatorFunction = textValidatorFunction;
             this.keyValidatorFunction = keyValidatorFunction;
+            this.overrideDefaultKeyValidatorFunction = overrideDefaultKeyValidatorFunction;
         }
         #endregion
 
@@ -115,65 +133,64 @@ namespace SaveFileManager
         /// <inheritdoc cref="BaseUI.HandleAction"/>
         public override object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null, OptionsUI? optionsUI = null)
         {
-            if (key.Equals(keyResults.ElementAt((int)Key.ENTER)))
+            if (!key.Equals(keyResults.ElementAt((int)Key.ENTER)))
             {
-                if (optionsUI == null || !optionsUI.elements.Any(element => element == this))
-                {
-                    Console.WriteLine(preText);
-                    Value = Console.ReadLine() ?? "";
-                }
-                else
-                {
-                    var xOffset = GetCurrentLineCharCountBeforeValue(optionsUI.cursorIcon);
-                    var yOffset = GetLineNumberAfterTextFieldValue(optionsUI);
-                    Utils.MoveCursor((xOffset, yOffset));
+                return false;
+            }
 
-                    bool retry;
-                    do
-                    {
-                        retry = false;
-                        var newValue = ReadInput(xOffset, optionsUI.cursorIcon);
-                        if (textValidatorFunction is null)
-                        {
-                            Value = newValue;
-                        }
-                        else
-                        {
-                            var (status, message) = textValidatorFunction(newValue);
-                            if (message != null)
-                            {
-                                Utils.MoveCursor((-newValue.Length, 0));
-                                Console.Write("\u001b[0K" + message);
-                                Console.ReadKey(true);
-                                Utils.MoveCursor((-message.Length, 0));
-                                Console.Write("\u001b[0K" + newValue);
-                                var (Left, Top) = Console.GetCursorPosition();
-                                if (multiline)
-                                {
-                                    Console.Write(postValue.Replace("\n", optionsUI.cursorIcon.sIconR + "\n" + optionsUI.cursorIcon.sIcon));
-                                }
-                                else
-                                {
-                                    Console.Write(postValue);
-                                }
-                                Console.SetCursorPosition(Left, Top);
-                            }
-                            if (status == TextFieldValidatorStatus.VALID)
-                            {
-                                Value = newValue;
-                            }
-                            else if (status == TextFieldValidatorStatus.RETRY)
-                            {
-                                retry = true;
-                                Utils.MoveCursor((-newValue.Length, 0));
-                            }
-                        }
-                    }
-                    while (retry);
-                }
-
+            if (optionsUI == null || !optionsUI.elements.Any(element => element == this))
+            {
+                Console.WriteLine(preText);
+                Value = Console.ReadLine() ?? "";
                 return true;
             }
+
+            var xOffset = GetCurrentLineCharCountBeforeValue(optionsUI.cursorIcon);
+            var yOffset = GetLineNumberAfterTextFieldValue(optionsUI);
+            Utils.MoveCursor((xOffset, yOffset));
+
+            bool retry;
+            do
+            {
+                retry = false;
+                var newValue = ReadInput(xOffset, optionsUI.cursorIcon);
+                if (textValidatorFunction is null)
+                {
+                    Value = newValue;
+                    continue;
+                }
+
+                var (status, message) = textValidatorFunction(newValue);
+                if (message != null)
+                {
+                    Utils.MoveCursor((-newValue.Length, 0));
+                    Console.Write("\u001b[0K" + message);
+                    Console.ReadKey(true);
+                    Utils.MoveCursor((-message.Length, 0));
+                    Console.Write("\u001b[0K" + newValue);
+                    var (Left, Top) = Console.GetCursorPosition();
+                    if (multiline)
+                    {
+                        Console.Write(postValue.Replace("\n", optionsUI.cursorIcon.sIconR + "\n" + optionsUI.cursorIcon.sIcon));
+                    }
+                    else
+                    {
+                        Console.Write(postValue);
+                    }
+                    Console.SetCursorPosition(Left, Top);
+                }
+
+                if (status == TextFieldValidatorStatus.VALID)
+                {
+                    Value = newValue;
+                }
+                else if (status == TextFieldValidatorStatus.RETRY)
+                {
+                    retry = true;
+                    Utils.MoveCursor((-newValue.Length, 0));
+                }
+            }
+            while (retry);
             return true;
         }
 
@@ -288,6 +305,7 @@ namespace SaveFileManager
             fullPostValue = fullPostValue.Split("\n").First();
             var newValue = new StringBuilder(oldValueAsStartingValue ? Value : "");
             var preValuePos = Console.GetCursorPosition();
+            var cursorPos = 0;
 
             while (true)
             {
@@ -304,33 +322,73 @@ namespace SaveFileManager
                 {
                     Console.Write(postValue);
                 }
-                Console.SetCursorPosition(Left, Top);
+                var cursorPosOffset = newValue.Length - cursorPos;
+                Console.SetCursorPosition(Left - cursorPosOffset, Top);
 
                 var key = Console.ReadKey(true);
-                if (keyValidatorFunction is null || keyValidatorFunction(newValue, key))
+                Console.SetCursorPosition(Left, Top);
+                if (overrideDefaultKeyValidatorFunction && keyValidatorFunction is not null && !keyValidatorFunction(newValue, key))
                 {
-                    if (key.Key == ConsoleKey.Enter)
+                    continue;
+                }
+
+                // done
+                if (key.Key == ConsoleKey.Enter)
+                {
+                    break;
+                }
+                // backspace
+                else if (key.Key == ConsoleKey.Backspace)
+                {
+                    if (newValue.Length > 0 && cursorPos > 0)
                     {
-                        break;
+                        newValue.Remove(cursorPos - 1, 1);
+                        cursorPos--;
                     }
-                    else if (key.Key == ConsoleKey.Backspace)
+                }
+                // delete
+                else if (key.Key == ConsoleKey.Delete)
+                {
+                    if (newValue.Length > 0 && cursorPos != newValue.Length)
                     {
-                        if (newValue.Length > 0)
-                        {
-                            newValue.Remove(newValue.Length - 1, 1);
-                        }
+                        newValue.Remove(cursorPos, 1);
                     }
-                    else if (
-                        key.KeyChar != '\0' &&
-                        key.Key != ConsoleKey.Escape &&
-                        (
-                            maxLength < 0 ||
-                            (lengthAsDisplayLength ? Utils.GetDisplayLen(newValue.ToString() + key.KeyChar, xOffset) : newValue.Length + 1) <= maxLength
-                        )
-                    )
+                }
+                // cursor left
+                else if (
+                    key.KeyChar == '\0' &&
+                    key.Key == ConsoleKey.LeftArrow
+                )
+                {
+                    if (cursorPos > 0)
                     {
-                        newValue.Append(key.KeyChar);
+                        cursorPos--;
                     }
+                }
+                // cursor right
+                else if (
+                    key.KeyChar == '\0' &&
+                    key.Key == ConsoleKey.RightArrow
+                )
+                {
+                    if (cursorPos < newValue.Length)
+                    {
+                        cursorPos++;
+                    }
+                }
+                // add char
+                else if (
+                    key.KeyChar != '\0' &&
+                    key.Key != ConsoleKey.Escape &&
+                    (
+                        maxLength < 0 ||
+                        (lengthAsDisplayLength ? Utils.GetDisplayLen(newValue.ToString() + key.KeyChar, xOffset) : newValue.Length + 1) <= maxLength
+                    ) &&
+                    (overrideDefaultKeyValidatorFunction || keyValidatorFunction is null || keyValidatorFunction(newValue, key))
+                )
+                {
+                    newValue.Insert(cursorPos, key.KeyChar);
+                    cursorPos++;
                 }
             }
 
