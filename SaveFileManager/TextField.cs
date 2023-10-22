@@ -308,7 +308,7 @@ namespace SaveFileManager
             fullPostValue = fullPostValue.Split("\n").First();
             var newValue = new StringBuilder(oldValueAsStartingValue ? Value : "");
             var preValuePos = Console.GetCursorPosition();
-            var cursorPos = 0;
+            var cursorPos = newValue.Length;
 
             while (true)
             {
