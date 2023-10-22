@@ -78,9 +78,11 @@ namespace SaveFileManager
         /// A function to return if the key the user inputed is valid or not.
         /// </summary>
         /// <param name="currentValue">The currently tiped valur (not including the current key).</param>
-        /// <param name="inputKey">The key that the user inputed.</param>
-        /// <param name="cursorPosition">The position of the cursor before the inputKey was inserted.</param>
-        public delegate bool KeyValidatorDelegate(StringBuilder currentValue, ConsoleKeyInfo inputKey, int cursorPosition);
+        /// <param name="inputKey">The key that the user inputed.<br/>
+        /// null if a key will be removed instead of added. (can only happen if "overrideDefaultKeyValidatorFunction" is false)</param>
+        /// <param name="cursorPosition">The position of the cursor before the inputKey was inserted.<br/>
+        /// If a key was removed, this value is the position of the character that will be removed instead.</param>
+        public delegate bool KeyValidatorDelegate(StringBuilder currentValue, ConsoleKeyInfo? inputKey, int cursorPosition);
         #endregion
 
         #region Constructors
@@ -327,7 +329,6 @@ namespace SaveFileManager
                 Console.SetCursorPosition(Left - cursorPosOffset, Top);
 
                 var key = Console.ReadKey(true);
-                Console.SetCursorPosition(Left, Top);
                 if (overrideDefaultKeyValidatorFunction && keyValidatorFunction is not null && !keyValidatorFunction(newValue, key, cursorPos))
                 {
                     continue;
@@ -341,7 +342,11 @@ namespace SaveFileManager
                 // backspace
                 else if (key.Key == ConsoleKey.Backspace)
                 {
-                    if (newValue.Length > 0 && cursorPos > 0)
+                    if (
+                        newValue.Length > 0 &&
+                        cursorPos > 0 &&
+                        (overrideDefaultKeyValidatorFunction || keyValidatorFunction is null || keyValidatorFunction(newValue, null, cursorPos - 1))
+                    )
                     {
                         newValue.Remove(cursorPos - 1, 1);
                         cursorPos--;
@@ -350,7 +355,11 @@ namespace SaveFileManager
                 // delete
                 else if (key.Key == ConsoleKey.Delete)
                 {
-                    if (newValue.Length > 0 && cursorPos != newValue.Length)
+                    if (
+                        newValue.Length > 0 &&
+                        cursorPos != newValue.Length &&
+                        (overrideDefaultKeyValidatorFunction || keyValidatorFunction is null || keyValidatorFunction(newValue, null, cursorPos))
+                    )
                     {
                         newValue.Remove(cursorPos, 1);
                     }
@@ -391,6 +400,8 @@ namespace SaveFileManager
                     newValue.Insert(cursorPos, key.KeyChar);
                     cursorPos++;
                 }
+
+                Console.SetCursorPosition(Left, Top);
             }
 
             return newValue.ToString();
