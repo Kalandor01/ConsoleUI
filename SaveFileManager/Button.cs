@@ -20,6 +20,14 @@
         readonly UIAction action;
         #endregion
 
+        #region Override properties
+        /// <inheritdoc cref="BaseUI.IsClickable"/>
+        public override bool IsClickable {  get => true; }
+
+        /// <inheritdoc cref="BaseUI.IsOnlyClickable"/>
+        public override bool IsOnlyClickable { get => true; }
+        #endregion
+
         #region Constructors
         /// <summary>
         /// <inheritdoc cref="Button"/>
@@ -54,18 +62,6 @@
             {
                 return false;
             }
-        }
-
-        /// <inheritdoc cref="BaseUI.IsClickable"/>
-        public override bool IsClickable()
-        {
-            return true;
-        }
-
-        /// <inheritdoc cref="BaseUI.IsOnlyClickable"/>
-        public override bool IsOnlyClickable()
-        {
-            return true;
         }
         #endregion
     }

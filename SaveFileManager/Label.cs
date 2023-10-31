@@ -7,6 +7,11 @@
     /// </summary>
     public class Label : BaseUI
     {
+        #region Override properties
+        /// <inheritdoc cref="BaseUI.IsSelectable"/>
+        public override bool IsSelectable { get => false; }
+        #endregion
+
         #region Constructors
         /// <summary>
         /// <inheritdoc cref="Label"/>
@@ -25,12 +30,6 @@
 
         /// <inheritdoc cref="BaseUI.HandleAction"/>
         public override object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null, OptionsUI? optionsUI = null)
-        {
-            return false;
-        }
-
-        /// <inheritdoc cref="BaseUI.IsSelectable"/>
-        public override bool IsSelectable()
         {
             return false;
         }

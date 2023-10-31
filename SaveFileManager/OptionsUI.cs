@@ -69,7 +69,7 @@ namespace SaveFileManager
             ScrollSettings? scrollSettings = null,
             string? clearScreenText = null)
         {
-            if (elements.All(answer => answer is null || !answer.IsSelectable()))
+            if (elements.All(answer => answer is null || !answer.IsSelectable))
             {
                 throw new UINoSelectablesExeption();
             }
@@ -97,7 +97,7 @@ namespace SaveFileManager
         public object? Display(IEnumerable<KeyAction>? keybinds = null, IEnumerable<object>? keyResults = null)
         {
             // no selectable element
-            if (elements.All(element => element is null || !element.IsSelectable()))
+            if (elements.All(element => element is null || !element.IsSelectable))
             {
                 throw new UINoSelectablesExeption();
             }
@@ -117,11 +117,11 @@ namespace SaveFileManager
             cursorIcon ??= new CursorIcon();
 
             // is enter needed?
-            var enterKeyNeeded = elements.Any(element => element is not null && element.IsClickable());
+            var enterKeyNeeded = elements.Any(element => element is not null && element.IsClickable);
             // put selected on selectable
             selected = 0;
             while (
-                elements.ElementAt(selected)?.IsSelectable() != true
+                elements.ElementAt(selected)?.IsSelectable != true
             )
             {
                 selected++;
@@ -135,7 +135,7 @@ namespace SaveFileManager
             do
             {
                 // prevent infinite loop
-                if (elements.All(answer => answer is null || !answer.IsSelectable()))
+                if (elements.All(answer => answer is null || !answer.IsSelectable))
                 {
                     throw new UINoSelectablesExeption();
                 }
@@ -195,8 +195,8 @@ namespace SaveFileManager
                     var selectedElement = elements.ElementAt(selected);
                     if (
                         selectedElement is not null &&
-                        selectedElement.IsClickable() &&
-                        selectedElement.IsOnlyClickable()
+                        selectedElement.IsClickable &&
+                        selectedElement.IsOnlyClickable
                     )
                     {
                         pressedKey = Utils.GetKey(GetKeyMode.IGNORE_HORIZONTAL, keybinds);
@@ -230,7 +230,7 @@ namespace SaveFileManager
                             var newSelected = elements.ElementAt(selected);
                             if (
                                 newSelected is not null &&
-                                newSelected.IsSelectable()
+                                newSelected.IsSelectable
                             )
                             {
                                 break;
@@ -244,7 +244,7 @@ namespace SaveFileManager
                     // change value
                     else if (
                         selectedElement is not null &&
-                        selectedElement.IsSelectable() &&
+                        selectedElement.IsSelectable &&
                         (
                             pressedKey.Equals(keyResults.ElementAt((int)Key.LEFT)) ||
                             pressedKey.Equals(keyResults.ElementAt((int)Key.RIGHT)) ||

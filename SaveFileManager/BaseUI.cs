@@ -38,6 +38,23 @@ namespace SaveFileManager
         protected bool multiline;
         #endregion
 
+        #region Public properties
+        /// <summary>
+        /// Returns if the element is selectable.
+        /// </summary>
+        public virtual bool IsSelectable {  get => true; }
+
+        /// <summary>
+        /// Returns if the element can be clicked.
+        /// </summary>
+        public virtual bool IsClickable { get => false; }
+
+        /// <summary>
+        /// Returns if the element can only be clicked.
+        /// </summary>
+        public virtual bool IsOnlyClickable { get => false; }
+        #endregion
+
         #region Constructors
         /// <summary>
         /// <inheritdoc cref="BaseUI"/>
@@ -73,6 +90,7 @@ namespace SaveFileManager
             var icons = $"{iconR}\n{icon}";
             // icon
             txt.Append(icon);
+
             // pre text
             if (multiline)
             {
@@ -82,8 +100,10 @@ namespace SaveFileManager
             {
                 txt.Append(preText);
             }
+
             // special
             txt.Append(MakeSpecial(icons, optionsUI));
+
             // pre value
             if (multiline)
             {
@@ -93,11 +113,13 @@ namespace SaveFileManager
             {
                 txt.Append(preValue);
             }
+
             // value
             if (displayValue)
             {
                 txt.Append(MakeValue(optionsUI));
             }
+
             // post value
             if (multiline)
             {
@@ -107,6 +129,7 @@ namespace SaveFileManager
             {
                 txt.Append(postValue);
             }
+
             // icon right
             txt.Append(iconR + "\n");
             return txt.ToString();
@@ -142,30 +165,6 @@ namespace SaveFileManager
         public virtual object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null, OptionsUI? optionsUI = null)
         {
             return true;
-        }
-
-        /// <summary>
-        /// Returns if the element is selectable.
-        /// </summary>
-        public virtual bool IsSelectable()
-        {
-            return true;
-        }
-
-        /// <summary>
-        /// Returns if the element can be clicked.
-        /// </summary>
-        public virtual bool IsClickable()
-        {
-            return false;
-        }
-
-        /// <summary>
-        /// Returns if the element can only be clicked.
-        /// </summary>
-        public virtual bool IsOnlyClickable()
-        {
-            return false;
         }
         #endregion
     }

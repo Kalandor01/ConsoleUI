@@ -22,6 +22,14 @@
         string symbolOff;
         #endregion
 
+        #region Override properties
+        /// <inheritdoc cref="BaseUI.IsClickable"/>
+        public override bool IsClickable { get => true; }
+
+        /// <inheritdoc cref="BaseUI.IsOnlyClickable"/>
+        public override bool IsOnlyClickable { get => true; }
+        #endregion
+
         #region Constructors
         /// <summary>
         /// <inheritdoc cref="Toggle"/>
@@ -57,18 +65,6 @@
                 Value = !Value;
                 base.Value = Value ? 1 : 0;
             }
-            return true;
-        }
-
-        /// <inheritdoc cref="BaseUI.IsClickable"/>
-        public override bool IsClickable()
-        {
-            return true;
-        }
-
-        /// <inheritdoc cref="BaseUI.IsOnlyClickable"/>
-        public override bool IsOnlyClickable()
-        {
             return true;
         }
         #endregion

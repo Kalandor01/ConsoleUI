@@ -67,6 +67,14 @@ namespace SaveFileManager
         }
         #endregion
 
+        #region Override properties
+        /// <inheritdoc cref="BaseUI.IsClickable"/>
+        public override bool IsClickable { get => true; }
+
+        /// <inheritdoc cref="BaseUI.IsOnlyClickable"/>
+        public override bool IsOnlyClickable { get => true; }
+        #endregion
+
         #region Public delegates
         /// <summary>
         /// A function to return the status of the vaue, the user inputed.
@@ -114,7 +122,7 @@ namespace SaveFileManager
             : base(-1, preText, "", false, postValue, multiline)
         {
             this.preText = preText;
-            this.Value = value;
+            Value = value;
             this.postValue = postValue;
 
             this.oldValueAsStartingValue = oldValueAsStartingValue;
@@ -194,18 +202,6 @@ namespace SaveFileManager
                 }
             }
             while (retry);
-            return true;
-        }
-
-        /// <inheritdoc cref="BaseUI.IsClickable"/>
-        public override bool IsClickable()
-        {
-            return true;
-        }
-
-        /// <inheritdoc cref="BaseUI.IsOnlyClickable"/>
-        public override bool IsOnlyClickable()
-        {
             return true;
         }
         #endregion
