@@ -27,8 +27,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="NPrng" Version="1.0.0.2" />
-  </ItemGroup>
-
 </Project>

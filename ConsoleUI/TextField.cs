@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using System.Xml.Linq;
 
 namespace ConsoleUI
 {
@@ -40,6 +39,10 @@ namespace ConsoleUI
         /// (true = don't run the default validator)
         /// </summary>
         public bool overrideDefaultKeyValidatorFunction;
+        /// <summary>
+        /// Whether ANSI escape codes are enabled.
+        /// </summary>
+        public bool escapeCodesEnabled;
         #endregion
 
         #region Public Properties
@@ -107,6 +110,7 @@ namespace ConsoleUI
         /// <param name="textValidatorFunction"><inheritdoc cref="textValidatorFunction" path="//summary"/></param>
         /// <param name="keyValidatorFunction"><inheritdoc cref="keyValidatorFunction" path="//summary"/></param>
         /// <param name="overrideDefaultKeyValidatorFunction"><inheritdoc cref="overrideDefaultKeyValidatorFunction" path="//summary"/></param>
+        /// <param name="ansiEscapeCodesEnabled"><inheritdoc cref="escapeCodesEnabled" path="//summary"/>></param>
         public TextField(
             string value,
             string preText = "",
@@ -117,7 +121,8 @@ namespace ConsoleUI
             bool lengthAsDisplayLength = true,
             TextValidatorDelegate? textValidatorFunction = null,
             KeyValidatorDelegate? keyValidatorFunction = null,
-            bool overrideDefaultKeyValidatorFunction = true
+            bool overrideDefaultKeyValidatorFunction = true,
+            bool ansiEscapeCodesEnabled = true
         )
             : base(-1, preText, "", false, postValue, multiline)
         {
@@ -131,6 +136,7 @@ namespace ConsoleUI
             this.textValidatorFunction = textValidatorFunction;
             this.keyValidatorFunction = keyValidatorFunction;
             this.overrideDefaultKeyValidatorFunction = overrideDefaultKeyValidatorFunction;
+            escapeCodesEnabled = ansiEscapeCodesEnabled;
         }
         #endregion
 
@@ -281,7 +287,7 @@ namespace ConsoleUI
                 lineText.Append(preText);
             }
             var lastLine = lineText.ToString().Split("\n").Last();
-            return lengthAsDisplayLength ? Utils.GetDisplayLen(lastLine) : lastLine.Length;
+            return lengthAsDisplayLength ? Utils.GetDisplayLen(lastLine, escapeCodesEnabled: escapeCodesEnabled) : lastLine.Length;
         }
 
         /// <summary>
@@ -308,7 +314,7 @@ namespace ConsoleUI
 
             while (true)
             {
-                var postLength = lengthAsDisplayLength ? Utils.GetDisplayLen(fullPostValue, xOffset + newValue.Length) : fullPostValue.Length;
+                var postLength = lengthAsDisplayLength ? Utils.GetDisplayLen(fullPostValue, xOffset + newValue.Length, escapeCodesEnabled) : fullPostValue.Length;
                 var maxLength = maxInputLength ?? Console.BufferWidth - (xOffset + postLength);
                 Console.SetCursorPosition(preValuePos.Left, preValuePos.Top);
                 Console.Write("\u001b[0K" + newValue.ToString());
@@ -388,7 +394,7 @@ namespace ConsoleUI
                     key.Key != ConsoleKey.Escape &&
                     (
                         maxLength < 0 ||
-                        (lengthAsDisplayLength ? Utils.GetDisplayLen(newValue.ToString() + key.KeyChar, xOffset) : newValue.Length + 1) <= maxLength
+                        (lengthAsDisplayLength ? Utils.GetDisplayLen(newValue.ToString() + key.KeyChar, xOffset, escapeCodesEnabled) : newValue.Length + 1) <= maxLength
                     ) &&
                     (overrideDefaultKeyValidatorFunction || keyValidatorFunction is null || keyValidatorFunction(newValue, key, cursorPos))
                 )
