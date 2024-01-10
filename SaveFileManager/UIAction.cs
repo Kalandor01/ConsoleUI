@@ -21,16 +21,23 @@
         /// <summary>
         /// The list of arguments to run the function with.
         /// </summary>
-        readonly IEnumerable<object?>? actionParameters;
+        readonly object?[]? actionParameters;
         #endregion
 
         #region Constructors
-        /// <inheritdoc cref="UIAction(UIList?, Delegate?, IEnumerable{object?}?)"/>
+        /// <summary>
+        /// <inheritdoc cref="UIAction"/>
+        /// </summary>
+        /// <param name="uiList"><inheritdoc cref="actionUIList" path="//summary"/></param>
         public UIAction(UIList uiList)
             : this(uiList, null, null) { }
 
-        /// <inheritdoc cref="UIAction(UIList?, Delegate?, IEnumerable{object?}?)"/>
-        public UIAction(Delegate function, IEnumerable<object?>? args = null)
+        /// <summary>
+        /// <inheritdoc cref="UIAction"/>
+        /// </summary>
+        /// <param name="function"><inheritdoc cref="actionFunction" path="//summary"/></param>
+        /// <param name="args"><inheritdoc cref="actionParameters" path="//summary"/></param>
+        public UIAction(Delegate function, params object?[]? args)
             : this(null, function, args) { }
 
         /// <summary>
@@ -39,7 +46,7 @@
         /// <param name="uiList"><inheritdoc cref="actionUIList" path="//summary"/></param>
         /// <param name="function"><inheritdoc cref="actionFunction" path="//summary"/></param>
         /// <param name="args"><inheritdoc cref="actionParameters" path="//summary"/></param>
-        private UIAction(UIList? uiList, Delegate? function, IEnumerable<object?>? args)
+        private UIAction(UIList? uiList, Delegate? function, params object?[]? args)
         {
             actionUIList = uiList;
             actionFunction = function;

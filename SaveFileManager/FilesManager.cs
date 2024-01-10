@@ -263,8 +263,8 @@
                 if (filesData is not null && filesData.Count > 0)
                 {
                     var option = (int)new UIList(new List<string> { "New save", "Load/Delete save" }, " Main menu", canEscape: canExit, actions: new List<UIAction> {
-                        new UIAction(new NewFunctionDelegate(NewFilePreperation), new List<object> { getDataFunction, newFileFunction, maxFiles }),
-                        new UIAction(new LoadDeleteFunctionDelegate(LoadOrDeleteMenu), new List<object?> { getDataFunction, newFileFunction, loadFileFunction, keybinds, keyResults, fileName, fileExt })
+                        new UIAction(new NewFunctionDelegate(NewFilePreperation), getDataFunction, newFileFunction, maxFiles),
+                        new UIAction(new LoadDeleteFunctionDelegate(LoadOrDeleteMenu), getDataFunction, newFileFunction, loadFileFunction, keybinds, keyResults, fileName, fileExt)
                     }).Display(keybinds, keyResults);
                     if (option == -1)
                     {
