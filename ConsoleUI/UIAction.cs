@@ -1,4 +1,6 @@
-﻿namespace ConsoleUI
+﻿using ConsoleUI.Keybinds;
+
+namespace ConsoleUI
 {
     /// <summary>
     /// Stores an action, used in <c>Button</c> and <c>UIList</c>.
@@ -61,13 +63,8 @@
         /// - if the action invokes a <c>UIList</c>, the object's <c>Display</c> function gets called.
         /// </summary>
         /// <param name="extraParameter">Extra parameter to put at the beginning of the arguments list.</param>
-        /// <param name="keybinds">The list of <c>KeyAction</c> objects to use, for the <c>UIList</c> type.</param>
-        /// <param name="keyResults">The list of posible results for the <c>UIList</c> type.<br/>
-        /// The order of the elements in the tuple should be:<br/>
-        /// - escape, up, down, left, right, enter<br/>
-        ///If it is null, the default value is either returned from the <c>keybinds</c> or:<br/>
-        /// - { Key.ESCAPE, Key.UP, Key.DOWN, Key.LEFT, Key.RIGHT, Key.ENTER }</param>
-        public (UIActionType actionType, object? returned) InvokeAction(object? extraParameter = null, IEnumerable<KeyAction>? keybinds = null, IEnumerable<object>? keyResults = null)
+        /// <param name="keybinds">The list of <c>KeyAction</c> objects to use, if the action is calling a <c>UIList</c>.</param>
+        public (UIActionType actionType, object? returned) InvokeAction(object? extraParameter = null, IEnumerable<KeyAction>? keybinds = null)
         {
             // function
             if (actionFunction is not null)
@@ -91,7 +88,7 @@
             // UIList
             else
             {
-                return (UIActionType.UILIST, actionUIList?.Display(keybinds, keyResults));
+                return (UIActionType.UILIST, actionUIList?.Display(keybinds));
             }
         }
         #endregion

@@ -1,6 +1,8 @@
 ﻿using System.Text;
+using ConsoleUI.Keybinds;
+using ConsoleUI.UIElements.EventArgs;
 
-namespace ConsoleUI
+namespace ConsoleUI.UIElements
 {
     /// <summary>
     /// Object for the <c>OptionsUI</c> method.<br/>
@@ -59,7 +61,7 @@ namespace ConsoleUI
         #endregion
 
         #region Override methods
-        /// <inheritdoc cref="BaseUI.MakeSpecial"/>
+        /// <inheritdoc cref="BaseUI.MakeSpecial(string, OptionsUI?)"/>
         protected override string MakeSpecial(string icons, OptionsUI? optionsUI = null)
         {
             var txt = new StringBuilder();
@@ -70,10 +72,17 @@ namespace ConsoleUI
             return txt.ToString();
         }
 
-        /// <inheritdoc cref="BaseUI.HandleAction"/>
-        public override object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null, OptionsUI? optionsUI = null)
+        /// <inheritdoc cref="BaseUI.HandleAction(KeyAction, IEnumerable{KeyAction}, OptionsUI?)"/>
+        public override object HandleAction(KeyAction key, IEnumerable<KeyAction> keybinds, OptionsUI? optionsUI = null)
         {
-            if (key.Equals(keyResults.ElementAt((int)Key.RIGHT)))
+            var args = new KeyPressedEvenrArgs(key, keybinds);
+            RaiseKeyPressedEvent(args);
+            if (args.CancelKeyHandling)
+            {
+                return args.UpdateScreen ?? false;
+            }
+
+            if (key.Equals(keybinds.ElementAt((int)Key.RIGHT)))
             {
                 if (Value + step <= maxValue)
                 {
@@ -81,10 +90,10 @@ namespace ConsoleUI
                 }
                 else
                 {
-                    return false;
+                    return args.UpdateScreen ?? false;
                 }
             }
-            else if (key.Equals(keyResults.ElementAt((int)Key.LEFT)))
+            else if (key.Equals(keybinds.ElementAt((int)Key.LEFT)))
             {
                 if (Value - step >= minValue)
                 {
@@ -92,10 +101,10 @@ namespace ConsoleUI
                 }
                 else
                 {
-                    return false;
+                    return args.UpdateScreen ?? false;
                 }
             }
-            return true;
+            return args.UpdateScreen ?? true;
         }
         #endregion
     }

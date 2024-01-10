@@ -1,4 +1,7 @@
-﻿namespace ConsoleUI
+﻿using ConsoleUI.Keybinds;
+using ConsoleUI.UIElements.EventArgs;
+
+namespace ConsoleUI.UIElements
 {
     /// <summary>
     /// Object for the <c>OptionsUI</c> method.<br/>
@@ -33,7 +36,7 @@
         #endregion
 
         #region Override methods
-        /// <inheritdoc cref="BaseUI.MakeSpecial"/>
+        /// <inheritdoc cref="BaseUI.MakeSpecial(string, OptionsUI?)"/>
         protected override string MakeSpecial(string icons, OptionsUI? optionsUI = null)
         {
             if (multiline)
@@ -46,23 +49,30 @@
             }
         }
 
-        /// <inheritdoc cref="BaseUI.MakeValue"/>
+        /// <inheritdoc cref="BaseUI.MakeValue(OptionsUI?)"/>
         protected override string MakeValue(OptionsUI? optionsUI = null)
         {
             return $"{Value + 1}/{choices.Count()}";
         }
 
-        /// <inheritdoc cref="BaseUI.HandleAction"/>
-        public override object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null, OptionsUI? optionsUI = null)
+        /// <inheritdoc cref="BaseUI.HandleAction(KeyAction, IEnumerable{KeyAction}, OptionsUI?)"/>
+        public override object HandleAction(KeyAction key, IEnumerable<KeyAction> keybinds, OptionsUI? optionsUI = null)
         {
+            var args = new KeyPressedEvenrArgs(key, keybinds);
+            RaiseKeyPressedEvent(args);
+            if (args.CancelKeyHandling)
+            {
+                return args.UpdateScreen ?? false;
+            }
+
             var returnValue = false;
             if (
-                key.Equals(keyResults.ElementAt((int)Key.RIGHT)) ||
-                key.Equals(keyResults.ElementAt((int)Key.LEFT))
+                key.Equals(keybinds.ElementAt((int)Key.RIGHT)) ||
+                key.Equals(keybinds.ElementAt((int)Key.LEFT))
             )
             {
                 returnValue = true;
-                Value += key.Equals(keyResults.ElementAt((int)Key.RIGHT)) ? 1 : -1;
+                Value += key.Equals(keybinds.ElementAt((int)Key.RIGHT)) ? 1 : -1;
             }
             if (returnValue)
             {
@@ -72,7 +82,7 @@
                     Value = choices.Count() - 1;
                 }
             }
-            return returnValue;
+            return args.UpdateScreen ?? returnValue;
         }
         #endregion
     }

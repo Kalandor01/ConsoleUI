@@ -1,6 +1,8 @@
 ﻿using System.Text;
+using ConsoleUI.Keybinds;
+using ConsoleUI.UIElements.EventArgs;
 
-namespace ConsoleUI
+namespace ConsoleUI.UIElements
 {
     /// <summary>
     /// Abstract class for all classes used in the <c>OptionsUI</c> method.<br/>
@@ -42,7 +44,7 @@ namespace ConsoleUI
         /// <summary>
         /// Returns if the element is selectable.
         /// </summary>
-        public virtual bool IsSelectable {  get => true; }
+        public virtual bool IsSelectable { get => true; }
 
         /// <summary>
         /// Returns if the element can be clicked.
@@ -53,6 +55,23 @@ namespace ConsoleUI
         /// Returns if the element can only be clicked.
         /// </summary>
         public virtual bool IsOnlyClickable { get => false; }
+        #endregion
+
+        #region Event delegates
+        /// <summary>
+        /// Called when a key is pressed, when the cursor is over this element.
+        /// </summary>
+        /// <param name="sender">The UI element that called this event.</param>
+        /// <param name="args">The arguments for this event.</param>
+        public delegate void KeyPressedEventHandler(BaseUI sender, KeyPressedEvenrArgs args);
+        #endregion
+
+        #region Events
+        /// <summary>
+        /// Called when a key is pressed, when the cursor is over this element.<br/>
+        /// Returns if the input handling should continue (and the menu should refresh).
+        /// </summary>
+        public event KeyPressedEventHandler KeyPressed;
         #endregion
 
         #region Constructors
@@ -73,6 +92,16 @@ namespace ConsoleUI
             this.displayValue = displayValue;
             this.postValue = postValue;
             this.multiline = multiline;
+        }
+        #endregion
+
+        #region EventCallFunctions
+        /// <summary>
+        /// Calls the <c>KeyPressed</c> event.
+        /// </summary>
+        protected void RaiseKeyPressedEvent(KeyPressedEvenrArgs args)
+        {
+            KeyPressed?.Invoke(this, args);
         }
         #endregion
 
@@ -156,15 +185,16 @@ namespace ConsoleUI
 
         /// <summary>
         /// Handles what to return for the input key.<br/>
-        /// Returns if the screen should update.
         /// </summary>
-        /// <param name="key">The result object retrned from the key the user pressed.</param>
-        /// <param name="keyResults">The list of posible results returned by pressing a key.</param>
-        /// <param name="keybinds">The list of <c>KeyAction</c> objects to use, if the selected action is a <c>UIList</c>.</param>
+        /// <param name="key">The triggered key action.</param>
+        /// <param name="keybinds">The list of <c>KeyAction</c> objects, that were used.</param>
         /// <param name="optionsUI">The <c>OptionsUI</c> containing this object.</param>
-        public virtual object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null, OptionsUI? optionsUI = null)
+        /// <returns>If the screen should update.</returns>
+        public virtual object HandleAction(KeyAction key, IEnumerable<KeyAction> keybinds, OptionsUI? optionsUI = null)
         {
-            return true;
+            var args = new KeyPressedEvenrArgs(key, keybinds, updateScreen: false);
+            RaiseKeyPressedEvent(args);
+            return args.UpdateScreen ?? false;
         }
         #endregion
     }

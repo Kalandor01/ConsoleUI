@@ -1,4 +1,4 @@
-﻿namespace ConsoleUI
+﻿namespace ConsoleUI.UIElements
 {
     /// <summary>
     /// Values that can be returned by a <c>TextField</c>'s validator function's status.

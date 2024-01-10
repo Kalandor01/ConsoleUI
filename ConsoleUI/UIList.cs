@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Text;
+using ConsoleUI.Keybinds;
 
 namespace ConsoleUI
 {
@@ -114,24 +115,13 @@ namespace ConsoleUI
         /// SEE OBJECT FOR A MORE DETAILED DOCUMENTATION!<br/>
         /// Prints the <c>question</c> and then the list of answers from the <c>answers</c> list that the user can cycle between and select with the keys in the <c>keybinds</c>.
         /// </summary>
-        /// <param name="keybinds">The list of <c>KeyAction</c> objects to use, if the selected action is a <c>UIList</c>.</param>
-        /// <param name="keyResults">The list of posible results returned by pressing a key.<br/>
-        /// The order of the elements in the list should be:<br/>
-        /// - escape, up, down, left, right, enter<br/>
-        ///If it is null, the default value is either returned from the <c>keybinds</c> or:<br/>
-        /// - { Key.ESCAPE, Key.UP, Key.DOWN, Key.LEFT, Key.RIGHT, Key.ENTER }</param>
-        public object Display(IEnumerable<KeyAction>? keybinds = null, IEnumerable<object>? keyResults = null)
+        /// <param name="keybinds">The list of <c>KeyAction</c> objects to use. The order of the actions should be:<br/>
+        /// - escape, up, down, left, right, enter.</param>
+        public object Display(IEnumerable<KeyAction>? keybinds = null)
         {
-            if (keyResults is null || keyResults.Count() < 6)
+            if (keybinds is null || keybinds.Count() < 6)
             {
-                if (keybinds is null)
-                {
-                    keyResults = new List<object> { Key.ESCAPE, Key.UP, Key.DOWN, Key.LEFT, Key.RIGHT, Key.ENTER };
-                }
-                else
-                {
-                    keyResults = Utils.GetResultsList(keybinds);
-                }
+                keybinds = Utils.GetDefaultKeybinds();
             }
 
             selected = SetupSelected(0);
@@ -140,8 +130,8 @@ namespace ConsoleUI
             while (true)
             {
                 selected = SetupSelected(selected);
-                var key = keyResults.ElementAt((int)Key.ESCAPE);
-                while (!key.Equals(keyResults.ElementAt((int)Key.ENTER)))
+                var key = keybinds.ElementAt((int)Key.ESCAPE);
+                while (!key.Equals(keybinds.ElementAt((int)Key.ENTER)))
                 {
                     // clear screen + render
                     var txt = new StringBuilder(clearScreenText);
@@ -159,19 +149,19 @@ namespace ConsoleUI
 
                     // answer select
                     key = Utils.GetKey(GetKeyMode.IGNORE_HORIZONTAL, keybinds);
-                    if (canEscape && key.Equals(keyResults.ElementAt((int)Key.ESCAPE)))
+                    if (canEscape && key.Equals(keybinds.ElementAt((int)Key.ESCAPE)))
                     {
                         return -1;
                     }
-                    while (key.Equals(keyResults.ElementAt((int)Key.ESCAPE)))
+                    while (key.Equals(keybinds.ElementAt((int)Key.ESCAPE)))
                     {
                         key = Utils.GetKey(GetKeyMode.IGNORE_HORIZONTAL, keybinds);
                     }
-                    selected = MoveSelection(selected, key, keyResults);
+                    selected = MoveSelection(selected, key, keybinds);
                 }
                 // menu actions
                 selected = ConvertSelected(selected);
-                var action = HandleAction(selected, keybinds, keyResults);
+                var action = HandleAction(selected, keybinds);
                 if (action is not null)
                 {
                     return action;
@@ -231,7 +221,6 @@ namespace ConsoleUI
         /// Converts the selected answer number to the actual number depending on if <c>excludeNulls</c> is true.
         /// </summary>
         /// <param name="selected">The selected answer's number.</param>
-        /// <returns></returns>
         private int ConvertSelected(int selected)
         {
             if (excludeNulls)
@@ -257,13 +246,13 @@ namespace ConsoleUI
         /// Moves the selection depending on the input, in a way, where the selection can't land on an empty line.
         /// </summary>
         /// <param name="selected">The selected answer's number.</param>
-        /// <param name="keyResult">The result object retrned from presing a key.</param>
-        /// <param name="keyResults">The list of posible results returned by pressing a key.</param>
-        private int MoveSelection(int selected, object keyResult, IEnumerable<object> keyResults)
+        /// <param name="pressedKey">The pressed key.</param>
+        /// <param name="keybinds">The used keybinds.</param>
+        private int MoveSelection(int selected, KeyAction pressedKey, IEnumerable<KeyAction> keybinds)
         {
-            if (!keyResult.Equals(keyResults.ElementAt((int)Key.ENTER)))
+            if (!pressedKey.Equals(keybinds.ElementAt((int)Key.ENTER)))
             {
-                var moveAmount = keyResult.Equals(keyResults.ElementAt((int)Key.DOWN)) ? 1 : -1;
+                var moveAmount = pressedKey.Equals(keybinds.ElementAt((int)Key.DOWN)) ? 1 : -1;
                 while (true)
                 {
                     selected += moveAmount;
@@ -285,10 +274,10 @@ namespace ConsoleUI
         /// Handles what to return for the selected answer.
         /// </summary>
         /// <param name="selected">The selected answer's number.</param>
-        /// <param name="keybinds">The list of <c>KeyAction</c> objects to use, if the selected action is a <c>UIList</c>.</param>
-        /// <param name="keyResults">The list of posible results returned by pressing a key. Used, if the selected action is a <c>UIList</c>.</param>
+        /// <param name="keybinds">The list of <c>KeyAction</c> objects to use. The order of the actions should be:<br/>
+        /// - escape, up, down, left, right, enter.</param>
         /// <returns></returns>
-        private object? HandleAction(int selected, IEnumerable<KeyAction>? keybinds = null, IEnumerable<object>? keyResults = null)
+        private object? HandleAction(int selected, IEnumerable<KeyAction> keybinds)
         {
             if (
                 !actions.Any() ||
@@ -299,7 +288,7 @@ namespace ConsoleUI
                 return selected;
             }
 
-            var (actionType, returned) = selectedAction.InvokeAction(modifyList ? this : null, keybinds, keyResults);
+            var (actionType, returned) = selectedAction.InvokeAction(modifyList ? this : null, keybinds);
             if (actionType == UIActionType.UILIST)
             {
                 return null;

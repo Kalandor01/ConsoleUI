@@ -1,4 +1,7 @@
-﻿namespace ConsoleUI
+﻿using ConsoleUI.Keybinds;
+using ConsoleUI.UIElements.EventArgs;
+
+namespace ConsoleUI.UIElements
 {
     /// <summary>
     /// Object for the <c>OptionsUI</c> method.<br/>
@@ -51,21 +54,28 @@
         #endregion
 
         #region Override methods
-        /// <inheritdoc cref="BaseUI.MakeSpecial"/>
+        /// <inheritdoc cref="BaseUI.MakeSpecial(string, OptionsUI?)"/>
         protected override string MakeSpecial(string icons, OptionsUI? optionsUI = null)
         {
             return Value ? symbol : symbolOff;
         }
 
-        /// <inheritdoc cref="BaseUI.HandleAction"/>
-        public override object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null, OptionsUI? optionsUI = null)
+        /// <inheritdoc cref="BaseUI.HandleAction(KeyAction, IEnumerable{KeyAction}, OptionsUI?)"/>
+        public override object HandleAction(KeyAction key, IEnumerable<KeyAction> keybinds, OptionsUI? optionsUI = null)
         {
-            if (key.Equals(keyResults.ElementAt((int)Key.ENTER)))
+            var args = new KeyPressedEvenrArgs(key, keybinds);
+            RaiseKeyPressedEvent(args);
+            if (args.CancelKeyHandling)
+            {
+                return args.UpdateScreen ?? false;
+            }
+
+            if (key.Equals(keybinds.ElementAt((int)Key.ENTER)))
             {
                 Value = !Value;
                 base.Value = Value ? 1 : 0;
             }
-            return true;
+            return args.UpdateScreen ?? true;
         }
         #endregion
     }

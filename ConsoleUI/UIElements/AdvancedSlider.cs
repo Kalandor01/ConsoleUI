@@ -1,4 +1,4 @@
-﻿namespace ConsoleUI
+﻿namespace ConsoleUI.UIElements
 {
     /// <summary>
     /// A version of the <c>Slider</c>, that allways displays a customizable display name, for each value.<br/>
@@ -40,7 +40,7 @@
         #endregion
 
         #region Overrides
-        /// <inheritdoc/>
+        /// <inheritdoc cref="BaseUI.MakeValue(OptionsUI?)"/>
         protected override string MakeValue(OptionsUI? optionsUI = null)
         {
             return _displayValues.ElementAt(Value);

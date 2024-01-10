@@ -1,9 +1,9 @@
-﻿namespace ConsoleUI
+﻿namespace ConsoleUI.Keybinds
 {
     /// <summary>
     /// Required responses for the <c>KeyAction</c> object when used in one of the the UI objects/functions.
     /// </summary>
-    public enum Key:int
+    public enum Key : int
     {
         /// <summary>
         /// Key identifier that corespons to the escape action.

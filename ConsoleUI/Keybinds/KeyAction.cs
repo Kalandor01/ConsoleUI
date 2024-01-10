@@ -1,4 +1,4 @@
-﻿namespace ConsoleUI
+﻿namespace ConsoleUI.Keybinds
 {
     /// <summary>
     /// Object for <c>keybinds</c> for the <c>GetKey</c> function.
@@ -27,7 +27,8 @@
         /// <summary>
         /// The keys that can be pressed to trigger this action.
         /// </summary>
-        public IEnumerable<ConsoleKeyInfo> Keys {
+        public IEnumerable<ConsoleKeyInfo> Keys
+        {
             get { return keys; }
             protected set
             {
@@ -39,13 +40,15 @@
         #region Constructors
         ///<param name="ignoreMode">If the current <c>GetKeyMode</c> is the <c>ignoreMode</c> when calling <c>GetKey</c>, the keypress will be ignored.</param>
         /// <inheritdoc cref="KeyAction(object, ConsoleKeyInfo, IEnumerable{GetKeyMode})"/>
-        public KeyAction(object response, ConsoleKeyInfo key, GetKeyMode ignoreMode):
-            this(response, key, new List<GetKeyMode> { ignoreMode }) { }
+        public KeyAction(object response, ConsoleKeyInfo key, GetKeyMode ignoreMode) :
+            this(response, key, new List<GetKeyMode> { ignoreMode })
+        { }
 
         /// <param name="key">The key that can be pressed to trigger this action.</param>
         /// <inheritdoc cref="KeyAction(object, IEnumerable{ConsoleKeyInfo}, IEnumerable{GetKeyMode})"/>
-        public KeyAction(object response, ConsoleKeyInfo key, IEnumerable<GetKeyMode> ignoreModes):
-            this(response, new List<ConsoleKeyInfo> { key }, ignoreModes) { }
+        public KeyAction(object response, ConsoleKeyInfo key, IEnumerable<GetKeyMode> ignoreModes) :
+            this(response, new List<ConsoleKeyInfo> { key }, ignoreModes)
+        { }
 
         /// <summary>
         /// <inheritdoc cref="KeyAction"/>

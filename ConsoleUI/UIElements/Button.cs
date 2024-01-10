@@ -1,4 +1,7 @@
-﻿namespace ConsoleUI
+﻿using ConsoleUI.Keybinds;
+using ConsoleUI.UIElements.EventArgs;
+
+namespace ConsoleUI.UIElements
 {
     /// <summary>
     /// Object for the <c>OptionsUI</c> method.<br/>
@@ -22,7 +25,7 @@
 
         #region Override properties
         /// <inheritdoc cref="BaseUI.IsClickable"/>
-        public override bool IsClickable {  get => true; }
+        public override bool IsClickable { get => true; }
 
         /// <inheritdoc cref="BaseUI.IsOnlyClickable"/>
         public override bool IsOnlyClickable { get => true; }
@@ -45,22 +48,29 @@
         #endregion
 
         #region Override methods
-        /// <inheritdoc cref="BaseUI.HandleAction"/>
-        public override object HandleAction(object key, IEnumerable<object> keyResults, IEnumerable<KeyAction>? keybinds = null, OptionsUI? optionsUI = null)
+        /// <inheritdoc cref="BaseUI.HandleAction(KeyAction, IEnumerable{KeyAction}, OptionsUI?)"/>
+        public override object HandleAction(KeyAction key, IEnumerable<KeyAction> keybinds, OptionsUI? optionsUI = null)
         {
-            if (key.Equals(keyResults.ElementAt((int)Key.ENTER)))
+            var args = new KeyPressedEvenrArgs(key, keybinds);
+            RaiseKeyPressedEvent(args);
+            if (args.CancelKeyHandling)
             {
-                var (actionType, returned) = action.InvokeAction(modifyList ? this : null, keybinds, keyResults);
+                return args.UpdateScreen ?? false;
+            }
+
+            if (key.Equals(keybinds.ElementAt((int)Key.ENTER)))
+            {
+                var (actionType, returned) = action.InvokeAction(modifyList ? this : null, keybinds);
                 // function
                 if (actionType is UIActionType.FUNCTION)
                 {
-                    return returned is null ? true : returned;
+                    return returned is null ? (args.UpdateScreen ?? true) : returned;
                 }
-                return true;
+                return args.UpdateScreen ?? true;
             }
             else
             {
-                return false;
+                return args.UpdateScreen ?? false;
             }
         }
         #endregion

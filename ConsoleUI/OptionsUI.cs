@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using ConsoleUI.Keybinds;
+using ConsoleUI.UIElements;
+using System.Text;
 
 namespace ConsoleUI
 {
@@ -87,14 +89,10 @@ namespace ConsoleUI
         /// Prints the title and then a list of elements that the user can cycle between with the up and down arrows, and adjust with either the left and right arrow keys or the enter pressedKey depending on the input object type, and exit with the pressedKey assigned to escape.<br/>
         /// if an element in the list is null, the line will be blank and cannot be selected.
         /// </summary>
-        /// <param name="keybinds">The list of <c>KeyAction</c> objects to use, if the selected action is a <c>UIList</c>.</param>
-        /// <param name="keyResults">The list of posible results returned by pressing a key.<br/>
-        /// The order of the elements in the list should be:<br/>
-        /// - escape, up, down, left, right, enter<br/>
-        ///If it is null, the default value is either returned from the <c>keybinds</c> or:<br/>
-        /// - { Key.ESCAPE, Key.UP, Key.DOWN, Key.LEFT, Key.RIGHT, Key.ENTER }</param>
+        /// <param name="keybinds">The list of <c>KeyAction</c> objects to use. The order of the actions should be:<br/>
+        /// - escape, up, down, left, right, enter.</param>
         /// <exception cref="UINoSelectablesExeption">Exceptions thrown, if there are no selectable UI elements in the list.</exception>
-        public object? Display(IEnumerable<KeyAction>? keybinds = null, IEnumerable<object>? keyResults = null)
+        public object? Display(IEnumerable<KeyAction>? keybinds = null)
         {
             // no selectable element
             if (elements.All(element => element is null || !element.IsSelectable))
@@ -103,16 +101,9 @@ namespace ConsoleUI
             }
 
             // keybinds
-            if (keyResults is null || keyResults.Count() < 6)
+            if (keybinds is null || keybinds.Count() < 6)
             {
-                if (keybinds is null)
-                {
-                    keyResults = new List<object> { Key.ESCAPE, Key.UP, Key.DOWN, Key.LEFT, Key.RIGHT, Key.ENTER };
-                }
-                else
-                {
-                    keyResults = Utils.GetResultsList(keybinds);
-                }
+                keybinds = Utils.GetDefaultKeybinds();
             }
             cursorIcon ??= new CursorIcon();
 
@@ -131,7 +122,7 @@ namespace ConsoleUI
             int endIndex;
 
             // render/getkey loop
-            object pressedKey;
+            KeyAction pressedKey;
             do
             {
                 // prevent infinite loop
@@ -191,7 +182,7 @@ namespace ConsoleUI
                 do
                 {
                     // get pressedKey
-                    pressedKey = keyResults.ElementAt((int)Key.ENTER);
+                    pressedKey = keybinds.ElementAt((int)Key.ENTER);
                     var selectedElement = elements.ElementAt(selected);
                     if (
                         selectedElement is not null &&
@@ -203,25 +194,25 @@ namespace ConsoleUI
                     }
                     else
                     {
-                        while (pressedKey.Equals(keyResults.ElementAt((int)Key.ENTER)))
+                        while (pressedKey.Equals(keybinds.ElementAt((int)Key.ENTER)))
                         {
                             pressedKey = Utils.GetKey(GetKeyMode.NO_IGNORE, keybinds);
-                            if (pressedKey.Equals(keyResults.ElementAt((int)Key.ENTER)) && !enterKeyNeeded)
+                            if (pressedKey.Equals(keybinds.ElementAt((int)Key.ENTER)) && !enterKeyNeeded)
                             {
-                                pressedKey = keyResults.ElementAt((int)Key.ESCAPE);
+                                pressedKey = keybinds.ElementAt((int)Key.ESCAPE);
                             }
                         }
                     }
                     // move selection
                     if (
-                        pressedKey.Equals(keyResults.ElementAt((int)Key.UP)) ||
-                        pressedKey.Equals(keyResults.ElementAt((int)Key.DOWN))
+                        pressedKey.Equals(keybinds.ElementAt((int)Key.UP)) ||
+                        pressedKey.Equals(keybinds.ElementAt((int)Key.DOWN))
                     )
                     {
                         var prevSelected = selected;
                         while (true)
                         {
-                            selected += pressedKey.Equals(keyResults.ElementAt((int)Key.DOWN)) ? 1 : -1;
+                            selected += pressedKey.Equals(keybinds.ElementAt((int)Key.DOWN)) ? 1 : -1;
                             selected %= elements.Count();
                             if (selected < 0)
                             {
@@ -245,13 +236,10 @@ namespace ConsoleUI
                     else if (
                         selectedElement is not null &&
                         selectedElement.IsSelectable &&
-                        (
-                            pressedKey.Equals(keyResults.ElementAt((int)Key.LEFT)) ||
-                            pressedKey.Equals(keyResults.ElementAt((int)Key.RIGHT)) ||
-                            pressedKey.Equals(keyResults.ElementAt((int)Key.ENTER)))
-                        )
+                        !pressedKey.Equals(keybinds.ElementAt((int)Key.ESCAPE))
+                    )
                     {
-                        var returned = selectedElement.HandleAction(pressedKey, keyResults, keybinds, passInObject ? this : null);
+                        var returned = selectedElement.HandleAction(pressedKey, keybinds, passInObject ? this : null);
                         if (returned is not null)
                         {
                             if (returned.GetType() == typeof(bool))
@@ -264,14 +252,14 @@ namespace ConsoleUI
                             }
                         }
                     }
-                    else if (canEscape && pressedKey.Equals(keyResults.ElementAt((int)Key.ESCAPE)))
+                    else if (canEscape && pressedKey.Equals(keybinds.ElementAt((int)Key.ESCAPE)))
                     {
                         actualMove = true;
                     }
                 }
                 while (!actualMove);
             }
-            while (!canEscape || !pressedKey.Equals(keyResults.ElementAt((int)Key.ESCAPE)));
+            while (!canEscape || !pressedKey.Equals(keybinds.ElementAt((int)Key.ESCAPE)));
             return null;
         }
     }

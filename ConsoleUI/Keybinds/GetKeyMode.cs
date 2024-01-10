@@ -1,4 +1,4 @@
-﻿namespace ConsoleUI
+﻿namespace ConsoleUI.Keybinds
 {
     /// <summary>
     /// Modes for the <c>GetKey</c> function.
