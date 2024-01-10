@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace SaveFileManager
+namespace ConsoleUI
 {
     /// <summary>
     /// Object for displaying an options UI using the <c>Display</c> function.<br/>

@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Xml.Linq;
 
-namespace SaveFileManager
+namespace ConsoleUI
 {
     /// <summary>
     /// Object for the <c>OptionsUI</c> method.<br/>
@@ -77,7 +77,7 @@ namespace SaveFileManager
 
         #region Public delegates
         /// <summary>
-        /// A function to return the status of the vaue, the user inputed.
+        /// A function to return the status of the value, the user inputed.
         /// </summary>
         /// <param name="inputValue">The value that the user inputed.</param>
         public delegate (TextFieldValidatorStatus status, string? message) TextValidatorDelegate(string inputValue);
@@ -85,7 +85,7 @@ namespace SaveFileManager
         /// <summary>
         /// A function to return if the key the user inputed is valid or not.
         /// </summary>
-        /// <param name="currentValue">The currently tiped valur (not including the current key).</param>
+        /// <param name="currentValue">The currently tiped value (not including the current key).</param>
         /// <param name="inputKey">The key that the user inputed.<br/>
         /// null if a key will be removed instead of added. (can only happen if "overrideDefaultKeyValidatorFunction" is false)</param>
         /// <param name="cursorPosition">The position of the cursor before the inputKey was inserted.<br/>

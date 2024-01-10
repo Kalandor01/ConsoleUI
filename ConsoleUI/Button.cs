@@ -1,4 +1,4 @@
-﻿namespace SaveFileManager
+﻿namespace ConsoleUI
 {
     /// <summary>
     /// Object for the <c>OptionsUI</c> method.<br/>

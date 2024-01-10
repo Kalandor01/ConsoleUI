@@ -1,4 +1,4 @@
-﻿namespace SaveFileManager
+﻿namespace ConsoleUI
 {
     /// <summary>
     /// Object for storing the scroll icons for UI objects.

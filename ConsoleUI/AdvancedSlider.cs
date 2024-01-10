@@ -1,4 +1,4 @@
-﻿namespace SaveFileManager
+﻿namespace ConsoleUI
 {
     /// <summary>
     /// A version of the <c>Slider</c>, that allways displays a customizable display name, for each value.<br/>

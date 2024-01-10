@@ -1,4 +1,4 @@
-﻿namespace SaveFileManager
+﻿namespace ConsoleUI
 {
     /// <summary>
     /// Object for storing the cursor icon for UI objects.

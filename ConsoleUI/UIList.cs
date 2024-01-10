@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Text;
 
-namespace SaveFileManager
+namespace ConsoleUI
 {
     /// <summary>
     /// Object for displaying a terminal UI using the <c>Display</c> function.<br/>

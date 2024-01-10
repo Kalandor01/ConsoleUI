@@ -1,4 +1,4 @@
-﻿namespace SaveFileManager
+﻿namespace ConsoleUI
 {
     /// <summary>
     /// Posible action types from <c>UIAction</c>.

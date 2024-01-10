@@ -1,4 +1,4 @@
-﻿namespace SaveFileManager
+﻿namespace ConsoleUI
 {
     /// <summary>
     /// Object for <c>keybinds</c> for the <c>GetKey</c> function.

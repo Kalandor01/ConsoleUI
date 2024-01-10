@@ -1,2 +1,2 @@
-# SaveFileManager_CSharp
-File encoding and console UI tools.
+# ConsoleUI
+Tools to create a UI on the console.

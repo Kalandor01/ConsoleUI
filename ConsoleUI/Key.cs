@@ -1,4 +1,4 @@
-﻿namespace SaveFileManager
+﻿namespace ConsoleUI
 {
     /// <summary>
     /// Required responses for the <c>KeyAction</c> object when used in one of the the UI objects/functions.

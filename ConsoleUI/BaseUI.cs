@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace SaveFileManager
+namespace ConsoleUI
 {
     /// <summary>
     /// Abstract class for all classes used in the <c>OptionsUI</c> method.<br/>

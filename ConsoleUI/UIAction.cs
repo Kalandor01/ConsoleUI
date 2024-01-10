@@ -1,4 +1,4 @@
-﻿namespace SaveFileManager
+﻿namespace ConsoleUI
 {
     /// <summary>
     /// Stores an action, used in <c>Button</c> and <c>UIList</c>.
