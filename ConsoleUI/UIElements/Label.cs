@@ -1,7 +1,4 @@
-﻿using ConsoleUI.Keybinds;
-using ConsoleUI.UIElements.EventArgs;
-
-namespace ConsoleUI.UIElements
+﻿namespace ConsoleUI.UIElements
 {
     /// <summary>
     /// Object for the <c>OptionsUI</c> method.<br/>
@@ -29,15 +26,6 @@ namespace ConsoleUI.UIElements
         public override string MakeText(string icon, string iconR, OptionsUI? optionsUI = null)
         {
             return preText + "\n";
-        }
-
-        /// <inheritdoc cref="BaseUI.HandleAction(KeyAction, IEnumerable{KeyAction}, OptionsUI?)"/>
-        public override object HandleAction(KeyAction key, IEnumerable<KeyAction> keybinds, OptionsUI? optionsUI = null)
-        {
-            var args = new KeyPressedEvenrArgs(key, keybinds, updateScreen: false);
-            RaiseKeyPressedEvent(args);
-
-            return args.UpdateScreen ?? false;
         }
         #endregion
     }

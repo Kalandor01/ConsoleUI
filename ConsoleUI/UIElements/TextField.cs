@@ -90,7 +90,7 @@ namespace ConsoleUI.UIElements
         /// <summary>
         /// A function to return if the key the user inputed is valid or not.
         /// </summary>
-        /// <param name="currentValue">The currently tiped value (not including the current key).</param>
+        /// <param name="currentValue">The currently typed value (not including the current key).</param>
         /// <param name="inputKey">The key that the user inputed.<br/>
         /// null if a key will be removed instead of added. (can only happen if "overrideDefaultKeyValidatorFunction" is false)</param>
         /// <param name="cursorPosition">The position of the cursor before the inputKey was inserted.<br/>
@@ -149,37 +149,30 @@ namespace ConsoleUI.UIElements
             return Value;
         }
 
-        /// <inheritdoc cref="BaseUI.HandleAction(KeyAction, IEnumerable{KeyAction}, OptionsUI?)"/>
-        public override object HandleAction(KeyAction key, IEnumerable<KeyAction> keybinds, OptionsUI? optionsUI = null)
+        /// <inheritdoc cref="BaseUI.HandleActionProtected(KeyPressedEventArgs)"/>
+        protected override object HandleActionProtected(KeyPressedEventArgs args)
         {
-            var args = new KeyPressedEvenrArgs(key, keybinds);
-            RaiseKeyPressedEvent(args);
-            if (args.CancelKeyHandling)
+            if (!args.pressedKey.Equals(args.keybinds.ElementAt((int)Key.ENTER)))
             {
                 return args.UpdateScreen ?? false;
             }
 
-            if (!key.Equals(keybinds.ElementAt((int)Key.ENTER)))
-            {
-                return args.UpdateScreen ?? false;
-            }
-
-            if (optionsUI == null || !optionsUI.elements.Any(element => element == this))
+            if (args.optionsUI == null || !args.optionsUI.elements.Any(element => element == this))
             {
                 Console.WriteLine(preText);
                 Value = Console.ReadLine() ?? "";
                 return args.UpdateScreen ?? true;
             }
 
-            var xOffset = GetCurrentLineCharCountBeforeValue(optionsUI.cursorIcon);
-            var yOffset = GetLineNumberAfterTextFieldValue(optionsUI);
+            var xOffset = GetCurrentLineCharCountBeforeValue(args.optionsUI.cursorIcon);
+            var yOffset = GetLineNumberAfterTextFieldValue(args.optionsUI);
             Utils.MoveCursor((xOffset, yOffset));
 
             bool retry;
             do
             {
                 retry = false;
-                var newValue = ReadInput(xOffset, optionsUI.cursorIcon);
+                var newValue = ReadInput(xOffset, args.optionsUI.cursorIcon);
                 if (textValidatorFunction is null)
                 {
                     Value = newValue;
@@ -190,14 +183,14 @@ namespace ConsoleUI.UIElements
                 if (message != null)
                 {
                     Utils.MoveCursor((-newValue.Length, 0));
-                    Console.Write("\u001b[0K" + message);
+                    Console.Write(Utils.ClearLineFromCursorPosString() + message);
                     Console.ReadKey(true);
                     Utils.MoveCursor((-message.Length, 0));
-                    Console.Write("\u001b[0K" + newValue);
+                    Console.Write(Utils.ClearLineFromCursorPosString() + newValue);
                     var (Left, Top) = Console.GetCursorPosition();
                     if (multiline)
                     {
-                        Console.Write(postValue.Replace("\n", optionsUI.cursorIcon.sIconR + "\n" + optionsUI.cursorIcon.sIcon));
+                        Console.Write(postValue.Replace("\n", args.optionsUI.cursorIcon.sIconR + "\n" + args.optionsUI.cursorIcon.sIcon));
                     }
                     else
                     {
@@ -326,7 +319,7 @@ namespace ConsoleUI.UIElements
                 var postLength = lengthAsDisplayLength ? Utils.GetDisplayLen(fullPostValue, xOffset + newValue.Length, escapeCodesEnabled) : fullPostValue.Length;
                 var maxLength = maxInputLength ?? Console.BufferWidth - (xOffset + postLength);
                 Console.SetCursorPosition(preValuePos.Left, preValuePos.Top);
-                Console.Write("\u001b[0K" + newValue.ToString());
+                Console.Write(Utils.ClearLineFromCursorPosString() + newValue.ToString());
                 var (Left, Top) = Console.GetCursorPosition();
                 if (multiline)
                 {

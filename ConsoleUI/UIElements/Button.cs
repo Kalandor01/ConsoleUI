@@ -48,19 +48,12 @@ namespace ConsoleUI.UIElements
         #endregion
 
         #region Override methods
-        /// <inheritdoc cref="BaseUI.HandleAction(KeyAction, IEnumerable{KeyAction}, OptionsUI?)"/>
-        public override object HandleAction(KeyAction key, IEnumerable<KeyAction> keybinds, OptionsUI? optionsUI = null)
+        /// <inheritdoc cref="BaseUI.HandleActionProtected(KeyPressedEventArgs)"/>
+        protected override object HandleActionProtected(KeyPressedEventArgs args)
         {
-            var args = new KeyPressedEvenrArgs(key, keybinds);
-            RaiseKeyPressedEvent(args);
-            if (args.CancelKeyHandling)
+            if (args.pressedKey.Equals(args.keybinds.ElementAt((int)Key.ENTER)))
             {
-                return args.UpdateScreen ?? false;
-            }
-
-            if (key.Equals(keybinds.ElementAt((int)Key.ENTER)))
-            {
-                var (actionType, returned) = action.InvokeAction(modifyList ? this : null, keybinds);
+                var (actionType, returned) = action.InvokeAction(modifyList ? this : null, args.keybinds);
                 // function
                 if (actionType is UIActionType.FUNCTION)
                 {

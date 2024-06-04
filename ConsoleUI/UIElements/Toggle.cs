@@ -60,17 +60,10 @@ namespace ConsoleUI.UIElements
             return Value ? symbol : symbolOff;
         }
 
-        /// <inheritdoc cref="BaseUI.HandleAction(KeyAction, IEnumerable{KeyAction}, OptionsUI?)"/>
-        public override object HandleAction(KeyAction key, IEnumerable<KeyAction> keybinds, OptionsUI? optionsUI = null)
+        /// <inheritdoc cref="BaseUI.HandleActionProtected(KeyPressedEventArgs)"/>
+        protected override object HandleActionProtected(KeyPressedEventArgs args)
         {
-            var args = new KeyPressedEvenrArgs(key, keybinds);
-            RaiseKeyPressedEvent(args);
-            if (args.CancelKeyHandling)
-            {
-                return args.UpdateScreen ?? false;
-            }
-
-            if (key.Equals(keybinds.ElementAt((int)Key.ENTER)))
+            if (args.pressedKey.Equals(args.keybinds.ElementAt((int)Key.ENTER)))
             {
                 Value = !Value;
                 base.Value = Value ? 1 : 0;

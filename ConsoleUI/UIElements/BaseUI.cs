@@ -59,14 +59,38 @@ namespace ConsoleUI.UIElements
 
         #region Event delegates
         /// <summary>
+        /// Called before the UI element is displayed.
+        /// </summary>
+        /// <param name="sender">The UI element that called this event.</param>
+        /// <param name="args">The arguments for this event.</param>
+        public delegate void BeforeTextCreatedEventHandler(BaseUI sender, BeforeTextCreatedEventArgs args);
+
+        /// <summary>
+        /// Called after the UI element is displayed.
+        /// </summary>
+        /// <param name="sender">The UI element that called this event.</param>
+        /// <param name="args">The arguments for this event.</param>
+        public delegate void AfterTextCreatedEventHandler(BaseUI sender, AfterTextCreatedEventArgs args);
+
+        /// <summary>
         /// Called when a key is pressed, when the cursor is over this element.
         /// </summary>
         /// <param name="sender">The UI element that called this event.</param>
         /// <param name="args">The arguments for this event.</param>
-        public delegate void KeyPressedEventHandler(BaseUI sender, KeyPressedEvenrArgs args);
+        public delegate void KeyPressedEventHandler(BaseUI sender, KeyPressedEventArgs args);
         #endregion
 
         #region Events
+        /// <summary>
+        /// Called before the UI element is displayed.
+        /// </summary>
+        public event BeforeTextCreatedEventHandler BeforeTextCreated;
+
+        /// <summary>
+        /// Called after the UI element is displayed.
+        /// </summary>
+        public event AfterTextCreatedEventHandler AfterTextCreated;
+
         /// <summary>
         /// Called when a key is pressed, when the cursor is over this element.<br/>
         /// Returns if the input handling should continue (and the menu should refresh).
@@ -84,7 +108,14 @@ namespace ConsoleUI.UIElements
         /// <param name="displayValue"><inheritdoc cref="displayValue" path="//summary"/></param>
         /// <param name="postValue"><inheritdoc cref="postValue" path="//summary"/></param>
         /// <param name="multiline"><inheritdoc cref="multiline" path="//summary"/></param>
-        public BaseUI(int value = 0, string preText = "", string preValue = "", bool displayValue = false, string postValue = "", bool multiline = false)
+        public BaseUI(
+            int value = 0,
+            string preText = "",
+            string preValue = "",
+            bool displayValue = false,
+            string postValue = "",
+            bool multiline = false
+        )
         {
             Value = value;
             this.preText = preText;
@@ -97,11 +128,36 @@ namespace ConsoleUI.UIElements
 
         #region EventCallFunctions
         /// <summary>
+        /// Calls the <c>BeforeTextCreated</c> event.
+        /// </summary>
+        protected void RaiseBeforeTextCreatedEvent(BeforeTextCreatedEventArgs args)
+        {
+            if (BeforeTextCreated is not null)
+            {
+                BeforeTextCreated(this, args);
+            }
+        }
+
+        /// <summary>
+        /// Calls the <c>AfterTextCreated</c> event.
+        /// </summary>
+        protected void RaiseAfterTextCreatedEvent(AfterTextCreatedEventArgs args)
+        {
+            if (AfterTextCreated is not null)
+            {
+                AfterTextCreated(this, args);
+            }
+        }
+
+        /// <summary>
         /// Calls the <c>KeyPressed</c> event.
         /// </summary>
-        protected void RaiseKeyPressedEvent(KeyPressedEvenrArgs args)
+        protected void RaiseKeyPressedEvent(KeyPressedEventArgs args)
         {
-            KeyPressed?.Invoke(this, args);
+            if (KeyPressed is not null)
+            {
+                KeyPressed(this, args);
+            }
         }
         #endregion
 
@@ -114,6 +170,13 @@ namespace ConsoleUI.UIElements
         /// <param name="optionsUI">The <c>OptionsUI</c> containing this object.</param>
         public virtual string MakeText(string icon, string iconR, OptionsUI? optionsUI = null)
         {
+            var beforeArgs = new BeforeTextCreatedEventArgs(this, icon, iconR, optionsUI);
+            RaiseBeforeTextCreatedEvent(beforeArgs);
+            if (beforeArgs.OverrideText is not null)
+            {
+                return beforeArgs.OverrideText;
+            }
+
             var txt = new StringBuilder();
             // current icon group
             var icons = $"{iconR}\n{icon}";
@@ -161,7 +224,30 @@ namespace ConsoleUI.UIElements
 
             // icon right
             txt.Append(iconR + "\n");
-            return txt.ToString();
+            var createdText = txt.ToString();
+
+            var afterArgs = new AfterTextCreatedEventArgs(this, createdText, optionsUI);
+            RaiseAfterTextCreatedEvent(afterArgs);
+            return afterArgs.OverrideText ?? createdText;
+        }
+
+        /// <summary>
+        /// Handles what to return for the input key.<br/>
+        /// </summary>
+        /// <param name="key">The triggered key action.</param>
+        /// <param name="keybinds">The list of <c>KeyAction</c> objects, that were used.</param>
+        /// <param name="optionsUI">The <c>OptionsUI</c> containing this object.</param>
+        /// <returns>If the screen should update.</returns>
+        public virtual object HandleAction(KeyAction key, IEnumerable<KeyAction> keybinds, OptionsUI? optionsUI = null)
+        {
+            var args = new KeyPressedEventArgs(this, key, keybinds, optionsUI, updateScreen: false);
+            RaiseKeyPressedEvent(args);
+
+            if (args.CancelKeyHandling)
+            {
+                return args.UpdateScreen ?? false;
+            }
+            return HandleActionProtected(args);
         }
 
         /// <summary>
@@ -186,14 +272,10 @@ namespace ConsoleUI.UIElements
         /// <summary>
         /// Handles what to return for the input key.<br/>
         /// </summary>
-        /// <param name="key">The triggered key action.</param>
-        /// <param name="keybinds">The list of <c>KeyAction</c> objects, that were used.</param>
-        /// <param name="optionsUI">The <c>OptionsUI</c> containing this object.</param>
+        /// <param name="args">The <c>KeyPressedEventArgs</c> containing the arguments for this method.</param>
         /// <returns>If the screen should update.</returns>
-        public virtual object HandleAction(KeyAction key, IEnumerable<KeyAction> keybinds, OptionsUI? optionsUI = null)
+        protected virtual object HandleActionProtected(KeyPressedEventArgs args)
         {
-            var args = new KeyPressedEvenrArgs(key, keybinds, updateScreen: false);
-            RaiseKeyPressedEvent(args);
             return args.UpdateScreen ?? false;
         }
         #endregion

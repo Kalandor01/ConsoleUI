@@ -1,6 +1,6 @@
-﻿using System.Text;
-using ConsoleUI.Keybinds;
+﻿using ConsoleUI.Keybinds;
 using ConsoleUI.UIElements.EventArgs;
+using System.Text;
 
 namespace ConsoleUI.UIElements
 {
@@ -72,17 +72,10 @@ namespace ConsoleUI.UIElements
             return txt.ToString();
         }
 
-        /// <inheritdoc cref="BaseUI.HandleAction(KeyAction, IEnumerable{KeyAction}, OptionsUI?)"/>
-        public override object HandleAction(KeyAction key, IEnumerable<KeyAction> keybinds, OptionsUI? optionsUI = null)
+        /// <inheritdoc cref="BaseUI.HandleActionProtected(KeyPressedEventArgs)"/>
+        protected override object HandleActionProtected(KeyPressedEventArgs args)
         {
-            var args = new KeyPressedEvenrArgs(key, keybinds);
-            RaiseKeyPressedEvent(args);
-            if (args.CancelKeyHandling)
-            {
-                return args.UpdateScreen ?? false;
-            }
-
-            if (key.Equals(keybinds.ElementAt((int)Key.RIGHT)))
+            if (args.pressedKey.Equals(args.keybinds.ElementAt((int)Key.RIGHT)))
             {
                 if (Value + step <= maxValue)
                 {
@@ -93,7 +86,7 @@ namespace ConsoleUI.UIElements
                     return args.UpdateScreen ?? false;
                 }
             }
-            else if (key.Equals(keybinds.ElementAt((int)Key.LEFT)))
+            else if (args.pressedKey.Equals(args.keybinds.ElementAt((int)Key.LEFT)))
             {
                 if (Value - step >= minValue)
                 {
