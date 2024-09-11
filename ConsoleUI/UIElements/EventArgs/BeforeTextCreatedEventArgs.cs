@@ -6,10 +6,6 @@
     public class BeforeTextCreatedEventArgs
     {
         /// <summary>
-        /// The sender of the event.
-        /// </summary>
-        public readonly BaseUI sender;
-        /// <summary>
         /// The icon to be displayed on the left of the created text.
         /// </summary>
         public readonly string icon;
@@ -30,20 +26,17 @@
         /// <summary>
         /// <inheritdoc cref="BeforeTextCreatedEventArgs"/>
         /// </summary>
-        /// <param name="sender"><inheritdoc cref="sender" path="//summary"/></param>
         /// <param name="icon"><inheritdoc cref="icon" path="//summary"/></param>
         /// <param name="iconR"><inheritdoc cref="iconR" path="//summary"/></param>
         /// <param name="optionsUI"><inheritdoc cref="optionsUI" path="//summary"/></param>
         /// <param name="overrideText"><inheritdoc cref="OverrideText" path="//summary"/></param>
         public BeforeTextCreatedEventArgs(
-            BaseUI sender,
             string icon,
             string iconR,
             OptionsUI? optionsUI = null,
             string? overrideText = null
         )
         {
-            this.sender = sender;
             this.icon = icon;
             this.iconR = iconR;
             this.optionsUI = optionsUI;

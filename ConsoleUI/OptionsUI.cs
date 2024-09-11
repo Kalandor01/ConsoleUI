@@ -1,5 +1,6 @@
 ﻿using ConsoleUI.Keybinds;
 using ConsoleUI.UIElements;
+using ConsoleUI.UIElements.EventArgs;
 using System.Text;
 
 namespace ConsoleUI
@@ -49,6 +50,83 @@ namespace ConsoleUI
         public string clearScreenText;
         #endregion
 
+        #region Event delegates
+        /// <summary>
+        /// Called before the UI options are displayed.
+        /// </summary>
+        /// <param name="sender">The sender of this event.</param>
+        /// <param name="args">The arguments for this event.</param>
+        public delegate void BeforeOptionsDisplayedEventHandler(OptionsUI sender, BeforeOptionsDisplayedEventArgs args);
+
+        /// <summary>
+        /// Called after the UI options are displayed.
+        /// </summary>
+        /// <param name="sender">The sender of this event.</param>
+        /// <param name="args">The arguments for this event.</param>
+        public delegate void AfterOptionsDisplayedEventHandler(OptionsUI sender, AfterOptionsDisplayedEventArgs args);
+
+        /// <summary>
+        /// Called before a UI element text is created.
+        /// </summary>
+        /// <param name="sender">The sender of this event.</param>
+        /// <param name="args">The arguments for this event.</param>
+        public delegate void BeforeOptionsTextCreatedEventHandler(OptionsUI sender, BeforeOptionsTextCreatedEventArgs args);
+
+        /// <summary>
+        /// Called after a UI element text is created.
+        /// </summary>
+        /// <param name="sender">The sender of this event.</param>
+        /// <param name="args">The arguments for this event.</param>
+        public delegate void AfterOptionsTextCreatedEventHandler(OptionsUI sender, AfterOptionsTextCreatedEventArgs args);
+
+        /// <summary>
+        /// Called after a UI element text is displayed.
+        /// </summary>
+        /// <param name="sender">The sender of this event.</param>
+        /// <param name="args">The arguments for this event.</param>
+        public delegate void AfterOptionsTextDisplayedEventHandler(OptionsUI sender, AfterOptionsTextDisplayedEventArgs args);
+
+        /// <summary>
+        /// Called when a key is pressed.
+        /// </summary>
+        /// <param name="sender">The sender of this event.</param>
+        /// <param name="args">The arguments for this event.</param>
+        public delegate void OptionsKeyPressedEventHandler(OptionsUI sender, OptionsKeyPressedEventArgs args);
+        #endregion
+
+        #region Events
+        /// <summary>
+        /// Called before the UI options are displayed.
+        /// </summary>
+        public event BeforeOptionsDisplayedEventHandler BeforeOptionsDisplayed;
+
+        /// <summary>
+        /// Called after the UI options are displayed.
+        /// </summary>
+        public event AfterOptionsDisplayedEventHandler AfterOptionsDisplayed;
+
+        /// <summary>
+        /// Called before a UI element text is created.
+        /// </summary>
+        public event BeforeOptionsTextCreatedEventHandler BeforeTextCreated;
+
+        /// <summary>
+        /// Called after a UI element is text is created.
+        /// </summary>
+        public event AfterOptionsTextCreatedEventHandler AfterTextCreated;
+
+        /// <summary>
+        /// Called after a UI element text is displayed.
+        /// </summary>
+        public event AfterOptionsTextDisplayedEventHandler AfterTextDisplayed;
+
+        /// <summary>
+        /// Called when a key is pressed.<br/>
+        /// Returns if the input handling should continue (and the menu should refresh).
+        /// </summary>
+        public event OptionsKeyPressedEventHandler KeyPressed;
+        #endregion
+
         #region Public constructors
         /// <summary>
         /// <inheritdoc cref="OptionsUI"/>
@@ -85,6 +163,150 @@ namespace ConsoleUI
         }
         #endregion
 
+        #region EventCallFunctions
+        /// <summary>
+        /// Calls the <c>BeforeOptionsDisplayed</c> event.
+        /// </summary>
+        private void RaiseBeforeOptionsDisplayedEvent(BeforeOptionsDisplayedEventArgs args)
+        {
+            if (BeforeOptionsDisplayed is not null)
+            {
+                BeforeOptionsDisplayed(this, args);
+            }
+        }
+
+        /// <summary>
+        /// Calls the <c>AfterOptionsDisplayed</c> event.
+        /// </summary>
+        private void RaiseAfterOptionsDisplayedEvent(AfterOptionsDisplayedEventArgs args)
+        {
+            if (AfterOptionsDisplayed is not null)
+            {
+                AfterOptionsDisplayed(this, args);
+            }
+        }
+
+        /// <summary>
+        /// Calls the <c>BeforeTextCreated</c> event.
+        /// </summary>
+        private void RaiseBeforeTextCreatedEvent(BeforeOptionsTextCreatedEventArgs args)
+        {
+            if (BeforeTextCreated is not null)
+            {
+                BeforeTextCreated(this, args);
+            }
+        }
+
+        /// <summary>
+        /// Calls the <c>AfterTextCreated</c> event.
+        /// </summary>
+        protected void RaiseAfterTextCreatedEvent(AfterOptionsTextCreatedEventArgs args)
+        {
+            if (AfterTextCreated is not null)
+            {
+                AfterTextCreated(this, args);
+            }
+        }
+
+        /// <summary>
+        /// Calls the <c>AfterTextDisplayed</c> event.
+        /// </summary>
+        protected void RaiseAfterTextDisplayedEvent(AfterOptionsTextDisplayedEventArgs args)
+        {
+            if (AfterTextDisplayed is not null)
+            {
+                AfterTextDisplayed(this, args);
+            }
+        }
+
+        /// <summary>
+        /// Calls the <c>KeyPressed</c> event.
+        /// </summary>
+        protected void RaiseKeyPressedEvent(OptionsKeyPressedEventArgs args)
+        {
+            if (KeyPressed is not null)
+            {
+                KeyPressed(this, args);
+            }
+        }
+        #endregion
+
+        private void DisplayOptions()
+        {
+            var beforeDisplayArgs = new BeforeOptionsDisplayedEventArgs();
+            RaiseBeforeOptionsDisplayedEvent(beforeDisplayArgs);
+            if (beforeDisplayArgs.OverrideText != null)
+            {
+                Console.WriteLine(beforeDisplayArgs.OverrideText);
+                return;
+            }
+
+            // clear screen + render
+            var txtBeginning = new StringBuilder(clearScreenText);
+
+            // title
+            if (title is not null)
+            {
+                txtBeginning.Append($"{title}\n\n");
+            }
+
+            // elements
+            int endIndex;
+            if (scrollSettings.maxElements == -1 || scrollSettings.maxElements >= elements.Count())
+            {
+                startIndex = 0;
+                endIndex = elements.Count();
+            }
+            else
+            {
+                if (startIndex > selected - scrollSettings.scrollUpMargin)
+                {
+                    startIndex = selected - scrollSettings.scrollUpMargin;
+                }
+                if (startIndex + scrollSettings.maxElements - 1 < selected + scrollSettings.scrollDownMargin)
+                {
+                    startIndex = selected + scrollSettings.scrollDownMargin - (scrollSettings.maxElements - 1);
+                }
+
+                startIndex = Math.Clamp(startIndex, 0, elements.Count() - 1);
+                endIndex = Math.Clamp(startIndex + scrollSettings.maxElements, 0, elements.Count());
+                startIndex = Math.Clamp(endIndex - scrollSettings.maxElements, 0, elements.Count() - 1);
+            }
+
+            txtBeginning.Append(startIndex == 0 ? scrollSettings.scrollIcon.topEndIndicator : scrollSettings.scrollIcon.topContinueIndicator);
+            Console.Write(txtBeginning.ToString());
+            for (var x = startIndex; x < endIndex; x++)
+            {
+                var element = elements.ElementAt(x)!;
+                var beforeTextCreatedArgs = new BeforeOptionsTextCreatedEventArgs(x);
+                RaiseBeforeTextCreatedEvent(beforeTextCreatedArgs);
+                if (beforeTextCreatedArgs.OverrideText != null)
+                {
+                    Console.Write(beforeTextCreatedArgs.OverrideText);
+                    continue;
+                }
+
+                var elementText = element?.MakeText(
+                        selected == x ? cursorIcon.sIcon : cursorIcon.icon,
+                        selected == x ? cursorIcon.sIconR : cursorIcon.iconR,
+                        passInObject ? this : null
+                    ) ?? "\n";
+
+                var afterTextCreatedArgs = new AfterOptionsTextCreatedEventArgs(elementText, x);
+                RaiseAfterTextCreatedEvent(afterTextCreatedArgs);
+
+                Console.Write(afterTextCreatedArgs.OverrideText ?? elementText);
+
+                var afterTextDisplayedArgs = new AfterOptionsTextDisplayedEventArgs(elementText, x);
+                RaiseAfterTextDisplayedEvent(afterTextDisplayedArgs);
+            }
+
+            Console.WriteLine(endIndex == elements.Count() ? scrollSettings.scrollIcon.bottomEndIndicator : scrollSettings.scrollIcon.bottomContinueIndicator);
+
+            var afterDisplayArgs = new AfterOptionsDisplayedEventArgs(endIndex);
+            RaiseAfterOptionsDisplayedEvent(afterDisplayArgs);
+        }
+
         /// <summary>
         /// Prints the title and then a list of elements that the user can cycle between with the up and down arrows, and adjust with either the left and right arrow keys or the enter pressedKey depending on the input object type, and exit with the pressedKey assigned to escape.<br/>
         /// if an element in the list is null, the line will be blank and cannot be selected.
@@ -111,15 +333,12 @@ namespace ConsoleUI
             var enterKeyNeeded = elements.Any(element => element is not null && element.IsClickable);
             // put selected on selectable
             selected = 0;
-            while (
-                elements.ElementAt(selected)?.IsSelectable != true
-            )
+            while (elements.ElementAt(selected)?.IsSelectable != true)
             {
                 selected++;
             }
 
             startIndex = Math.Clamp(0, selected - scrollSettings.scrollUpMargin, elements.Count() - 1);
-            int endIndex;
 
             // render/getkey loop
             KeyAction pressedKey;
@@ -131,51 +350,7 @@ namespace ConsoleUI
                     throw new UINoSelectablesExeption();
                 }
 
-                // clear screen + render
-                var txt = new StringBuilder(clearScreenText);
-
-                // title
-                if (title is not null)
-                {
-                    txt.Append(title + "\n\n");
-                }
-
-                // elements
-                if (scrollSettings.maxElements == -1 || scrollSettings.maxElements >= elements.Count())
-                {
-                    startIndex = 0;
-                    endIndex = elements.Count();
-                }
-                else
-                {
-                    if (startIndex > selected - scrollSettings.scrollUpMargin)
-                    {
-                        startIndex = selected - scrollSettings.scrollUpMargin;
-                    }
-                    if (startIndex + scrollSettings.maxElements - 1 < selected + scrollSettings.scrollDownMargin)
-                    {
-                        startIndex = selected + scrollSettings.scrollDownMargin - (scrollSettings.maxElements - 1);
-                    }
-
-                    startIndex = Math.Clamp(startIndex, 0, elements.Count() - 1);
-                    endIndex = Math.Clamp(startIndex + scrollSettings.maxElements, 0, elements.Count());
-                    startIndex = Math.Clamp(endIndex - scrollSettings.maxElements, 0, elements.Count() - 1);
-                }
-
-                txt.Append(startIndex == 0 ? scrollSettings.scrollIcon.topEndIndicator : scrollSettings.scrollIcon.topContinueIndicator);
-                for (var x = startIndex; x < endIndex; x++)
-                {
-                    var element = elements.ElementAt(x);
-                    txt.Append(element?.MakeText(
-                            selected == x ? cursorIcon.sIcon : cursorIcon.icon,
-                            selected == x ? cursorIcon.sIconR : cursorIcon.iconR,
-                            passInObject ? this : null
-                        ) ??
-                        "\n");
-                }
-                txt.Append(endIndex == elements.Count() ? scrollSettings.scrollIcon.bottomEndIndicator : scrollSettings.scrollIcon.bottomContinueIndicator);
-
-                Console.WriteLine(txt);
+                DisplayOptions();
 
                 // move selection/change value
                 var actualMove = false;
@@ -203,6 +378,18 @@ namespace ConsoleUI
                             }
                         }
                     }
+
+                    var keyPressedEventArgs = new OptionsKeyPressedEventArgs(pressedKey, keybinds);
+                    RaiseKeyPressedEvent(keyPressedEventArgs);
+                    if (keyPressedEventArgs.UpdateScreen != null)
+                    {
+                        actualMove = (bool)keyPressedEventArgs.UpdateScreen;
+                    }
+                    if (keyPressedEventArgs.CancelKeyHandling)
+                    {
+                        continue;
+                    }
+
                     // move selection
                     if (
                         pressedKey.Equals(keybinds.ElementAt((int)Key.UP)) ||

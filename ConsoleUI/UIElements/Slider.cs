@@ -77,25 +77,19 @@ namespace ConsoleUI.UIElements
         {
             if (args.pressedKey.Equals(args.keybinds.ElementAt((int)Key.RIGHT)))
             {
-                if (Value + step <= maxValue)
-                {
-                    Value += step;
-                }
-                else
+                if (Value + step > maxValue)
                 {
                     return args.UpdateScreen ?? false;
                 }
+                Value += step;
             }
             else if (args.pressedKey.Equals(args.keybinds.ElementAt((int)Key.LEFT)))
             {
-                if (Value - step >= minValue)
-                {
-                    Value -= step;
-                }
-                else
+                if (Value - step < minValue)
                 {
                     return args.UpdateScreen ?? false;
                 }
+                Value -= step;
             }
             return args.UpdateScreen ?? true;
         }

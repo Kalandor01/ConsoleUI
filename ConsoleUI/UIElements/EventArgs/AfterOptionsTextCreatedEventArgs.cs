@@ -3,16 +3,16 @@
     /// <summary>
     /// Class for storing the arguments of the <c>AfterTextCreated</c> event.
     /// </summary>
-    public class AfterTextCreatedEventArgs
+    public class AfterOptionsTextCreatedEventArgs
     {
         /// <summary>
         /// The text the UI element created.
         /// </summary>
         public readonly string createdText;
         /// <summary>
-        /// The OptionsUI containing the UI element.
+        /// The index of the current BaseUI element.
         /// </summary>
-        public readonly OptionsUI? selectedUI;
+        public readonly int currentUIIndex;
 
         /// <summary>
         /// If not null, halts text creartion and returns this text instead.
@@ -20,19 +20,19 @@
         public string? OverrideText { get; set; }
 
         /// <summary>
-        /// <inheritdoc cref="AfterTextCreatedEventArgs"/>
+        /// <inheritdoc cref="AfterOptionsTextCreatedEventArgs"/>
         /// </summary>
         /// <param name="createdText"><inheritdoc cref="createdText" path="//summary"/></param>
-        /// <param name="selectedUI"><inheritdoc cref="selectedUI" path="//summary"/></param>
+        /// <param name="currentUIIndex"><inheritdoc cref="currentUIIndex" path="//summary"/></param>
         /// <param name="overrideText"><inheritdoc cref="OverrideText" path="//summary"/></param>
-        public AfterTextCreatedEventArgs(
+        public AfterOptionsTextCreatedEventArgs(
             string createdText,
-            OptionsUI? selectedUI = null,
+            int currentUIIndex,
             string? overrideText = null
         )
         {
             this.createdText = createdText;
-            this.selectedUI = selectedUI;
+            this.currentUIIndex = currentUIIndex;
             OverrideText = overrideText;
         }
     }

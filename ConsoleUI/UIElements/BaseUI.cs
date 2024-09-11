@@ -1,6 +1,6 @@
-﻿using System.Text;
-using ConsoleUI.Keybinds;
+﻿using ConsoleUI.Keybinds;
 using ConsoleUI.UIElements.EventArgs;
+using System.Text;
 
 namespace ConsoleUI.UIElements
 {
@@ -170,7 +170,7 @@ namespace ConsoleUI.UIElements
         /// <param name="optionsUI">The <c>OptionsUI</c> containing this object.</param>
         public virtual string MakeText(string icon, string iconR, OptionsUI? optionsUI = null)
         {
-            var beforeArgs = new BeforeTextCreatedEventArgs(this, icon, iconR, optionsUI);
+            var beforeArgs = new BeforeTextCreatedEventArgs(icon, iconR, optionsUI);
             RaiseBeforeTextCreatedEvent(beforeArgs);
             if (beforeArgs.OverrideText is not null)
             {
@@ -226,7 +226,7 @@ namespace ConsoleUI.UIElements
             txt.Append(iconR + "\n");
             var createdText = txt.ToString();
 
-            var afterArgs = new AfterTextCreatedEventArgs(this, createdText, optionsUI);
+            var afterArgs = new AfterTextCreatedEventArgs(createdText, optionsUI);
             RaiseAfterTextCreatedEvent(afterArgs);
             return afterArgs.OverrideText ?? createdText;
         }
@@ -240,7 +240,7 @@ namespace ConsoleUI.UIElements
         /// <returns>If the screen should update.</returns>
         public virtual object HandleAction(KeyAction key, IEnumerable<KeyAction> keybinds, OptionsUI? optionsUI = null)
         {
-            var args = new KeyPressedEventArgs(this, key, keybinds, optionsUI, updateScreen: false);
+            var args = new KeyPressedEventArgs(key, keybinds, optionsUI);
             RaiseKeyPressedEvent(args);
 
             if (args.CancelKeyHandling)

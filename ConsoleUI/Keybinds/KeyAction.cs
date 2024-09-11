@@ -64,5 +64,13 @@
             this.ignoreModes = ignoreModes ?? throw new ArgumentNullException(nameof(ignoreModes));
         }
         #endregion
+
+        #region Public overrides
+        /// <inheritdoc cref="object.ToString()"/>
+        public override string? ToString()
+        {
+            return response.ToString();
+        }
+        #endregion
     }
 }
