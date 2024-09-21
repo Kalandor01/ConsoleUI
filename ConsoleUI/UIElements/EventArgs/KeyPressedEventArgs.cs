@@ -11,10 +11,12 @@ namespace ConsoleUI.UIElements.EventArgs
         /// The key action, the user triggered.
         /// </summary>
         public readonly KeyAction pressedKey;
+
         /// <summary>
         /// The keybinds used.
         /// </summary>
         public readonly IEnumerable<KeyAction> keybinds;
+
         /// <summary>
         /// The OptionsUI containing the UI element.
         /// </summary>
