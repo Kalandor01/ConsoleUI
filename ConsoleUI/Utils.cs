@@ -8,6 +8,17 @@ namespace ConsoleUI
     /// </summary>
     public static partial class Utils
     {
+        #region Delegates
+        /// <summary>
+        /// The function to get the next valid key the user pressed.<br/>
+        /// Should function similarly to <see cref="GetKey(GetKeyMode, IEnumerable{KeyAction}?)"/>.
+        /// </summary>
+        /// <param name="mode">The GetKeyMode to use.</param>
+        /// <param name="keybinds">The list of KeyActions.</param>
+        /// <returns></returns>
+        public delegate KeyAction GetKeyFunctionDelegate(GetKeyMode mode, IEnumerable<KeyAction> keybinds);
+        #endregion
+
         #region Public functions
         /// <summary>
         /// Writes out text, and then waits for a key press.
@@ -25,22 +36,22 @@ namespace ConsoleUI
         /// </summary>
         public static IEnumerable<KeyAction> GetDefaultKeybinds()
         {
-            return new List<KeyAction>
-            {
-                new KeyAction(Key.ESCAPE, new ConsoleKeyInfo('\u001b', ConsoleKey.Escape, false, false, false), GetKeyMode.IGNORE_ESCAPE),
-                new KeyAction(Key.UP, new ConsoleKeyInfo('\u0000', ConsoleKey.UpArrow, false, false, false), GetKeyMode.IGNORE_VERTICAL),
-                new KeyAction(Key.DOWN, new ConsoleKeyInfo('\u0000', ConsoleKey.DownArrow, false, false, false), GetKeyMode.IGNORE_VERTICAL),
-                new KeyAction(Key.LEFT, new ConsoleKeyInfo('\u0000', ConsoleKey.LeftArrow, false, false, false), GetKeyMode.IGNORE_HORIZONTAL),
-                new KeyAction(Key.RIGHT, new ConsoleKeyInfo('\u0000', ConsoleKey.RightArrow, false, false, false), GetKeyMode.IGNORE_HORIZONTAL),
-                new KeyAction(Key.ENTER, new ConsoleKeyInfo('\r', ConsoleKey.Enter, false, false, false), GetKeyMode.IGNORE_ENTER),
-            };
+            return
+            [
+                new(Key.ESCAPE, new ConsoleKeyInfo('\u001b', ConsoleKey.Escape, false, false, false), GetKeyMode.IGNORE_ESCAPE),
+                new(Key.UP, new ConsoleKeyInfo('\u0000', ConsoleKey.UpArrow, false, false, false), GetKeyMode.IGNORE_VERTICAL),
+                new(Key.DOWN, new ConsoleKeyInfo('\u0000', ConsoleKey.DownArrow, false, false, false), GetKeyMode.IGNORE_VERTICAL),
+                new(Key.LEFT, new ConsoleKeyInfo('\u0000', ConsoleKey.LeftArrow, false, false, false), GetKeyMode.IGNORE_HORIZONTAL),
+                new(Key.RIGHT, new ConsoleKeyInfo('\u0000', ConsoleKey.RightArrow, false, false, false), GetKeyMode.IGNORE_HORIZONTAL),
+                new(Key.ENTER, new ConsoleKeyInfo('\r', ConsoleKey.Enter, false, false, false), GetKeyMode.IGNORE_ENTER),
+            ];
         }
 
         /// <inheritdoc cref="GetKey(IEnumerable{GetKeyMode}, IEnumerable{KeyAction}?)"/>
         /// <param name="mode">The GetKeyMode to use.</param>
         public static KeyAction GetKey(GetKeyMode mode = GetKeyMode.NO_IGNORE, IEnumerable<KeyAction>? keybinds = null)
         {
-            return GetKey(new List<GetKeyMode> { mode }, keybinds);
+            return GetKey([mode], keybinds);
         }
 
         /// <summary>

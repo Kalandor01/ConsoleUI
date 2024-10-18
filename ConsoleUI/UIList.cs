@@ -1,6 +1,7 @@
-﻿using System.Collections;
+﻿using ConsoleUI.Keybinds;
+using System.Collections;
 using System.Text;
-using ConsoleUI.Keybinds;
+using static ConsoleUI.Utils;
 
 namespace ConsoleUI
 {
@@ -102,7 +103,7 @@ namespace ConsoleUI
             this.cursorIcon = cursorIcon ?? new CursorIcon();
             this.multiline = multiline;
             this.canEscape = canEscape;
-            this.actions = actions ?? new List<UIAction?>();
+            this.actions = actions ?? [];
             this.excludeNulls = excludeNulls;
             modifyList = modifiableUIList;
             this.scrollSettings = scrollSettings ?? new ScrollSettings();
@@ -117,12 +118,18 @@ namespace ConsoleUI
         /// </summary>
         /// <param name="keybinds">The list of <c>KeyAction</c> objects to use. The order of the actions should be:<br/>
         /// - escape, up, down, left, right, enter.</param>
-        public object Display(IEnumerable<KeyAction>? keybinds = null)
+        /// <param name="getKeyFunction">The function to get the next valid key the user pressed.<br/>
+        /// Should function similarly to <see cref="GetKey(GetKeyMode, IEnumerable{KeyAction}?)"/>.></param>
+        public object Display(
+            IEnumerable<KeyAction>? keybinds = null,
+            GetKeyFunctionDelegate? getKeyFunction = null
+        )
         {
             if (keybinds is null || keybinds.Count() < 6)
             {
-                keybinds = Utils.GetDefaultKeybinds();
+                keybinds = GetDefaultKeybinds();
             }
+            getKeyFunction ??= GetKey;
 
             selected = SetupSelected(0);
             startIndex = Math.Clamp(0, selected - scrollSettings.scrollUpMargin, answers.Count() - 1);
@@ -148,20 +155,20 @@ namespace ConsoleUI
                     Console.WriteLine(txt);
 
                     // answer select
-                    key = Utils.GetKey(GetKeyMode.IGNORE_HORIZONTAL, keybinds);
+                    key = getKeyFunction(GetKeyMode.IGNORE_HORIZONTAL, keybinds);
                     if (canEscape && key.Equals(keybinds.ElementAt((int)Key.ESCAPE)))
                     {
                         return -1;
                     }
                     while (key.Equals(keybinds.ElementAt((int)Key.ESCAPE)))
                     {
-                        key = Utils.GetKey(GetKeyMode.IGNORE_HORIZONTAL, keybinds);
+                        key = getKeyFunction(GetKeyMode.IGNORE_HORIZONTAL, keybinds);
                     }
                     selected = MoveSelection(selected, key, keybinds);
                 }
                 // menu actions
                 selected = ConvertSelected(selected);
-                var action = HandleAction(selected, keybinds);
+                var action = HandleAction(selected, keybinds, getKeyFunction);
                 if (action is not null)
                 {
                     return action;
@@ -276,8 +283,13 @@ namespace ConsoleUI
         /// <param name="selected">The selected answer's number.</param>
         /// <param name="keybinds">The list of <c>KeyAction</c> objects to use. The order of the actions should be:<br/>
         /// - escape, up, down, left, right, enter.</param>
+        /// <param name="getKeyFunction">The function to get the next valid key the user pressed.></param>
         /// <returns></returns>
-        private object? HandleAction(int selected, IEnumerable<KeyAction> keybinds)
+        private object? HandleAction(
+            int selected,
+            IEnumerable<KeyAction> keybinds,
+            GetKeyFunctionDelegate getKeyFunction
+        )
         {
             if (
                 !actions.Any() ||
@@ -288,7 +300,7 @@ namespace ConsoleUI
                 return selected;
             }
 
-            var (actionType, returned) = selectedAction.InvokeAction(modifyList ? this : null, keybinds);
+            var (actionType, returned) = selectedAction.InvokeAction(modifyList ? this : null, keybinds, getKeyFunction);
             if (actionType == UIActionType.UILIST)
             {
                 return null;

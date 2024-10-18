@@ -2,6 +2,7 @@
 using ConsoleUI.UIElements;
 using ConsoleUI.UIElements.EventArgs;
 using System.Text;
+using static ConsoleUI.Utils;
 
 namespace ConsoleUI
 {
@@ -283,8 +284,13 @@ namespace ConsoleUI
         /// </summary>
         /// <param name="keybinds">The list of <c>KeyAction</c> objects to use. The order of the actions should be:<br/>
         /// - escape, up, down, left, right, enter.</param>
+        /// <param name="getKeyFunction">The function to get the next valid key the user pressed.<br/>
+        /// Should function similarly to <see cref="GetKey(GetKeyMode, IEnumerable{KeyAction}?)"/>.></param>
         /// <exception cref="UINoSelectablesExeption">Exceptions thrown, if there are no selectable UI elements in the list.</exception>
-        public object? Display(IEnumerable<KeyAction>? keybinds = null)
+        public object? Display(
+            IEnumerable<KeyAction>? keybinds = null,
+            GetKeyFunctionDelegate? getKeyFunction = null
+        )
         {
             // no selectable element
             if (elements.All(element => element is null || !element.IsSelectable))
@@ -295,8 +301,10 @@ namespace ConsoleUI
             // keybinds
             if (keybinds is null || keybinds.Count() < 6)
             {
-                keybinds = Utils.GetDefaultKeybinds();
+                keybinds = GetDefaultKeybinds();
             }
+            getKeyFunction ??= GetKey;
+
             cursorIcon ??= new CursorIcon();
 
             // is enter needed?
@@ -335,13 +343,13 @@ namespace ConsoleUI
                         selectedElement.IsOnlyClickable
                     )
                     {
-                        pressedKey = Utils.GetKey(GetKeyMode.IGNORE_HORIZONTAL, keybinds);
+                        pressedKey = getKeyFunction(GetKeyMode.IGNORE_HORIZONTAL, keybinds);
                     }
                     else
                     {
                         while (pressedKey.Equals(keybinds.ElementAt((int)Key.ENTER)))
                         {
-                            pressedKey = Utils.GetKey(GetKeyMode.NO_IGNORE, keybinds);
+                            pressedKey = getKeyFunction(GetKeyMode.NO_IGNORE, keybinds);
                             if (pressedKey.Equals(keybinds.ElementAt((int)Key.ENTER)) && !enterKeyNeeded)
                             {
                                 pressedKey = keybinds.ElementAt((int)Key.ESCAPE);

@@ -41,13 +41,13 @@
         ///<param name="ignoreMode">If the current <c>GetKeyMode</c> is the <c>ignoreMode</c> when calling <c>GetKey</c>, the keypress will be ignored.</param>
         /// <inheritdoc cref="KeyAction(object, ConsoleKeyInfo, IEnumerable{GetKeyMode})"/>
         public KeyAction(object response, ConsoleKeyInfo key, GetKeyMode ignoreMode) :
-            this(response, key, new List<GetKeyMode> { ignoreMode })
+            this(response, key, [ignoreMode])
         { }
 
         /// <param name="key">The key that can be pressed to trigger this action.</param>
         /// <inheritdoc cref="KeyAction(object, IEnumerable{ConsoleKeyInfo}, IEnumerable{GetKeyMode})"/>
         public KeyAction(object response, ConsoleKeyInfo key, IEnumerable<GetKeyMode> ignoreModes) :
-            this(response, new List<ConsoleKeyInfo> { key }, ignoreModes)
+            this(response, [key], ignoreModes)
         { }
 
         /// <summary>
@@ -66,6 +66,25 @@
         #endregion
 
         #region Public overrides
+        public bool Equals(KeyAction action)
+        {
+            if (
+                action.response.Equals(response) &&
+                action.keys.SequenceEqual(keys) &&
+                action.ignoreModes.SequenceEqual(ignoreModes)
+            )
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <inheritdoc cref="object.Equals(object?)"/>
+        public override bool Equals(object? obj)
+        {
+            return obj is KeyAction action && Equals(action);
+        }
+
         /// <inheritdoc cref="object.ToString()"/>
         public override string? ToString()
         {
