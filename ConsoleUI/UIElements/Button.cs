@@ -51,20 +51,18 @@ namespace ConsoleUI.UIElements
         /// <inheritdoc cref="BaseUI.HandleActionProtected(KeyPressedEventArgs)"/>
         protected override object HandleActionProtected(KeyPressedEventArgs args)
         {
-            if (args.pressedKey.Equals(args.keybinds.ElementAt((int)Key.ENTER)))
-            {
-                var (actionType, returned) = action.InvokeAction(modifyList ? this : null, args.keybinds);
-                // function
-                if (actionType is UIActionType.FUNCTION)
-                {
-                    return returned is null ? (args.UpdateScreen ?? true) : returned;
-                }
-                return args.UpdateScreen ?? true;
-            }
-            else
+            if (!args.pressedKey.Equals(args.keybinds.ElementAt((int)Key.ENTER)))
             {
                 return args.UpdateScreen ?? false;
             }
+
+            var (actionType, returned) = action.InvokeAction(modifyList ? this : null, args.keybinds, args.getKeyFunction);
+            // function
+            if (actionType is UIActionType.FUNCTION)
+            {
+                return returned is null ? (args.UpdateScreen ?? true) : returned;
+            }
+            return args.UpdateScreen ?? true;
         }
         #endregion
     }

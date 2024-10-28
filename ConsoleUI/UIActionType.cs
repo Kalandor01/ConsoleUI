@@ -12,6 +12,10 @@
         /// <summary>
         /// <c>UIList</c> action type.
         /// </summary>
-        UILIST
+        UILIST,
+        /// <summary>
+        /// <c>OptionsUI</c> action type.
+        /// </summary>
+        OPTIONSUI,
     }
 }

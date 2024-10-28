@@ -10,6 +10,11 @@ namespace ConsoleUI
     {
         #region Private fields
         /// <summary>
+        /// The type of the UIAction.
+        /// </summary>
+        readonly UIActionType actionType;
+
+        /// <summary>
         /// The UIList object to display when the action is triggered.
         /// </summary>
         readonly UIList? actionUIList;
@@ -18,11 +23,6 @@ namespace ConsoleUI
         /// The OptionsUI object to display when the action is triggered.
         /// </summary>
         readonly OptionsUI? actionOptionsUI;
-
-        /// <summary>
-        /// The GetKeyFunction to use for the UIList/OptionsUI.
-        /// </summary>
-        readonly GetKeyFunctionDelegate? actionGetKeyFunction;
 
         /// <summary>
         /// The function to run when the action is triggered.<br/>
@@ -42,17 +42,15 @@ namespace ConsoleUI
         /// <inheritdoc cref="UIAction"/>
         /// </summary>
         /// <param name="uiList"><inheritdoc cref="actionUIList" path="//summary"/></param>
-        /// <param name="getKeyFunction"><inheritdoc cref="actionGetKeyFunction" path="//summary"/></param>
-        public UIAction(UIList uiList, GetKeyFunctionDelegate? getKeyFunction = null)
-            : this(uiList, null, getKeyFunction, null, null) { }
+        public UIAction(UIList uiList)
+            : this(UIActionType.UILIST, uiList, null, null, null) { }
 
         /// <summary>
         /// <inheritdoc cref="UIAction"/>
         /// </summary>
         /// <param name="optionsUI"><inheritdoc cref="actionOptionsUI" path="//summary"/></param>
-        /// <param name="getKeyFunction"><inheritdoc cref="actionGetKeyFunction" path="//summary"/></param>
-        public UIAction(OptionsUI optionsUI, GetKeyFunctionDelegate? getKeyFunction = null)
-            : this(null, optionsUI, getKeyFunction, null, null) { }
+        public UIAction(OptionsUI optionsUI)
+            : this(UIActionType.OPTIONSUI, null, optionsUI, null, null) { }
 
         /// <summary>
         /// <inheritdoc cref="UIAction"/>
@@ -60,26 +58,27 @@ namespace ConsoleUI
         /// <param name="function"><inheritdoc cref="actionFunction" path="//summary"/></param>
         /// <param name="args"><inheritdoc cref="actionParameters" path="//summary"/></param>
         public UIAction(Delegate function, params object?[]? args)
-            : this(null, null, null, function, args) { }
+            : this(UIActionType.FUNCTION, null, null, function, args) { }
 
         /// <summary>
         /// <inheritdoc cref="UIAction"/>
         /// </summary>
+        /// <param name="actionType"><inheritdoc cref="actionType" path="//summary"/></param>
         /// <param name="uiList"><inheritdoc cref="actionUIList" path="//summary"/></param>
         /// <param name="optionsUI"><inheritdoc cref="actionOptionsUI" path="//summary"/></param>
-        /// <param name="getKeyFunction"><inheritdoc cref="actionGetKeyFunction" path="//summary"/></param>
         /// <param name="function"><inheritdoc cref="actionFunction" path="//summary"/></param>
         /// <param name="args"><inheritdoc cref="actionParameters" path="//summary"/></param>
         private UIAction(
+            UIActionType actionType,
             UIList? uiList,
             OptionsUI? optionsUI,
-            GetKeyFunctionDelegate? getKeyFunction,
-            Delegate? function, params object?[]? args
+            Delegate? function,
+            params object?[]? args
         )
         {
+            this.actionType = actionType;
             actionUIList = uiList;
             actionOptionsUI = optionsUI;
-            actionGetKeyFunction = getKeyFunction;
             actionFunction = function;
             actionParameters = args;
         }
@@ -100,12 +99,14 @@ namespace ConsoleUI
             GetKeyFunctionDelegate? getKeyFunction = null
         )
         {
-            // function
-            if (actionFunction is not null)
+            switch (actionType)
             {
-                object?[]? argsArray = null;
-                if (extraParameter is not null || (actionParameters is not null && actionParameters.Length != 0))
-                {
+                case UIActionType.FUNCTION:
+                    if (extraParameter is null && (actionParameters is null || actionParameters.Length == 0))
+                    {
+                        return (UIActionType.FUNCTION, actionFunction?.DynamicInvoke(null));
+                    }
+
                     var args = new List<object?>();
                     if (extraParameter is not null)
                     {
@@ -115,14 +116,13 @@ namespace ConsoleUI
                     {
                         args.AddRange(actionParameters);
                     }
-                    argsArray = [.. args];
-                }
-                return (UIActionType.FUNCTION, actionFunction.DynamicInvoke(argsArray));
-            }
-            // UIList
-            else
-            {
-                return (UIActionType.UILIST, actionUIList?.Display(keybinds, getKeyFunction ?? actionGetKeyFunction));
+                    return (UIActionType.FUNCTION, actionFunction?.DynamicInvoke([.. args]));
+                case UIActionType.UILIST:
+                    return (actionType, actionUIList?.Display(keybinds, getKeyFunction));
+                case UIActionType.OPTIONSUI:
+                    return (actionType, actionOptionsUI?.Display(keybinds, getKeyFunction));
+                default:
+                    throw new ArgumentException($"Unknown action type: \"{actionType}\"!");
             }
         }
         #endregion

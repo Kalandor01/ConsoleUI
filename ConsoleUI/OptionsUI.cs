@@ -357,7 +357,7 @@ namespace ConsoleUI
                         }
                     }
 
-                    var keyPressedEventArgs = new OptionsKeyPressedEventArgs(pressedKey, keybinds);
+                    var keyPressedEventArgs = new OptionsKeyPressedEventArgs(pressedKey, keybinds, getKeyFunction);
                     RaiseKeyPressedEvent(keyPressedEventArgs);
                     if (keyPressedEventArgs.UpdateScreen != null)
                     {
@@ -384,7 +384,7 @@ namespace ConsoleUI
                         !pressedKey.Equals(keybinds.ElementAt((int)Key.ESCAPE))
                     )
                     {
-                        var returned = selectedElement.HandleAction(pressedKey, keybinds, passInObject ? this : null);
+                        var returned = selectedElement.HandleAction(pressedKey, keybinds, getKeyFunction, passInObject ? this : null);
                         if (returned is not null)
                         {
                             if (returned.GetType() == typeof(bool))

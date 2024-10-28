@@ -236,11 +236,17 @@ namespace ConsoleUI.UIElements
         /// </summary>
         /// <param name="key">The triggered key action.</param>
         /// <param name="keybinds">The list of <c>KeyAction</c> objects, that were used.</param>
+        /// <param name="getKeyFunction">The function used to get the next valid key the user pressed.</param>
         /// <param name="optionsUI">The <c>OptionsUI</c> containing this object.</param>
         /// <returns>If the screen should update.</returns>
-        public virtual object HandleAction(KeyAction key, IEnumerable<KeyAction> keybinds, OptionsUI? optionsUI = null)
+        public virtual object HandleAction(
+            KeyAction key,
+            IEnumerable<KeyAction> keybinds,
+            Utils.GetKeyFunctionDelegate getKeyFunction,
+            OptionsUI? optionsUI = null
+        )
         {
-            var args = new KeyPressedEventArgs(key, keybinds, optionsUI);
+            var args = new KeyPressedEventArgs(key, keybinds, getKeyFunction, optionsUI);
             RaiseKeyPressedEvent(args);
 
             if (args.CancelKeyHandling)
