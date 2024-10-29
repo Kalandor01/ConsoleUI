@@ -53,46 +53,46 @@ namespace ConsoleUI
 
         #region Event delegates
         /// <summary>
-        /// Called before the UI options are displayed.
+        /// Called before the UI elements are displayed.
         /// </summary>
         /// <param name="sender">The sender of this event.</param>
         /// <param name="args">The arguments for this event.</param>
-        public delegate void BeforeOptionsDisplayedEventHandler(OptionsUI sender, BeforeOptionsDisplayedEventArgs args);
+        public delegate void BeforeElementsDisplayedEventHandler(OptionsUI sender, BeforeElementsDisplayedEventArgs args);
 
         /// <summary>
-        /// Called after the UI options are displayed.
+        /// Called after the UI elements are displayed.
         /// </summary>
         /// <param name="sender">The sender of this event.</param>
         /// <param name="args">The arguments for this event.</param>
-        public delegate void AfterOptionsDisplayedEventHandler(OptionsUI sender, AfterOptionsDisplayedEventArgs args);
+        public delegate void AfterElementsDisplayedEventHandler(OptionsUI sender, AfterElementsDisplayedEventArgs args);
 
         /// <summary>
         /// Called before a UI element text is created.
         /// </summary>
         /// <param name="sender">The sender of this event.</param>
         /// <param name="args">The arguments for this event.</param>
-        public delegate void BeforeOptionsTextCreatedEventHandler(OptionsUI sender, BeforeOptionsTextCreatedEventArgs args);
+        public delegate void BeforeOptionsTextCreatedEventHandler(OptionsUI sender, BeforeElementTextCreatedEventArgs args);
 
         /// <summary>
         /// Called after a UI element text is created.
         /// </summary>
         /// <param name="sender">The sender of this event.</param>
         /// <param name="args">The arguments for this event.</param>
-        public delegate void AfterOptionsTextCreatedEventHandler(OptionsUI sender, AfterOptionsTextCreatedEventArgs args);
+        public delegate void AfterOptionsTextCreatedEventHandler(OptionsUI sender, AfterElementTextCreatedEventArgs args);
 
         /// <summary>
         /// Called after a UI element text is displayed.
         /// </summary>
         /// <param name="sender">The sender of this event.</param>
         /// <param name="args">The arguments for this event.</param>
-        public delegate void AfterOptionsTextDisplayedEventHandler(OptionsUI sender, AfterOptionsTextDisplayedEventArgs args);
+        public delegate void AfterOptionsTextDisplayedEventHandler(OptionsUI sender, AfterElementTextDisplayedEventArgs args);
 
         /// <summary>
         /// Called when a key is pressed.
         /// </summary>
         /// <param name="sender">The sender of this event.</param>
         /// <param name="args">The arguments for this event.</param>
-        public delegate void OptionsKeyPressedEventHandler(OptionsUI sender, OptionsKeyPressedEventArgs args);
+        public delegate void OptionsKeyPressedEventHandler(OptionsUI sender, KeyPressedEventArgs args);
 
         /// <summary>
         /// Called when the selected element is changed.
@@ -111,14 +111,14 @@ namespace ConsoleUI
 
         #region Events
         /// <summary>
-        /// Called before the UI options are displayed.
+        /// Called before the UI elements are displayed.
         /// </summary>
-        public event BeforeOptionsDisplayedEventHandler BeforeOptionsDisplayed;
+        public event BeforeElementsDisplayedEventHandler BeforeElementsDisplayed;
 
         /// <summary>
-        /// Called after the UI options are displayed.
+        /// Called after the UI elements are displayed.
         /// </summary>
-        public event AfterOptionsDisplayedEventHandler AfterOptionsDisplayed;
+        public event AfterElementsDisplayedEventHandler AfterElementsDisplayed;
 
         /// <summary>
         /// Called before a UI element text is created.
@@ -189,31 +189,31 @@ namespace ConsoleUI
 
         #region EventCallFunctions
         /// <summary>
-        /// Calls the <c>BeforeOptionsDisplayed</c> event.
+        /// Calls the <c>BeforeElementsDisplayed</c> event.
         /// </summary>
-        private void RaiseBeforeOptionsDisplayedEvent(BeforeOptionsDisplayedEventArgs args)
+        private void RaiseBeforeElementsDisplayedEvent(BeforeElementsDisplayedEventArgs args)
         {
-            if (BeforeOptionsDisplayed is not null)
+            if (BeforeElementsDisplayed is not null)
             {
-                BeforeOptionsDisplayed(this, args);
+                BeforeElementsDisplayed(this, args);
             }
         }
 
         /// <summary>
-        /// Calls the <c>AfterOptionsDisplayed</c> event.
+        /// Calls the <c>AfterElementsDisplayed</c> event.
         /// </summary>
-        private void RaiseAfterOptionsDisplayedEvent(AfterOptionsDisplayedEventArgs args)
+        private void RaiseAfterElementsDisplayedEvent(AfterElementsDisplayedEventArgs args)
         {
-            if (AfterOptionsDisplayed is not null)
+            if (AfterElementsDisplayed is not null)
             {
-                AfterOptionsDisplayed(this, args);
+                AfterElementsDisplayed(this, args);
             }
         }
 
         /// <summary>
         /// Calls the <c>BeforeTextCreated</c> event.
         /// </summary>
-        private void RaiseBeforeTextCreatedEvent(BeforeOptionsTextCreatedEventArgs args)
+        private void RaiseBeforeTextCreatedEvent(BeforeElementTextCreatedEventArgs args)
         {
             if (BeforeTextCreated is not null)
             {
@@ -224,7 +224,7 @@ namespace ConsoleUI
         /// <summary>
         /// Calls the <c>AfterTextCreated</c> event.
         /// </summary>
-        protected void RaiseAfterTextCreatedEvent(AfterOptionsTextCreatedEventArgs args)
+        protected void RaiseAfterTextCreatedEvent(AfterElementTextCreatedEventArgs args)
         {
             if (AfterTextCreated is not null)
             {
@@ -235,7 +235,7 @@ namespace ConsoleUI
         /// <summary>
         /// Calls the <c>AfterTextDisplayed</c> event.
         /// </summary>
-        protected void RaiseAfterTextDisplayedEvent(AfterOptionsTextDisplayedEventArgs args)
+        protected void RaiseAfterTextDisplayedEvent(AfterElementTextDisplayedEventArgs args)
         {
             if (AfterTextDisplayed is not null)
             {
@@ -246,7 +246,7 @@ namespace ConsoleUI
         /// <summary>
         /// Calls the <c>KeyPressed</c> event.
         /// </summary>
-        protected void RaiseKeyPressedEvent(OptionsKeyPressedEventArgs args)
+        protected void RaiseKeyPressedEvent(KeyPressedEventArgs args)
         {
             if (KeyPressed is not null)
             {
@@ -320,7 +320,8 @@ namespace ConsoleUI
 
             // render/getkey loop
             KeyAction pressedKey;
-            do
+            var actualMove = true;
+            while (true)
             {
                 // prevent infinite loop
                 if (elements.All(answer => answer is null || !answer.IsSelectable))
@@ -328,10 +329,13 @@ namespace ConsoleUI
                     throw new UINoSelectablesExeption();
                 }
 
-                DisplayOptions();
+                if (actualMove)
+                {
+                    DisplayOptions();
+                }
+                actualMove = false;
 
                 // move selection/change value
-                var actualMove = false;
                 do
                 {
                     // get pressedKey
@@ -357,7 +361,7 @@ namespace ConsoleUI
                         }
                     }
 
-                    var keyPressedEventArgs = new OptionsKeyPressedEventArgs(pressedKey, keybinds, getKeyFunction);
+                    var keyPressedEventArgs = new KeyPressedEventArgs(pressedKey, keybinds, getKeyFunction);
                     RaiseKeyPressedEvent(keyPressedEventArgs);
                     if (keyPressedEventArgs.UpdateScreen != null)
                     {
@@ -413,11 +417,22 @@ namespace ConsoleUI
                     }
                 }
                 while (!actualMove);
-            }
-            while (!canEscape || !pressedKey.Equals(keybinds.ElementAt((int)Key.ESCAPE)));
 
-            RaiseBeforeExitingEvent(new BeforeExitingEventArgs(null, false));
-            return null;
+                if (canEscape && pressedKey.Equals(keybinds.ElementAt((int)Key.ESCAPE)))
+                {
+                    var beforeExitingEventArgs = new BeforeExitingEventArgs(null, false);
+                    RaiseBeforeExitingEvent(beforeExitingEventArgs);
+
+                    if (!beforeExitingEventArgs.CancelExiting)
+                    {
+                        return null;
+                    }
+                    if (beforeExitingEventArgs.UpdateScreen != null)
+                    {
+                        actualMove = (bool)beforeExitingEventArgs.UpdateScreen;
+                    }
+                }
+            }
         }
         #endregion
 
@@ -427,8 +442,8 @@ namespace ConsoleUI
         /// </summary>
         private void DisplayOptions()
         {
-            var beforeDisplayArgs = new BeforeOptionsDisplayedEventArgs();
-            RaiseBeforeOptionsDisplayedEvent(beforeDisplayArgs);
+            var beforeDisplayArgs = new BeforeElementsDisplayedEventArgs();
+            RaiseBeforeElementsDisplayedEvent(beforeDisplayArgs);
             if (beforeDisplayArgs.OverrideText != null)
             {
                 Console.WriteLine(beforeDisplayArgs.OverrideText);
@@ -472,7 +487,7 @@ namespace ConsoleUI
             for (var x = startIndex; x < endIndex; x++)
             {
                 var element = elements.ElementAt(x)!;
-                var beforeTextCreatedArgs = new BeforeOptionsTextCreatedEventArgs(x);
+                var beforeTextCreatedArgs = new BeforeElementTextCreatedEventArgs(x);
                 RaiseBeforeTextCreatedEvent(beforeTextCreatedArgs);
                 if (beforeTextCreatedArgs.OverrideText != null)
                 {
@@ -486,25 +501,26 @@ namespace ConsoleUI
                         passInObject ? this : null
                     ) ?? "\n";
 
-                var afterTextCreatedArgs = new AfterOptionsTextCreatedEventArgs(elementText, x);
+                var afterTextCreatedArgs = new AfterElementTextCreatedEventArgs(elementText, x);
                 RaiseAfterTextCreatedEvent(afterTextCreatedArgs);
 
                 Console.Write(afterTextCreatedArgs.OverrideText ?? elementText);
 
-                var afterTextDisplayedArgs = new AfterOptionsTextDisplayedEventArgs(elementText, x);
+                var afterTextDisplayedArgs = new AfterElementTextDisplayedEventArgs(elementText, x);
                 RaiseAfterTextDisplayedEvent(afterTextDisplayedArgs);
             }
 
             Console.WriteLine(endIndex == elements.Count() ? scrollSettings.scrollIcon.bottomEndIndicator : scrollSettings.scrollIcon.bottomContinueIndicator);
 
-            var afterDisplayArgs = new AfterOptionsDisplayedEventArgs(endIndex);
-            RaiseAfterOptionsDisplayedEvent(afterDisplayArgs);
+            var afterDisplayArgs = new AfterElementsDisplayedEventArgs(endIndex);
+            RaiseAfterElementsDisplayedEvent(afterDisplayArgs);
         }
 
         /// <summary>
         /// Moves the selection.
         /// </summary>
         /// <param name="selectionOffset">How much to move the selection down.</param>
+        /// <param name="updateScreen">If the screen should update.</param>
         /// <returns>If the selection changed.</returns>
         private void MoveSelectedion(int selectionOffset, ref bool updateScreen)
         {

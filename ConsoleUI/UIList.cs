@@ -1,4 +1,5 @@
 ﻿using ConsoleUI.Keybinds;
+using ConsoleUI.UIElements.EventArgs;
 using System.Collections;
 using System.Text;
 using static ConsoleUI.Utils;
@@ -66,6 +67,94 @@ namespace ConsoleUI
         public string clearScreenText;
         #endregion
 
+        #region Event delegates
+        /// <summary>
+        /// Called before the UI elements are displayed.
+        /// </summary>
+        /// <param name="sender">The sender of this event.</param>
+        /// <param name="args">The arguments for this event.</param>
+        public delegate void BeforeElementsDisplayedEventHandler(UIList sender, BeforeElementsDisplayedEventArgs args);
+
+        /// <summary>
+        /// Called after the UI elements are displayed.
+        /// </summary>
+        /// <param name="sender">The sender of this event.</param>
+        /// <param name="args">The arguments for this event.</param>
+        public delegate void AfterElementsDisplayedEventHandler(UIList sender, AfterElementsDisplayedEventArgs args);
+
+        /// <summary>
+        /// Called before a UI element text is created.
+        /// </summary>
+        /// <param name="sender">The sender of this event.</param>
+        /// <param name="args">The arguments for this event.</param>
+        public delegate void BeforeElementTextCreatedEventHandler(UIList sender, BeforeElementTextCreatedEventArgs args);
+
+        /// <summary>
+        /// Called after a UI element text is created.
+        /// </summary>
+        /// <param name="sender">The sender of this event.</param>
+        /// <param name="args">The arguments for this event.</param>
+        public delegate void AfterElementTextCreatedEventHandler(UIList sender, AfterElementTextCreatedEventArgs args);
+
+        /// <summary>
+        /// Called when a key is pressed.
+        /// </summary>
+        /// <param name="sender">The sender of this event.</param>
+        /// <param name="args">The arguments for this event.</param>
+        public delegate void OptionsKeyPressedEventHandler(UIList sender, KeyPressedEventArgs args);
+
+        /// <summary>
+        /// Called when the selected element is changed.
+        /// </summary>
+        /// <param name="sender">The sender of this event.</param>
+        /// <param name="args">The arguments for this event.</param>
+        public delegate void SelectionChangedEventHandler(UIList sender, SelectionChangedEventArgs args);
+
+        /// <summary>
+        /// Called before the UI exits.
+        /// </summary>
+        /// <param name="sender">The sender of this event.</param>
+        /// <param name="args">The arguments for this event.</param>
+        public delegate void BeforeExitingEventHandler(UIList sender, BeforeExitingEventArgs args);
+        #endregion
+
+        #region Events
+        /// <summary>
+        /// Called before the UI elements are displayed.
+        /// </summary>
+        public event BeforeElementsDisplayedEventHandler BeforeElementsDisplayed;
+
+        /// <summary>
+        /// Called after the UI elements are displayed.
+        /// </summary>
+        public event AfterElementsDisplayedEventHandler AfterElementsDisplayed;
+
+        /// <summary>
+        /// Called before a UI element text is created.
+        /// </summary>
+        public event BeforeElementTextCreatedEventHandler BeforeTextCreated;
+
+        /// <summary>
+        /// Called after a UI element is text is created.
+        /// </summary>
+        public event AfterElementTextCreatedEventHandler AfterTextCreated;
+
+        /// <summary>
+        /// Called when a key is pressed.
+        /// </summary>
+        public event OptionsKeyPressedEventHandler KeyPressed;
+
+        /// <summary>
+        /// Called when the selected element is changed.
+        /// </summary>
+        public event SelectionChangedEventHandler SelectionChanged;
+
+        /// <summary>
+        /// Called before the UI exits.
+        /// </summary>
+        public event BeforeExitingEventHandler BeforeExiting;
+        #endregion
+
         #region Constructors
         /// <summary>
         /// <inheritdoc cref="UIList"/>
@@ -111,6 +200,85 @@ namespace ConsoleUI
         }
         #endregion
 
+        #region EventCallFunctions
+        /// <summary>
+        /// Calls the <c>BeforeElementsDisplayed</c> event.
+        /// </summary>
+        private void RaiseBeforeElementsDisplayedEvent(BeforeElementsDisplayedEventArgs args)
+        {
+            if (BeforeElementsDisplayed is not null)
+            {
+                BeforeElementsDisplayed(this, args);
+            }
+        }
+
+        /// <summary>
+        /// Calls the <c>AfterElementsDisplayed</c> event.
+        /// </summary>
+        private void RaiseAfterElementsDisplayedEvent(AfterElementsDisplayedEventArgs args)
+        {
+            if (AfterElementsDisplayed is not null)
+            {
+                AfterElementsDisplayed(this, args);
+            }
+        }
+
+        /// <summary>
+        /// Calls the <c>BeforeTextCreated</c> event.
+        /// </summary>
+        private void RaiseBeforeTextCreatedEvent(BeforeElementTextCreatedEventArgs args)
+        {
+            if (BeforeTextCreated is not null)
+            {
+                BeforeTextCreated(this, args);
+            }
+        }
+
+        /// <summary>
+        /// Calls the <c>AfterTextCreated</c> event.
+        /// </summary>
+        protected void RaiseAfterTextCreatedEvent(AfterElementTextCreatedEventArgs args)
+        {
+            if (AfterTextCreated is not null)
+            {
+                AfterTextCreated(this, args);
+            }
+        }
+
+        /// <summary>
+        /// Calls the <c>KeyPressed</c> event.
+        /// </summary>
+        protected void RaiseKeyPressedEvent(KeyPressedEventArgs args)
+        {
+            if (KeyPressed is not null)
+            {
+                KeyPressed(this, args);
+            }
+        }
+
+        /// <summary>
+        /// Calls the <c>SelectionChanged</c> event.
+        /// </summary>
+        protected void RaiseSelectionChangedEvent(SelectionChangedEventArgs args)
+        {
+            if (SelectionChanged is not null)
+            {
+                SelectionChanged(this, args);
+            }
+        }
+
+        /// <summary>
+        /// Calls the <c>BeforeExiting</c> event.
+        /// </summary>
+        protected void RaiseBeforeExitingEvent(BeforeExitingEventArgs args)
+        {
+            if (BeforeExiting is not null)
+            {
+                BeforeExiting(this, args);
+            }
+        }
+        #endregion
+
         #region Public methods
         /// <summary>
         /// SEE OBJECT FOR A MORE DETAILED DOCUMENTATION!<br/>
@@ -138,40 +306,117 @@ namespace ConsoleUI
             {
                 selected = SetupSelected(selected);
                 var key = keybinds.ElementAt((int)Key.ESCAPE);
+                var updateScreen = true;
                 while (!key.Equals(keybinds.ElementAt((int)Key.ENTER)))
                 {
-                    // clear screen + render
-                    var txt = new StringBuilder(clearScreenText);
-
-                    // question
-                    if (question is not null)
+                    if (updateScreen)
                     {
-                        txt.Append(question + "\n\n");
+                        var beforeDisplayArgs = new BeforeElementsDisplayedEventArgs();
+                        RaiseBeforeElementsDisplayedEvent(beforeDisplayArgs);
+                        if (beforeDisplayArgs.OverrideText is null)
+                        {
+                            // clear screen + render
+                            var txt = new StringBuilder(clearScreenText);
+
+                            // question
+                            if (question is not null)
+                            {
+                                txt.Append(question + "\n\n");
+                            }
+
+                            // answers
+                            txt.Append(MakeText(out var endIndex));
+
+                            Console.WriteLine(txt);
+
+                            var afterDisplayArgs = new AfterElementsDisplayedEventArgs(endIndex);
+                            RaiseAfterElementsDisplayedEvent(afterDisplayArgs);
+                        }
+                        else
+                        {
+                            Console.WriteLine(beforeDisplayArgs.OverrideText);
+                        }
                     }
-
-                    // answers
-                    txt.Append(MakeText());
-
-                    Console.WriteLine(txt);
+                    updateScreen = true;
 
                     // answer select
-                    key = getKeyFunction(GetKeyMode.IGNORE_HORIZONTAL, keybinds);
-                    if (canEscape && key.Equals(keybinds.ElementAt((int)Key.ESCAPE)))
-                    {
-                        return -1;
-                    }
-                    while (key.Equals(keybinds.ElementAt((int)Key.ESCAPE)))
+                    var cancelled = false;
+                    while (true)
                     {
                         key = getKeyFunction(GetKeyMode.IGNORE_HORIZONTAL, keybinds);
+
+                        var keyPressedArgs = new KeyPressedEventArgs(key, keybinds, getKeyFunction);
+                        RaiseKeyPressedEvent(keyPressedArgs);
+
+                        if (keyPressedArgs.UpdateScreen is not null)
+                        {
+                            updateScreen = (bool)keyPressedArgs.UpdateScreen;
+                        }
+
+                        if (keyPressedArgs.CancelKeyHandling)
+                        {
+                            cancelled = true;
+                            break;
+                        }
+
+                        if (key.Equals(keybinds.ElementAt((int)Key.ESCAPE)))
+                        {
+                            if (canEscape)
+                            {
+                                var beforeExitingEventArgs = new BeforeExitingEventArgs(-1, false);
+                                RaiseBeforeExitingEvent(beforeExitingEventArgs);
+
+                                if (!beforeExitingEventArgs.CancelExiting)
+                                {
+                                    return -1;
+                                }
+                                if (beforeExitingEventArgs.UpdateScreen != null)
+                                {
+                                    updateScreen = (bool)beforeExitingEventArgs.UpdateScreen;
+                                }
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            break;
+                        }
                     }
+
+                    if (cancelled)
+                    {
+                        continue;
+                    }
+
+                    var prevSelected = selected;
                     selected = MoveSelection(selected, key, keybinds);
+
+                    var selectionChangedEventArgs = new SelectionChangedEventArgs(prevSelected, selected);
+                    RaiseSelectionChangedEvent(selectionChangedEventArgs);
+                    selected = selectionChangedEventArgs.NewSelected;
+                    if (selectionChangedEventArgs.UpdateScreen != null)
+                    {
+                        updateScreen = (bool)selectionChangedEventArgs.UpdateScreen;
+                    }
+                    updateScreen |= prevSelected != selected;
                 }
+
                 // menu actions
                 selected = ConvertSelected(selected);
                 var action = HandleAction(selected, keybinds, getKeyFunction);
                 if (action is not null)
                 {
-                    return action;
+                    var beforeExitingEventArgs = new BeforeExitingEventArgs(action, true);
+                    RaiseBeforeExitingEvent(beforeExitingEventArgs);
+
+                    if (!beforeExitingEventArgs.CancelExiting)
+                    {
+                        return action;
+                    }
+                    if (beforeExitingEventArgs.UpdateScreen != null)
+                    {
+                        updateScreen = (bool)beforeExitingEventArgs.UpdateScreen;
+                    }
                 }
             }
         }
@@ -181,9 +426,8 @@ namespace ConsoleUI
         /// <summary>
         /// Returns the text that represents the UI of this object, without the question.
         /// </summary>
-        private StringBuilder MakeText()
+        private StringBuilder MakeText(out int endIndex)
         {
-            int endIndex;
             if (scrollSettings.maxElements == -1 || scrollSettings.maxElements >= answers.Count())
             {
                 startIndex = 0;
@@ -209,8 +453,17 @@ namespace ConsoleUI
             text.Append(startIndex == 0 ? scrollSettings.scrollIcon.topEndIndicator : scrollSettings.scrollIcon.topContinueIndicator);
             for (var x = startIndex; x < endIndex; x++)
             {
-                var answer = answers.ElementAt(x);
-                if (answer is null)
+                var element = answers.ElementAt(x);
+
+                var beforeTextCreatedArgs = new BeforeElementTextCreatedEventArgs(x);
+                RaiseBeforeTextCreatedEvent(beforeTextCreatedArgs);
+                if (beforeTextCreatedArgs.OverrideText != null)
+                {
+                    Console.Write(beforeTextCreatedArgs.OverrideText);
+                    continue;
+                }
+
+                if (element is null)
                 {
                     text.AppendLine();
                     continue;
@@ -218,7 +471,12 @@ namespace ConsoleUI
 
                 var currIcon = selected == x ? cursorIcon.sIcon : cursorIcon.icon;
                 var currIconR = selected == x ? cursorIcon.sIconR : cursorIcon.iconR;
-                text.Append(currIcon + (multiline ? answer.Replace("\n", $"{currIconR}\n{currIcon}") : answer) + $"{currIconR}\n");
+                var elementText = currIcon + (multiline ? element.Replace("\n", $"{currIconR}\n{currIcon}") : element) + $"{currIconR}\n";
+
+                var afterTextCreatedArgs = new AfterElementTextCreatedEventArgs(elementText, x);
+                RaiseAfterTextCreatedEvent(afterTextCreatedArgs);
+
+                text.Append(afterTextCreatedArgs.OverrideText ?? elementText);
             }
             text.Append(endIndex == answers.Count() ? scrollSettings.scrollIcon.bottomEndIndicator : scrollSettings.scrollIcon.bottomContinueIndicator);
             return text;

@@ -3,7 +3,7 @@
     /// <summary>
     /// Class for storing the arguments of the <c>BeforeTextCreated</c> event.
     /// </summary>
-    public class BeforeOptionsTextCreatedEventArgs
+    public class BeforeElementTextCreatedEventArgs
     {
         /// <summary>
         /// The index of the current BaseUI element.
@@ -16,11 +16,11 @@
         public string? OverrideText { get; set; }
 
         /// <summary>
-        /// <inheritdoc cref="BeforeOptionsTextCreatedEventArgs"/>
+        /// <inheritdoc cref="BeforeElementTextCreatedEventArgs"/>
         /// </summary>
         /// <param name="currentUIIndex"><inheritdoc cref="currentUIIndex" path="//summary"/></param>
         /// <param name="overrideText"><inheritdoc cref="OverrideText" path="//summary"/></param>
-        public BeforeOptionsTextCreatedEventArgs(
+        public BeforeElementTextCreatedEventArgs(
             int currentUIIndex,
             string? overrideText = null
         )

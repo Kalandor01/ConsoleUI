@@ -77,7 +77,7 @@ namespace ConsoleUI.UIElements
         /// </summary>
         /// <param name="sender">The UI element that called this event.</param>
         /// <param name="args">The arguments for this event.</param>
-        public delegate void KeyPressedEventHandler(BaseUI sender, KeyPressedEventArgs args);
+        public delegate void KeyPressedEventHandler(BaseUI sender, UIKeyPressedEventArgs args);
         #endregion
 
         #region Events
@@ -152,7 +152,7 @@ namespace ConsoleUI.UIElements
         /// <summary>
         /// Calls the <c>KeyPressed</c> event.
         /// </summary>
-        protected void RaiseKeyPressedEvent(KeyPressedEventArgs args)
+        protected void RaiseKeyPressedEvent(UIKeyPressedEventArgs args)
         {
             if (KeyPressed is not null)
             {
@@ -246,7 +246,7 @@ namespace ConsoleUI.UIElements
             OptionsUI? optionsUI = null
         )
         {
-            var args = new KeyPressedEventArgs(key, keybinds, getKeyFunction, optionsUI);
+            var args = new UIKeyPressedEventArgs(key, keybinds, getKeyFunction, optionsUI);
             RaiseKeyPressedEvent(args);
 
             if (args.CancelKeyHandling)
@@ -280,7 +280,7 @@ namespace ConsoleUI.UIElements
         /// </summary>
         /// <param name="args">The <c>KeyPressedEventArgs</c> containing the arguments for this method.</param>
         /// <returns>If the screen should update.</returns>
-        protected virtual object HandleActionProtected(KeyPressedEventArgs args)
+        protected virtual object HandleActionProtected(UIKeyPressedEventArgs args)
         {
             return args.UpdateScreen ?? false;
         }

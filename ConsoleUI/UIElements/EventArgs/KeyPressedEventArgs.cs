@@ -23,16 +23,11 @@ namespace ConsoleUI.UIElements.EventArgs
         public readonly Utils.GetKeyFunctionDelegate getKeyFunction;
 
         /// <summary>
-        /// The OptionsUI containing the UI element.
-        /// </summary>
-        public readonly OptionsUI? optionsUI;
-
-        /// <summary>
-        /// Whether to immedietly exit the key handling function.
+        /// Whether to immedietly stop the key handling.
         /// </summary>
         public bool CancelKeyHandling { get; set; }
         /// <summary>
-        /// Whether to update the screen after exiting the key handling function.
+        /// Whether to update the screen after the key handling ends.
         /// </summary>
         public bool? UpdateScreen { get; set; }
 
@@ -42,14 +37,12 @@ namespace ConsoleUI.UIElements.EventArgs
         /// <param name="pressedKey"><inheritdoc cref="pressedKey" path="//summary"/></param>
         /// <param name="keybinds"><inheritdoc cref="keybinds" path="//summary"/></param>
         /// <param name="getKeyFunction"><inheritdoc cref="getKeyFunction" path="//summary"/></param>
-        /// <param name="optionsUI"><inheritdoc cref="optionsUI" path="//summary"/></param>
         /// <param name="cancelKeyHandling"><inheritdoc cref="CancelKeyHandling" path="//summary"/></param>
         /// <param name="updateScreen"><inheritdoc cref="UpdateScreen" path="//summary"/></param>
         public KeyPressedEventArgs(
             KeyAction pressedKey,
             IEnumerable<KeyAction> keybinds,
             Utils.GetKeyFunctionDelegate getKeyFunction,
-            OptionsUI? optionsUI = null,
             bool cancelKeyHandling = false,
             bool? updateScreen = null
         )
@@ -57,7 +50,6 @@ namespace ConsoleUI.UIElements.EventArgs
             this.pressedKey = pressedKey;
             this.keybinds = keybinds;
             this.getKeyFunction = getKeyFunction;
-            this.optionsUI = optionsUI;
             CancelKeyHandling = cancelKeyHandling;
             UpdateScreen = updateScreen;
         }

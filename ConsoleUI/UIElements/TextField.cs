@@ -45,6 +45,10 @@ namespace ConsoleUI.UIElements
         /// Whether ANSI escape codes are enabled.
         /// </summary>
         public bool escapeCodesEnabled;
+        /// <summary>
+        /// The function used to read the input text from the user.
+        /// </summary>
+        public ReadKeyDelegate readKeyFunction;
         #endregion
 
         #region Public Properties
@@ -96,6 +100,11 @@ namespace ConsoleUI.UIElements
         /// <param name="cursorPosition">The position of the cursor before the inputKey was inserted.<br/>
         /// If a key was removed, this value is the position of the character that will be removed instead.</param>
         public delegate bool KeyValidatorDelegate(StringBuilder currentValue, ConsoleKeyInfo? inputKey, int cursorPosition);
+
+        /// <summary>
+        /// Reads a key from the user.
+        /// </summary>
+        public delegate ConsoleKeyInfo ReadKeyDelegate();
         #endregion
 
         #region Constructors
@@ -113,6 +122,7 @@ namespace ConsoleUI.UIElements
         /// <param name="keyValidatorFunction"><inheritdoc cref="keyValidatorFunction" path="//summary"/></param>
         /// <param name="overrideDefaultKeyValidatorFunction"><inheritdoc cref="overrideDefaultKeyValidatorFunction" path="//summary"/></param>
         /// <param name="ansiEscapeCodesEnabled"><inheritdoc cref="escapeCodesEnabled" path="//summary"/>></param>
+        /// <param name="readKeyFunction"><inheritdoc cref="readKeyFunction" path="//summary"/></param>
         public TextField(
             string value,
             string preText = "",
@@ -124,7 +134,8 @@ namespace ConsoleUI.UIElements
             TextValidatorDelegate? textValidatorFunction = null,
             KeyValidatorDelegate? keyValidatorFunction = null,
             bool overrideDefaultKeyValidatorFunction = true,
-            bool ansiEscapeCodesEnabled = true
+            bool ansiEscapeCodesEnabled = true,
+            ReadKeyDelegate? readKeyFunction = null
         )
             : base(-1, preText, "", false, postValue, multiline)
         {
@@ -139,6 +150,7 @@ namespace ConsoleUI.UIElements
             this.keyValidatorFunction = keyValidatorFunction;
             this.overrideDefaultKeyValidatorFunction = overrideDefaultKeyValidatorFunction;
             escapeCodesEnabled = ansiEscapeCodesEnabled;
+            this.readKeyFunction = readKeyFunction ?? DefGetKey;
         }
         #endregion
 
@@ -149,8 +161,8 @@ namespace ConsoleUI.UIElements
             return Value;
         }
 
-        /// <inheritdoc cref="BaseUI.HandleActionProtected(KeyPressedEventArgs)"/>
-        protected override object HandleActionProtected(KeyPressedEventArgs args)
+        /// <inheritdoc cref="BaseUI.HandleActionProtected(UIKeyPressedEventArgs)"/>
+        protected override object HandleActionProtected(UIKeyPressedEventArgs args)
         {
             if (!args.pressedKey.Equals(args.keybinds.ElementAt((int)Key.ENTER)))
             {
@@ -184,7 +196,7 @@ namespace ConsoleUI.UIElements
                 {
                     Utils.MoveCursor((-newValue.Length, 0));
                     Console.Write(Utils.ClearLineFromCursorPosString() + message);
-                    Console.ReadKey(true);
+                    readKeyFunction();
                     Utils.MoveCursor((-message.Length, 0));
                     Console.Write(Utils.ClearLineFromCursorPosString() + newValue);
                     var (Left, Top) = Console.GetCursorPosition();
@@ -215,6 +227,14 @@ namespace ConsoleUI.UIElements
         #endregion
 
         #region Private functions
+        /// <summary>
+        /// The default read key function.
+        /// </summary>
+        private static ConsoleKeyInfo DefGetKey()
+        {
+            return Console.ReadKey(true);
+        }
+
         /// <summary>
         /// Gets the number of lines after the value that is in this object, in the display.
         /// </summary>
@@ -332,7 +352,7 @@ namespace ConsoleUI.UIElements
                 var cursorPosOffset = newValue.Length - cursorPos;
                 Console.SetCursorPosition(Left - cursorPosOffset, Top);
 
-                var key = Console.ReadKey(true);
+                var key = readKeyFunction();
                 if (overrideDefaultKeyValidatorFunction && keyValidatorFunction is not null && !keyValidatorFunction(newValue, key, cursorPos))
                 {
                     continue;

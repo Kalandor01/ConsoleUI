@@ -1,9 +1,9 @@
 ﻿namespace ConsoleUI.UIElements.EventArgs
 {
     /// <summary>
-    /// Class for storing the arguments of the <c>BeforeOptionsDisplayed</c> event.
+    /// Class for storing the arguments of the <c>BeforeElementsDisplayed</c> event.
     /// </summary>
-    public class BeforeOptionsDisplayedEventArgs
+    public class BeforeElementsDisplayedEventArgs
     {
         /// <summary>
         /// If not null, halts text creartion and returns this text instead.
@@ -11,10 +11,10 @@
         public string? OverrideText { get; set; }
 
         /// <summary>
-        /// <inheritdoc cref="BeforeOptionsDisplayedEventArgs"/>
+        /// <inheritdoc cref="BeforeElementsDisplayedEventArgs"/>
         /// </summary>
         /// <param name="overrideText"><inheritdoc cref="OverrideText" path="//summary"/></param>
-        public BeforeOptionsDisplayedEventArgs(string? overrideText = null)
+        public BeforeElementsDisplayedEventArgs(string? overrideText = null)
         {
             OverrideText = overrideText;
         }

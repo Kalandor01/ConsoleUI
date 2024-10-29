@@ -72,8 +72,8 @@ namespace ConsoleUI.UIElements
             return txt.ToString();
         }
 
-        /// <inheritdoc cref="BaseUI.HandleActionProtected(KeyPressedEventArgs)"/>
-        protected override object HandleActionProtected(KeyPressedEventArgs args)
+        /// <inheritdoc cref="BaseUI.HandleActionProtected(UIKeyPressedEventArgs)"/>
+        protected override object HandleActionProtected(UIKeyPressedEventArgs args)
         {
             if (args.pressedKey.Equals(args.keybinds.ElementAt((int)Key.RIGHT)))
             {
