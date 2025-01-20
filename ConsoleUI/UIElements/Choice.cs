@@ -14,7 +14,7 @@ namespace ConsoleUI.UIElements
         /// <summary>
         /// The list of options the user can choose from.
         /// </summary>
-        readonly IEnumerable<string> choices;
+        public IList<string> choices;
         #endregion
 
         #region Constructors
@@ -28,8 +28,8 @@ namespace ConsoleUI.UIElements
         /// <param name="postValue"><inheritdoc cref="BaseUI.postValue" path="//summary"/></param>
         /// <param name="multiline"><inheritdoc cref="BaseUI.multiline" path="//summary"/></param>
         /// <param name="choices"><inheritdoc cref="choices" path="//summary"/></param>
-        public Choice(IEnumerable<string> choices, int value = 0, string preText = "", string preValue = "", bool displayValue = false, string postValue = "", bool multiline = false)
-            : base(Math.Clamp(value, 0, choices.Count() - 1), preText, preValue, displayValue, postValue, multiline)
+        public Choice(IList<string> choices, int value = 0, string preText = "", string preValue = "", bool displayValue = false, string postValue = "", bool multiline = false)
+            : base(Math.Clamp(value, 0, choices.Count - 1), preText, preValue, displayValue, postValue, multiline)
         {
             this.choices = choices;
         }
@@ -41,18 +41,18 @@ namespace ConsoleUI.UIElements
         {
             if (multiline)
             {
-                return choices.ElementAt(Value).Replace("\n", icons);
+                return choices[Value].Replace("\n", icons);
             }
             else
             {
-                return choices.ElementAt(Value);
+                return choices[Value];
             }
         }
 
         /// <inheritdoc cref="BaseUI.MakeValue(OptionsUI?)"/>
         protected override string MakeValue(OptionsUI? optionsUI = null)
         {
-            return $"{Value + 1}/{choices.Count()}";
+            return $"{Value + 1}/{choices.Count}";
         }
 
         /// <inheritdoc cref="BaseUI.HandleActionProtected(UIKeyPressedEventArgs)"/>
@@ -69,10 +69,10 @@ namespace ConsoleUI.UIElements
             }
             if (returnValue)
             {
-                Value %= choices.Count();
+                Value %= choices.Count;
                 if (Value < 0)
                 {
-                    Value = choices.Count() - 1;
+                    Value = choices.Count - 1;
                 }
             }
             return args.UpdateScreen ?? returnValue;

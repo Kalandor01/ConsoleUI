@@ -10,17 +10,17 @@ namespace ConsoleUI.UIElements
     /// </summary>
     public class Button : BaseUI
     {
-        #region Private fields
+        #region Fields
         /// <summary>
         /// If its true, and the action invokes a function, it will get a the <c>Button</c> object as its first argument (and can modify it) when the function is called.
         /// </summary>
-        readonly bool modifyList;
+        public readonly bool modifyList;
         /// <summary>
         /// The action to invoke when the button is pressed.<br/>
         /// - If the action invokes a function, and returns false the UI will not update.<br/>
         /// - If the function returns anything other than a bool, the <c>OptionsUI</c> will instantly return that value.
         /// </summary>
-        readonly UIAction action;
+        public UIAction action;
         #endregion
 
         #region Override properties

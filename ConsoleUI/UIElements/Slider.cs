@@ -11,27 +11,27 @@ namespace ConsoleUI.UIElements
     /// </summary>
     public class Slider : BaseUI
     {
-        #region Protected fields
+        #region Fields
         /// <summary>
         /// The maximum value of the slider.
         /// </summary>
-        protected int minValue;
+        public int minValue;
         /// <summary>
         /// The minimum value of the slider.
         /// </summary>
-        protected int maxValue;
+        public int maxValue;
         /// <summary>
         /// The amount, the value will change by, when the user changes the value of the slider.
         /// </summary>
-        protected int step;
+        public int step;
         /// <summary>
         /// The symbol that will represent a filled space in the slider's progress bar.
         /// </summary>
-        protected string symbol;
+        public string symbol;
         /// <summary>
         /// The symbol that will represent an empty space in the slider's progress bar.
         /// </summary>
-        protected string symbolEmpty;
+        public string symbolEmpty;
         #endregion
 
         #region Constructors

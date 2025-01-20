@@ -27,7 +27,7 @@ namespace ConsoleUI.UIElements
         public event ToggledEventHandler Toggled;
         #endregion
 
-        #region Private fields
+        #region Fields
         /// <summary>
         /// The current value of the object.
         /// </summary>
@@ -35,11 +35,11 @@ namespace ConsoleUI.UIElements
         /// <summary>
         /// The text displayed when the toggle is on.
         /// </summary>
-        string symbol;
+        public string symbol;
         /// <summary>
         /// The text displayed when the toggle is off.
         /// </summary>
-        string symbolOff;
+        public string symbolOff;
         #endregion
 
         #region Override properties

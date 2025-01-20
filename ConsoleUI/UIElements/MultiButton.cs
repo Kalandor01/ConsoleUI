@@ -1,6 +1,5 @@
 ﻿using ConsoleUI.Keybinds;
 using ConsoleUI.UIElements.EventArgs;
-using System;
 using System.Text;
 
 namespace ConsoleUI.UIElements
@@ -16,22 +15,22 @@ namespace ConsoleUI.UIElements
         /// <summary>
         /// The list of buttons the user can press. The action is the same as <see cref="Button.action"/>
         /// </summary>
-        readonly IEnumerable<(UIAction action, string inactiveText, string activeText)> buttons;
+        public IList<MultiButtonElement> buttons;
 
         /// <summary>
         /// The strings to put between the buttons.
         /// </summary>
-        readonly IEnumerable<string>? splitters;
+        public IList<string>? splitters;
 
         /// <summary>
         /// The splitter string that will be displayed if there aren't enough splitters in the list.
         /// </summary>
-        readonly string defaultSplitter;
+        public string defaultSplitter;
 
         /// <summary>
         /// If its true, and the action invokes a function, it will get a the <c>MultiButton</c> object as its first argument (and can modify it) when the function is called.
         /// </summary>
-        readonly bool modifyList;
+        public readonly bool modifyList;
         #endregion
 
         #region Override properties
@@ -52,9 +51,9 @@ namespace ConsoleUI.UIElements
         /// <param name="modifyList"><inheritdoc cref="modifyList" path="//summary"/></param>
         /// <param name="multiline"><inheritdoc cref="BaseUI.multiline" path="//summary"/></param>
         public MultiButton(
-            IEnumerable<(UIAction action, string inactiveText, string activeText)> buttons,
+            IList<MultiButtonElement> buttons,
             string defaultSplitter,
-            IEnumerable<string>? splitters = null,
+            IList<string>? splitters = null,
             int value = 0,
             string preValue = "",
             string postValue = "",
@@ -74,16 +73,14 @@ namespace ConsoleUI.UIElements
         /// <inheritdoc cref="BaseUI.MakeSpecial(string, OptionsUI?)"/>
         protected override string MakeSpecial(string icons, OptionsUI? optionsUI = null)
         {
-            var buttonCount = buttons.Count();
-            var splitterCount = splitters?.Count() ?? 0;
+            var splitterCount = splitters?.Count ?? 0;
             var txt = new StringBuilder();
-            for (var x = 0; x < buttonCount; x++)
+            for (var x = 0; x < buttons.Count; x++)
             {
-                var (_, inactiveText, activeText) = buttons.ElementAt(x);
-                txt.Append(x == Value ? activeText : inactiveText);
-                if (x < buttonCount - 1)
+                txt.Append(x == Value ? buttons[x].activeText : buttons[x].inactiveText);
+                if (x < buttons.Count - 1)
                 {
-                    txt.Append(splitterCount > x ? splitters?.ElementAt(x) : defaultSplitter);
+                    txt.Append(splitterCount > x ? splitters?[x] : defaultSplitter);
                 }
             }
             return multiline ? txt.Replace("\n", icons).ToString() : txt.ToString();
@@ -99,10 +96,10 @@ namespace ConsoleUI.UIElements
             {
                 Value += args.pressedKey.Equals(args.keybinds.ElementAt((int)Key.RIGHT)) ? 1 : -1;
 
-                Value %= buttons.Count();
+                Value %= buttons.Count;
                 if (Value < 0)
                 {
-                    Value = buttons.Count() - 1;
+                    Value = buttons.Count - 1;
                 }
                 return args.UpdateScreen ?? true;
             }
@@ -111,8 +108,7 @@ namespace ConsoleUI.UIElements
                 return args.UpdateScreen ?? false;
             }
 
-            var action = buttons.ElementAt(Value).action;
-            var (actionType, returned) = action.InvokeAction(modifyList ? this : null, args.keybinds, args.getKeyFunction);
+            var (actionType, returned) = buttons[Value].action.InvokeAction(modifyList ? this : null, args.keybinds, args.getKeyFunction);
             // function
             if (actionType is UIActionType.FUNCTION)
             {
