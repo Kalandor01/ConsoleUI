@@ -10,6 +10,23 @@ namespace ConsoleUI.UIElements
     /// </summary>
     public class Toggle : BaseUI
     {
+        #region Event delegates
+        /// <summary>
+        /// Called when a key is pressed, when the cursor is over this element.
+        /// </summary>
+        /// <param name="sender">The UI element that called this event.</param>
+        /// <param name="args">The arguments for this event.</param>
+        public delegate void ToggledEventHandler(BaseUI sender, UIKeyPressedEventArgs args);
+        #endregion
+
+        #region Events
+        /// <summary>
+        /// Called when a the toggle key is pressed, when the cursor is over this element.<br/>
+        /// Returns if the input handling should continue (and the menu should refresh).
+        /// </summary>
+        public event ToggledEventHandler Toggled;
+        #endregion
+
         #region Private fields
         /// <summary>
         /// The current value of the object.
@@ -53,6 +70,19 @@ namespace ConsoleUI.UIElements
         }
         #endregion
 
+        #region EventCallFunctions
+        /// <summary>
+        /// Calls the <c>Toggled</c> event.
+        /// </summary>
+        protected void RaiseToggledEvent(UIKeyPressedEventArgs args)
+        {
+            if (Toggled is not null)
+            {
+                Toggled(this, args);
+            }
+        }
+        #endregion
+
         #region Override methods
         /// <inheritdoc cref="BaseUI.MakeSpecial(string, OptionsUI?)"/>
         protected override string MakeSpecial(string icons, OptionsUI? optionsUI = null)
@@ -65,6 +95,7 @@ namespace ConsoleUI.UIElements
         {
             if (args.pressedKey.Equals(args.keybinds.ElementAt((int)Key.ENTER)))
             {
+                RaiseToggledEvent(args);
                 Value = !Value;
                 base.Value = Value ? 1 : 0;
             }

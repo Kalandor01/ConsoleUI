@@ -343,11 +343,13 @@ namespace ConsoleUI
                     var selectedElement = elements.ElementAt(selected);
                     if (
                         selectedElement is not null &&
-                        selectedElement.IsClickable &&
-                        selectedElement.IsOnlyClickable
+                        selectedElement.IsClickable
                     )
                     {
-                        pressedKey = getKeyFunction(GetKeyMode.IGNORE_HORIZONTAL, keybinds);
+                        pressedKey = getKeyFunction(
+                            selectedElement.IsOnlyClickable ? GetKeyMode.IGNORE_HORIZONTAL : GetKeyMode.NO_IGNORE,
+                            keybinds
+                        );
                     }
                     else
                     {
