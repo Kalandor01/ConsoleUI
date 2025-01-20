@@ -18,7 +18,7 @@ namespace ConsoleUI
         /// A list of answers, the user can select.<br/>
         /// If an element in the list is null the line will be blank and cannot be selected.
         /// </summary>
-        public IEnumerable<string?> answers;
+        public IList<string?> answers;
         /// <summary>
         /// The string to print before the answers.
         /// </summary>
@@ -40,7 +40,7 @@ namespace ConsoleUI
         /// - If the action type is function, and it returns -1 the <c>display</c> function will instantly exit.<br/>
         /// - If the function returns a list where the first element is -1 the <c>Display</c> function will instantly return that list with the first element replaced by the selected answer's number.
         /// </summary>
-        public IEnumerable<UIAction?> actions;
+        public IList<UIAction?> actions;
         /// <summary>
         /// If true, the selected option will not see non-selectable elements as part of the list. This also makes it so you don't have to put a placeholder value in the <c>actions</c> list for every null value in the <c>answers</c> list.
         /// </summary>
@@ -172,12 +172,12 @@ namespace ConsoleUI
         /// By default, it's 70 newlines (faster than actualy clearing the screen).</param>
         /// <exception cref="UINoSelectablesExeption"></exception>
         public UIList(
-            IEnumerable<string?> answers,
+            IList<string?> answers,
             string? question = null,
             CursorIcon? cursorIcon = null,
             bool multiline = false,
             bool canEscape = false,
-            IEnumerable<UIAction?>? actions = null,
+            IList<UIAction?>? actions = null,
             bool excludeNulls = false,
             bool modifiableUIList = false,
             ScrollSettings? scrollSettings = null,
@@ -300,7 +300,7 @@ namespace ConsoleUI
             getKeyFunction ??= GetKey;
 
             selected = SetupSelected(0);
-            startIndex = Math.Clamp(0, selected - scrollSettings.scrollUpMargin, answers.Count() - 1);
+            startIndex = Math.Clamp(0, selected - scrollSettings.scrollUpMargin, answers.Count - 1);
 
             while (true)
             {
@@ -428,10 +428,10 @@ namespace ConsoleUI
         /// </summary>
         private StringBuilder MakeText(out int endIndex)
         {
-            if (scrollSettings.maxElements == -1 || scrollSettings.maxElements >= answers.Count())
+            if (scrollSettings.maxElements == -1 || scrollSettings.maxElements >= answers.Count)
             {
                 startIndex = 0;
-                endIndex = answers.Count();
+                endIndex = answers.Count;
             }
             else
             {
@@ -444,16 +444,16 @@ namespace ConsoleUI
                     startIndex = selected + scrollSettings.scrollDownMargin - (scrollSettings.maxElements - 1);
                 }
 
-                startIndex = Math.Clamp(startIndex, 0, answers.Count() - 1);
-                endIndex = Math.Clamp(startIndex + scrollSettings.maxElements, 0, answers.Count());
-                startIndex = Math.Clamp(endIndex - scrollSettings.maxElements, 0, answers.Count() - 1);
+                startIndex = Math.Clamp(startIndex, 0, answers.Count - 1);
+                endIndex = Math.Clamp(startIndex + scrollSettings.maxElements, 0, answers.Count);
+                startIndex = Math.Clamp(endIndex - scrollSettings.maxElements, 0, answers.Count - 1);
             }
 
             var text = new StringBuilder();
             text.Append(startIndex == 0 ? scrollSettings.scrollIcon.topEndIndicator : scrollSettings.scrollIcon.topContinueIndicator);
             for (var x = startIndex; x < endIndex; x++)
             {
-                var element = answers.ElementAt(x);
+                var element = answers[x];
 
                 var beforeTextCreatedArgs = new BeforeElementTextCreatedEventArgs(x);
                 RaiseBeforeTextCreatedEvent(beforeTextCreatedArgs);
@@ -478,7 +478,7 @@ namespace ConsoleUI
 
                 text.Append(afterTextCreatedArgs.OverrideText ?? elementText);
             }
-            text.Append(endIndex == answers.Count() ? scrollSettings.scrollIcon.bottomEndIndicator : scrollSettings.scrollIcon.bottomContinueIndicator);
+            text.Append(endIndex == answers.Count ? scrollSettings.scrollIcon.bottomEndIndicator : scrollSettings.scrollIcon.bottomContinueIndicator);
             return text;
         }
 
@@ -491,9 +491,9 @@ namespace ConsoleUI
             if (excludeNulls)
             {
                 var selectedF = selected;
-                for (var x = 0; x < answers.Count(); x++)
+                for (var x = 0; x < answers.Count; x++)
                 {
-                    if (answers.ElementAt(x) is null)
+                    if (answers[x] is null)
                     {
                         selectedF--;
                     }
@@ -521,12 +521,12 @@ namespace ConsoleUI
                 while (true)
                 {
                     selected += moveAmount;
-                    selected %= answers.Count();
+                    selected %= answers.Count;
                     if (selected < 0)
                     {
-                        selected = answers.Count() - 1;
+                        selected = answers.Count - 1;
                     }
-                    if (answers.ElementAt(selected) is not null)
+                    if (answers[selected] is not null)
                     {
                         break;
                     }
@@ -551,8 +551,8 @@ namespace ConsoleUI
         {
             if (
                 !actions.Any() ||
-                selected >= actions.Count() ||
-                actions.ElementAt(selected) is not UIAction selectedAction
+                selected >= actions.Count ||
+                actions[selected] is not UIAction selectedAction
             )
             {
                 return selected;
@@ -593,10 +593,10 @@ namespace ConsoleUI
         /// <returns></returns>
         private int SetupSelected(int selected)
         {
-            selected = Math.Clamp(selected, 0, answers.Count() - 1);
-            while (answers.ElementAt(selected) is null)
+            selected = Math.Clamp(selected, 0, answers.Count - 1);
+            while (answers[selected] is null)
             {
-                selected = (selected + 1) % answers.Count();
+                selected = (selected + 1) % answers.Count;
             }
             return selected;
         }

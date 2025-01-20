@@ -16,7 +16,7 @@ namespace ConsoleUI
         /// <summary>
         /// The list of <c>BaseUI</c> objects to use.
         /// </summary>
-        public IEnumerable<BaseUI?> elements;
+        public IList<BaseUI?> elements;
         /// <summary>
         /// The string to print before the <c>elements</c>.
         /// </summary>
@@ -165,7 +165,7 @@ namespace ConsoleUI
         /// By default, it's 70 newlines (faster than actualy clearing the screen).</param>
         /// <exception cref="UINoSelectablesExeption">Exceptions thrown, if there are no selectable UI elements in the list.</exception>
         public OptionsUI(
-            IEnumerable<BaseUI?> elements,
+            IList<BaseUI?> elements,
             string? title = null,
             CursorIcon? cursorIcon = null,
             bool canEscape = true,
@@ -311,12 +311,12 @@ namespace ConsoleUI
             var enterKeyNeeded = elements.Any(element => element is not null && element.IsClickable);
             // put selected on selectable
             selected = 0;
-            while (elements.ElementAt(selected)?.IsSelectable != true)
+            while (elements[selected]?.IsSelectable != true)
             {
                 selected++;
             }
 
-            startIndex = Math.Clamp(0, selected - scrollSettings.scrollUpMargin, elements.Count() - 1);
+            startIndex = Math.Clamp(0, selected - scrollSettings.scrollUpMargin, elements.Count - 1);
 
             // render/getkey loop
             KeyAction pressedKey;
@@ -340,7 +340,7 @@ namespace ConsoleUI
                 {
                     // get pressedKey
                     pressedKey = keybinds.ElementAt((int)Key.ENTER);
-                    var selectedElement = elements.ElementAt(selected);
+                    var selectedElement = elements[selected];
                     if (
                         selectedElement is not null &&
                         selectedElement.IsClickable
@@ -463,10 +463,10 @@ namespace ConsoleUI
 
             // elements
             int endIndex;
-            if (scrollSettings.maxElements == -1 || scrollSettings.maxElements >= elements.Count())
+            if (scrollSettings.maxElements == -1 || scrollSettings.maxElements >= elements.Count)
             {
                 startIndex = 0;
-                endIndex = elements.Count();
+                endIndex = elements.Count;
             }
             else
             {
@@ -479,16 +479,16 @@ namespace ConsoleUI
                     startIndex = selected + scrollSettings.scrollDownMargin - (scrollSettings.maxElements - 1);
                 }
 
-                startIndex = Math.Clamp(startIndex, 0, elements.Count() - 1);
-                endIndex = Math.Clamp(startIndex + scrollSettings.maxElements, 0, elements.Count());
-                startIndex = Math.Clamp(endIndex - scrollSettings.maxElements, 0, elements.Count() - 1);
+                startIndex = Math.Clamp(startIndex, 0, elements.Count - 1);
+                endIndex = Math.Clamp(startIndex + scrollSettings.maxElements, 0, elements.Count);
+                startIndex = Math.Clamp(endIndex - scrollSettings.maxElements, 0, elements.Count - 1);
             }
 
             txtBeginning.Append(startIndex == 0 ? scrollSettings.scrollIcon.topEndIndicator : scrollSettings.scrollIcon.topContinueIndicator);
             Console.Write(txtBeginning.ToString());
             for (var x = startIndex; x < endIndex; x++)
             {
-                var element = elements.ElementAt(x)!;
+                var element = elements[x]!;
                 var beforeTextCreatedArgs = new BeforeElementTextCreatedEventArgs(x);
                 RaiseBeforeTextCreatedEvent(beforeTextCreatedArgs);
                 if (beforeTextCreatedArgs.OverrideText != null)
@@ -512,7 +512,7 @@ namespace ConsoleUI
                 RaiseAfterTextDisplayedEvent(afterTextDisplayedArgs);
             }
 
-            Console.WriteLine(endIndex == elements.Count() ? scrollSettings.scrollIcon.bottomEndIndicator : scrollSettings.scrollIcon.bottomContinueIndicator);
+            Console.WriteLine(endIndex == elements.Count ? scrollSettings.scrollIcon.bottomEndIndicator : scrollSettings.scrollIcon.bottomContinueIndicator);
 
             var afterDisplayArgs = new AfterElementsDisplayedEventArgs(endIndex);
             RaiseAfterElementsDisplayedEvent(afterDisplayArgs);
@@ -530,12 +530,12 @@ namespace ConsoleUI
             while (true)
             {
                 selected += selectionOffset;
-                selected %= elements.Count();
+                selected %= elements.Count;
                 if (selected < 0)
                 {
-                    selected = elements.Count() - 1;
+                    selected = elements.Count - 1;
                 }
-                var newSelected = elements.ElementAt(selected);
+                var newSelected = elements[selected];
                 if (
                     newSelected is not null &&
                     newSelected.IsSelectable
