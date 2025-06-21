@@ -65,6 +65,10 @@ namespace ConsoleUI
         /// The text to display, to clear the screen.
         /// </summary>
         public string clearScreenText;
+        /// <summary>
+        /// The <see cref="IConsoleProxy"/> to use.
+        /// </summary>
+        public IConsoleProxy consoleProxy;
         #endregion
 
         #region Event delegates
@@ -170,6 +174,7 @@ namespace ConsoleUI
         /// <param name="scrollSettings"><inheritdoc cref="scrollSettings" path="//summary"/></param>
         /// <param name="clearScreenText"><inheritdoc cref="clearScreenText" path="//summary"/><br/>
         /// By default, it's 70 newlines (faster than actualy clearing the screen).</param>
+        /// <param name="consoleProxy"><inheritdoc cref="consoleProxy" path="//summary"/> <see cref="ConsoleProxy"/> by default.</param>
         /// <exception cref="UINoSelectablesExeption"></exception>
         public UIList(
             IList<string?> answers,
@@ -181,7 +186,9 @@ namespace ConsoleUI
             bool excludeNulls = false,
             bool modifiableUIList = false,
             ScrollSettings? scrollSettings = null,
-            string? clearScreenText = null)
+            string? clearScreenText = null,
+            IConsoleProxy? consoleProxy = null
+        )
         {
             if (!answers.Any() || answers.All(answer => answer is null))
             {
@@ -197,6 +204,7 @@ namespace ConsoleUI
             modifyList = modifiableUIList;
             this.scrollSettings = scrollSettings ?? new ScrollSettings();
             this.clearScreenText = clearScreenText ?? "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
+            this.consoleProxy = consoleProxy ?? new ConsoleProxy();
         }
         #endregion
 
@@ -287,7 +295,7 @@ namespace ConsoleUI
         /// <param name="keybinds">The list of <c>KeyAction</c> objects to use. The order of the actions should be:<br/>
         /// - escape, up, down, left, right, enter.</param>
         /// <param name="getKeyFunction">The function to get the next valid key the user pressed.<br/>
-        /// Should function similarly to <see cref="GetKey(GetKeyMode, IEnumerable{KeyAction}?)"/>.></param>
+        /// Should function similarly to <see cref="GetKey(GetKeyMode, IEnumerable{KeyAction}?, IConsoleProxy?)"/>.></param>
         public object Display(
             IEnumerable<KeyAction>? keybinds = null,
             GetKeyFunctionDelegate? getKeyFunction = null
@@ -297,7 +305,7 @@ namespace ConsoleUI
             {
                 keybinds = GetDefaultKeybinds();
             }
-            getKeyFunction ??= GetKey;
+            getKeyFunction ??= (mode, keybinds) => GetKey(mode, keybinds, consoleProxy);
 
             selected = SetupSelected(0);
             startIndex = Math.Clamp(0, selected - scrollSettings.scrollUpMargin, answers.Count - 1);
@@ -327,14 +335,14 @@ namespace ConsoleUI
                             // answers
                             txt.Append(MakeText(out var endIndex));
 
-                            Console.WriteLine(txt);
+                            consoleProxy.WriteLine(txt);
 
                             var afterDisplayArgs = new AfterElementsDisplayedEventArgs(endIndex);
                             RaiseAfterElementsDisplayedEvent(afterDisplayArgs);
                         }
                         else
                         {
-                            Console.WriteLine(beforeDisplayArgs.OverrideText);
+                            consoleProxy.WriteLine(beforeDisplayArgs.OverrideText);
                         }
                     }
                     updateScreen = true;
@@ -459,7 +467,7 @@ namespace ConsoleUI
                 RaiseBeforeTextCreatedEvent(beforeTextCreatedArgs);
                 if (beforeTextCreatedArgs.OverrideText != null)
                 {
-                    Console.Write(beforeTextCreatedArgs.OverrideText);
+                    consoleProxy.Write(beforeTextCreatedArgs.OverrideText);
                     continue;
                 }
 

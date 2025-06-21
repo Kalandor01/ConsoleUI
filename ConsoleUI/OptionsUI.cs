@@ -49,6 +49,10 @@ namespace ConsoleUI
         /// The text to display, to clear the screen.
         /// </summary>
         public string clearScreenText;
+        /// <summary>
+        /// The <see cref="IConsoleProxy"/> to use, to write to the output.
+        /// </summary>
+        public IConsoleProxy consoleProxy;
         #endregion
 
         #region Event delegates
@@ -163,6 +167,8 @@ namespace ConsoleUI
         /// <param name="scrollSettings"><inheritdoc cref="scrollSettings" path="//summary"/></param>
         /// <param name="clearScreenText"><inheritdoc cref="clearScreenText" path="//summary"/><br/>
         /// By default, it's 70 newlines (faster than actualy clearing the screen).</param>
+        /// <param name="consoleProxy"><inheritdoc cref="consoleProxy" path="//summary"/><br/>
+        /// (Uses the <see cref="ConsoleProxy"/> by default.)</param>
         /// <exception cref="UINoSelectablesExeption">Exceptions thrown, if there are no selectable UI elements in the list.</exception>
         public OptionsUI(
             IList<BaseUI?> elements,
@@ -171,7 +177,9 @@ namespace ConsoleUI
             bool canEscape = true,
             bool passInObject = true,
             ScrollSettings? scrollSettings = null,
-            string? clearScreenText = null)
+            string? clearScreenText = null,
+            IConsoleProxy? consoleProxy = null
+        )
         {
             if (elements.All(answer => answer is null || !answer.IsSelectable))
             {
@@ -184,6 +192,7 @@ namespace ConsoleUI
             this.passInObject = passInObject;
             this.scrollSettings = scrollSettings ?? new ScrollSettings();
             this.clearScreenText = clearScreenText ?? "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
+            this.consoleProxy = consoleProxy ?? new ConsoleProxy();
         }
         #endregion
 
@@ -285,7 +294,7 @@ namespace ConsoleUI
         /// <param name="keybinds">The list of <c>KeyAction</c> objects to use. The order of the actions should be:<br/>
         /// - escape, up, down, left, right, enter.</param>
         /// <param name="getKeyFunction">The function to get the next valid key the user pressed.<br/>
-        /// Should function similarly to <see cref="GetKey(GetKeyMode, IEnumerable{KeyAction}?)"/>.></param>
+        /// Should function similarly to <see cref="GetKey(GetKeyMode, IEnumerable{KeyAction}?, IConsoleProxy?)"/>.></param>
         /// <exception cref="UINoSelectablesExeption">Exceptions thrown, if there are no selectable UI elements in the list.</exception>
         public object? Display(
             IEnumerable<KeyAction>? keybinds = null,
@@ -303,7 +312,7 @@ namespace ConsoleUI
             {
                 keybinds = GetDefaultKeybinds();
             }
-            getKeyFunction ??= GetKey;
+            getKeyFunction ??= (mode, keybinds) => GetKey(mode, keybinds, consoleProxy);
 
             cursorIcon ??= new CursorIcon();
 
@@ -331,7 +340,7 @@ namespace ConsoleUI
 
                 if (actualMove)
                 {
-                    DisplayOptions();
+                    DisplayOptions(consoleProxy);
                 }
                 actualMove = false;
 
@@ -442,13 +451,14 @@ namespace ConsoleUI
         /// <summary>
         /// Displays all visible options.
         /// </summary>
-        private void DisplayOptions()
+        /// <param name="consoleProxy">The <see cref="IConsoleProxy"/> to use, to write to the output.</param>
+        private void DisplayOptions(IConsoleProxy consoleProxy)
         {
             var beforeDisplayArgs = new BeforeElementsDisplayedEventArgs();
             RaiseBeforeElementsDisplayedEvent(beforeDisplayArgs);
             if (beforeDisplayArgs.OverrideText != null)
             {
-                Console.WriteLine(beforeDisplayArgs.OverrideText);
+                consoleProxy.WriteLine(beforeDisplayArgs.OverrideText);
                 return;
             }
 
@@ -485,7 +495,7 @@ namespace ConsoleUI
             }
 
             txtBeginning.Append(startIndex == 0 ? scrollSettings.scrollIcon.topEndIndicator : scrollSettings.scrollIcon.topContinueIndicator);
-            Console.Write(txtBeginning.ToString());
+            consoleProxy.Write(txtBeginning.ToString());
             for (var x = startIndex; x < endIndex; x++)
             {
                 var element = elements[x]!;
@@ -493,7 +503,7 @@ namespace ConsoleUI
                 RaiseBeforeTextCreatedEvent(beforeTextCreatedArgs);
                 if (beforeTextCreatedArgs.OverrideText != null)
                 {
-                    Console.Write(beforeTextCreatedArgs.OverrideText);
+                    consoleProxy.Write(beforeTextCreatedArgs.OverrideText);
                     continue;
                 }
 
@@ -506,13 +516,13 @@ namespace ConsoleUI
                 var afterTextCreatedArgs = new AfterElementTextCreatedEventArgs(elementText, x);
                 RaiseAfterTextCreatedEvent(afterTextCreatedArgs);
 
-                Console.Write(afterTextCreatedArgs.OverrideText ?? elementText);
+                consoleProxy.Write(afterTextCreatedArgs.OverrideText ?? elementText);
 
                 var afterTextDisplayedArgs = new AfterElementTextDisplayedEventArgs(elementText, x);
                 RaiseAfterTextDisplayedEvent(afterTextDisplayedArgs);
             }
 
-            Console.WriteLine(endIndex == elements.Count ? scrollSettings.scrollIcon.bottomEndIndicator : scrollSettings.scrollIcon.bottomContinueIndicator);
+            consoleProxy.WriteLine(endIndex == elements.Count ? scrollSettings.scrollIcon.bottomEndIndicator : scrollSettings.scrollIcon.bottomContinueIndicator);
 
             var afterDisplayArgs = new AfterElementsDisplayedEventArgs(endIndex);
             RaiseAfterElementsDisplayedEvent(afterDisplayArgs);

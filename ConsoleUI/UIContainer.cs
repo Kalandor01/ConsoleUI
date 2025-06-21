@@ -41,6 +41,10 @@ namespace ConsoleUI
         /// </summary>
         private string _rawText;
         /// <summary>
+        /// The console proxy to use.
+        /// </summary>
+        private IConsoleProxy _consoleProxy;
+        /// <summary>
         /// The text to display.
         /// </summary>
         private string _text;
@@ -165,6 +169,22 @@ namespace ConsoleUI
         }
 
         /// <summary>
+        /// <inheritdoc cref="_consoleProxy" path="//summary"/>
+        /// </summary>
+        public IConsoleProxy ConsoleProxy
+        {
+            get => _consoleProxy;
+            set
+            {
+                if (_consoleProxy != value)
+                {
+                    TextCalculated = false;
+                    _consoleProxy = value;
+                }
+            }
+        }
+
+        /// <summary>
         /// <inheritdoc cref="_text" path="//summary"/>
         /// </summary>
         public string Text
@@ -180,7 +200,7 @@ namespace ConsoleUI
                 }
                 else
                 {
-                    var (x, y) = Console.GetCursorPosition();
+                    var (x, y) = ConsoleProxy.GetCursorPosition();
                     originalCursorPosX = x;
                     originalCursorPosY = y;
                 }
@@ -192,7 +212,7 @@ namespace ConsoleUI
 
                 if (!_textCalculated)
                 {
-                    var (x, y) = Console.GetCursorPosition();
+                    var (x, y) = ConsoleProxy.GetCursorPosition();
                     RecalculateText(x, y);
                 }
 
@@ -223,6 +243,7 @@ namespace ConsoleUI
         /// <param name="linebreakOnlyAtWhitespace"><inheritdoc cref="LinebreakOnlyAtWhitespace" path="//summary"/></param>
         /// <param name="overwritePreviousText"><inheritdoc cref="OverwritePreviousText" path="//summary"/></param>
         /// <param name="useCursorPositionSaving"><inheritdoc cref="UseCursorPositionSaving" path="//summary"/></param>
+        /// <param name="consoleProxy"><inheritdoc cref="ConsoleProxy"/></param>
         public UIContainer(
             string text,
             (int x, int y)? origin = null,
@@ -230,9 +251,11 @@ namespace ConsoleUI
             bool truncateText = true,
             bool linebreakOnlyAtWhitespace = false,
             bool overwritePreviousText = true,
-            bool useCursorPositionSaving = true
+            bool useCursorPositionSaving = true,
+            IConsoleProxy? consoleProxy = null
         )
         {
+            ConsoleProxy = consoleProxy ?? new ConsoleProxy();
             TextCalculated = false;
             RawText = text;
             Origin = origin;
@@ -250,7 +273,7 @@ namespace ConsoleUI
         /// </summary>
         public void RecalculateText()
         {
-            var (x, y) = Console.GetCursorPosition();
+            var (x, y) = ConsoleProxy.GetCursorPosition();
             RecalculateText(x, y);
         }
         #endregion

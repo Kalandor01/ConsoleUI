@@ -46,9 +46,10 @@ namespace ConsoleUI.UIElements
         /// </summary>
         public bool escapeCodesEnabled;
         /// <summary>
-        /// The function used to read the input text from the user.
+        /// The function used to read the input text from the user.<br/>
+        /// Uses <see cref="IConsoleProxy.ReadKey(bool)"/> by default.
         /// </summary>
-        public ReadKeyDelegate readKeyFunction;
+        public ReadKeyDelegate? readKeyFunction;
         #endregion
 
         #region Public Properties
@@ -150,7 +151,7 @@ namespace ConsoleUI.UIElements
             this.keyValidatorFunction = keyValidatorFunction;
             this.overrideDefaultKeyValidatorFunction = overrideDefaultKeyValidatorFunction;
             escapeCodesEnabled = ansiEscapeCodesEnabled;
-            this.readKeyFunction = readKeyFunction ?? DefGetKey;
+            this.readKeyFunction = readKeyFunction;
         }
         #endregion
 
@@ -169,22 +170,23 @@ namespace ConsoleUI.UIElements
                 return args.UpdateScreen ?? false;
             }
 
+            var consoleProxy = args.optionsUI?.consoleProxy ?? new ConsoleProxy();
             if (args.optionsUI == null || !args.optionsUI.elements.Any(element => element == this))
             {
-                Console.WriteLine(preText);
-                Value = Console.ReadLine() ?? "";
+                consoleProxy.WriteLine(preText);
+                Value = consoleProxy.ReadLine() ?? "";
                 return args.UpdateScreen ?? true;
             }
 
             var xOffset = GetCurrentLineCharCountBeforeValue(args.optionsUI.cursorIcon);
             var yOffset = GetLineNumberAfterTextFieldValue(args.optionsUI);
-            Utils.MoveCursor((xOffset, yOffset));
+            consoleProxy.MoveCursor(xOffset, yOffset);
 
             bool retry;
             do
             {
                 retry = false;
-                var newValue = ReadInput(xOffset, args.optionsUI.cursorIcon);
+                var newValue = ReadInput(consoleProxy, xOffset, args.optionsUI.cursorIcon);
                 if (textValidatorFunction is null)
                 {
                     Value = newValue;
@@ -194,21 +196,21 @@ namespace ConsoleUI.UIElements
                 var (status, message) = textValidatorFunction(newValue);
                 if (message != null)
                 {
-                    Utils.MoveCursor((-newValue.Length, 0));
-                    Console.Write(Utils.ClearLineFromCursorPosString() + message);
-                    readKeyFunction();
-                    Utils.MoveCursor((-message.Length, 0));
-                    Console.Write(Utils.ClearLineFromCursorPosString() + newValue);
-                    var (Left, Top) = Console.GetCursorPosition();
+                    consoleProxy.MoveCursor(-newValue.Length, 0);
+                    consoleProxy.Write(Utils.ClearLineFromCursorPosString() + message);
+                    GetKey(consoleProxy);
+                    consoleProxy.MoveCursor(-message.Length, 0);
+                    consoleProxy.Write(Utils.ClearLineFromCursorPosString() + newValue);
+                    var (column, row) = consoleProxy.GetCursorPosition();
                     if (multiline)
                     {
-                        Console.Write(postValue.Replace("\n", args.optionsUI.cursorIcon.sIconR + "\n" + args.optionsUI.cursorIcon.sIcon));
+                        consoleProxy.Write(postValue.Replace("\n", args.optionsUI.cursorIcon.sIconR + "\n" + args.optionsUI.cursorIcon.sIcon));
                     }
                     else
                     {
-                        Console.Write(postValue);
+                        consoleProxy.Write(postValue);
                     }
-                    Console.SetCursorPosition(Left, Top);
+                    consoleProxy.SetCursorPosition(column, row);
                 }
 
                 if (status == TextFieldValidatorStatus.VALID)
@@ -218,7 +220,7 @@ namespace ConsoleUI.UIElements
                 else if (status == TextFieldValidatorStatus.RETRY)
                 {
                     retry = true;
-                    Utils.MoveCursor((-newValue.Length, 0));
+                    consoleProxy.MoveCursor(-newValue.Length, 0);
                 }
             }
             while (retry);
@@ -226,13 +228,15 @@ namespace ConsoleUI.UIElements
         }
         #endregion
 
-        #region Private functions
+        #region Private methods
         /// <summary>
         /// The default read key function.
         /// </summary>
-        private static ConsoleKeyInfo DefGetKey()
+        private ConsoleKeyInfo GetKey(IConsoleProxy consoleProxy)
         {
-            return Console.ReadKey(true);
+            return readKeyFunction is not null
+                ? readKeyFunction()
+                : consoleProxy.ReadKey(false);
         }
 
         /// <summary>
@@ -256,19 +260,19 @@ namespace ConsoleUI.UIElements
 
             // get displayed range
             int endIndex;
-            if (optionsUI.scrollSettings.maxElements == -1 || optionsUI.scrollSettings.maxElements >= optionsUI.elements.Count())
+            if (optionsUI.scrollSettings.maxElements == -1 || optionsUI.scrollSettings.maxElements >= optionsUI.elements.Count)
             {
-                endIndex = optionsUI.elements.Count();
+                endIndex = optionsUI.elements.Count;
             }
             else
             {
-                endIndex = Math.Clamp(optionsUI.startIndex + optionsUI.scrollSettings.maxElements, 0, optionsUI.elements.Count());
+                endIndex = Math.Clamp(optionsUI.startIndex + optionsUI.scrollSettings.maxElements, 0, optionsUI.elements.Count);
             }
 
             // lines after current object
             for (var x = optionsUI.selected + 1; x < endIndex; x++)
             {
-                var element = optionsUI.elements.ElementAt(x);
+                var element = optionsUI.elements[x];
                 if (element is not null)
                 {
                     txt.Append(element.MakeText(
@@ -286,7 +290,7 @@ namespace ConsoleUI.UIElements
                     txt.Append(element.ToString() + "\n");
                 }
             }
-            txt.Append(endIndex == optionsUI.elements.Count() ? optionsUI.scrollSettings.scrollIcon.bottomEndIndicator : optionsUI.scrollSettings.scrollIcon.bottomContinueIndicator);
+            txt.Append(endIndex == optionsUI.elements.Count ? optionsUI.scrollSettings.scrollIcon.bottomEndIndicator : optionsUI.scrollSettings.scrollIcon.bottomContinueIndicator);
             txt.Append('\n');
 
             return txt.ToString().Count(c => c == '\n') + 1;
@@ -313,11 +317,12 @@ namespace ConsoleUI.UIElements
         }
 
         /// <summary>
-        /// Reads user input, like <c>Console.ReadLine()</c>, but puts the <c>postValue</c> after the text, while typing.
+        /// Reads user input, like <see cref="IConsoleProxy.ReadLine"/>, but puts the <see cref="PostValue"/> after the text, while typing.
         /// </summary>
+        /// <param name="consoleProxy">The <see cref="IConsoleProxy"/>.</param>
         /// <param name="xOffset">The x offset from the left side of the console window, where the input should be placed.</param>
-        /// <param name="cursorIcon">The <c>CursorIcon</c> passed into the <c>OptionsUI</c>, that includes this object.</param>
-        private string ReadInput(int xOffset, CursorIcon cursorIcon)
+        /// <param name="cursorIcon">The <see cref="CursorIcon"/> passed into the <see cref="OptionsUI"/>, that includes this object.</param>
+        private string ReadInput(IConsoleProxy consoleProxy, int xOffset, CursorIcon cursorIcon)
         {
             var fullPostValue = "";
             if (multiline)
@@ -331,28 +336,31 @@ namespace ConsoleUI.UIElements
             fullPostValue += cursorIcon.sIconR;
             fullPostValue = fullPostValue.Split("\n").First();
             var newValue = new StringBuilder(oldValueAsStartingValue ? Value : "");
-            var preValuePos = Console.GetCursorPosition();
+            var preValuePos = consoleProxy.GetCursorPosition();
             var cursorPos = newValue.Length;
 
             while (true)
             {
                 var postLength = lengthAsDisplayLength ? Utils.GetDisplayLen(fullPostValue, xOffset + newValue.Length, escapeCodesEnabled) : fullPostValue.Length;
-                var maxLength = maxInputLength ?? Console.BufferWidth - (xOffset + postLength);
-                Console.SetCursorPosition(preValuePos.Left, preValuePos.Top);
-                Console.Write(Utils.ClearLineFromCursorPosString() + newValue.ToString());
-                var (Left, Top) = Console.GetCursorPosition();
+                var maxLength = maxInputLength ?? consoleProxy.ConsoleWidth - (xOffset + postLength);
+                consoleProxy.WriteAtPosition(
+                    Utils.ClearLineFromCursorPosString() + newValue.ToString(),
+                    preValuePos.column,
+                    preValuePos.row
+                );
+                var (column, row) = consoleProxy.GetCursorPosition();
                 if (multiline)
                 {
-                    Console.Write(postValue.Replace("\n", cursorIcon.sIconR + "\n" + cursorIcon.sIcon));
+                    consoleProxy.Write(postValue.Replace("\n", cursorIcon.sIconR + "\n" + cursorIcon.sIcon));
                 }
                 else
                 {
-                    Console.Write(postValue);
+                    consoleProxy.Write(postValue);
                 }
                 var cursorPosOffset = newValue.Length - cursorPos;
-                Console.SetCursorPosition(Left - cursorPosOffset, Top);
+                consoleProxy.SetCursorPosition(column - cursorPosOffset, row);
 
-                var key = readKeyFunction();
+                var key = GetKey(consoleProxy);
                 if (overrideDefaultKeyValidatorFunction && keyValidatorFunction is not null && !keyValidatorFunction(newValue, key, cursorPos))
                 {
                     continue;
@@ -425,7 +433,7 @@ namespace ConsoleUI.UIElements
                     cursorPos++;
                 }
 
-                Console.SetCursorPosition(Left, Top);
+                consoleProxy.SetCursorPosition(column, row);
             }
 
             return newValue.ToString();

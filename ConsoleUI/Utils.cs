@@ -11,7 +11,7 @@ namespace ConsoleUI
         #region Delegates
         /// <summary>
         /// The function to get the next valid key the user pressed.<br/>
-        /// Should function similarly to <see cref="GetKey(GetKeyMode, IEnumerable{KeyAction}?)"/>.
+        /// Should function similarly to <see cref="GetKey(GetKeyMode, IEnumerable{KeyAction}?, IConsoleProxy?)"/>.
         /// </summary>
         /// <param name="mode">The GetKeyMode to use.</param>
         /// <param name="keybinds">The list of KeyActions.</param>
@@ -20,17 +20,6 @@ namespace ConsoleUI
         #endregion
 
         #region Public functions
-        /// <summary>
-        /// Writes out text, and then waits for a key press.
-        /// </summary>
-        /// <param name="text">The text to write out.</param>
-        public static void PressKey(string text)
-        {
-            Console.Write(text);
-            Console.ReadKey(true);
-            Console.WriteLine();
-        }
-
         /// <summary>
         /// Returns the default keybinds.
         /// </summary>
@@ -47,27 +36,26 @@ namespace ConsoleUI
             ];
         }
 
-        /// <inheritdoc cref="GetKey(IEnumerable{GetKeyMode}, IEnumerable{KeyAction}?)"/>
-        /// <param name="mode">The GetKeyMode to use.</param>
-        public static KeyAction GetKey(GetKeyMode mode = GetKeyMode.NO_IGNORE, IEnumerable<KeyAction>? keybinds = null)
-        {
-            return GetKey([mode], keybinds);
-        }
-
         /// <summary>
         /// Function for detecting one key from a list of keypresses.<br/>
         /// Depending on the mode, it ignores some keys.<br/>
         /// </summary>
-        /// <param name="modeList">The list of GetKeyMode to use.</param>
-        /// <param name="keybinds">The list of KeyActions.</param>
-        /// <returns>The <c>response</c> of the <c>KeyAction</c> object that maches the key the user pressed.</returns>
-        public static KeyAction GetKey(IEnumerable<GetKeyMode> modeList, IEnumerable<KeyAction>? keybinds = null)
+        /// <param name="modeList">The list of <see cref="GetKeyMode"/>s to use.</param>
+        /// <param name="keybinds">The list of <see cref="KeyAction"/>s.</param>
+        /// <param name="consoleProxy">The <see cref="IConsoleProxy"/> to use.</param>
+        /// <returns>The <see cref="KeyAction.response"/> where <see cref="KeyAction.Keys"/> contains the key that the user pressed.</returns>
+        public static KeyAction GetKey(
+            IEnumerable<GetKeyMode> modeList,
+            IEnumerable<KeyAction>? keybinds = null,
+            IConsoleProxy? consoleProxy = null
+        )
         {
             keybinds ??= GetDefaultKeybinds();
+            consoleProxy ??= new ConsoleProxy();
 
             while (true)
             {
-                var key = Console.ReadKey(true);
+                var key = consoleProxy.ReadKey(false);
                 foreach (var action in keybinds)
                 {
                     var ignore = false;
@@ -87,18 +75,15 @@ namespace ConsoleUI
             }
         }
 
-        /// <summary>
-        /// Returns the <c>keyResults</c> for <c>UIList</c> or <c>OptionsUI</c> functions.
-        /// </summary>
-        /// <param name="keybinds">The list of <c>KeyAction</c> objects to use.</param>
-        public static IEnumerable<object> GetResultsList(IEnumerable<KeyAction> keybinds)
+        /// <inheritdoc cref="GetKey(IEnumerable{GetKeyMode}, IEnumerable{KeyAction}?, IConsoleProxy?)"/>
+        /// <param name="mode">The <see cref="GetKeyMode"/> to use.</param>
+        public static KeyAction GetKey(
+            GetKeyMode mode = GetKeyMode.NO_IGNORE,
+            IEnumerable<KeyAction>? keybinds = null,
+            IConsoleProxy? consoleProxy = null
+        )
         {
-            var keyResults = new List<object>();
-            foreach (var action in keybinds)
-            {
-                keyResults.Add(action.response);
-            }
-            return keyResults;
+            return GetKey([mode], keybinds, consoleProxy);
         }
 
         /// <summary>
@@ -147,22 +132,52 @@ namespace ConsoleUI
         }
 
         /// <summary>
-        /// Offsets the coordinates of the cursor.
-        /// </summary>
-        /// <param name="offset">The offset coordinates.</param>
-        public static void MoveCursor((int x, int y) offset)
-        {
-            (int x, int y) = (Math.Clamp(Console.CursorLeft + offset.x, 0, Console.BufferWidth - 1), Math.Clamp(Console.CursorTop - offset.y, 0, Console.BufferHeight - 1));
-            Console.SetCursorPosition(x, y);
-        }
-
-        /// <summary>
         /// Removes all ANSI escape codes from the string.
         /// </summary>
         /// <param name="text">The string to clean.</param>
         public static string RemoveAnsiEscapeCodes(string text)
         {
             return AnsiEscapeCodeRegex().Replace(text, "");
+        }
+
+        /// <summary>
+        /// Calculates the length of a character in a text, as it will be displayed on the screen.
+        /// </summary>
+        /// <param name="character">The character.</param>
+        /// <param name="startingXPos">The X position, where the text will be displayed on the terminal. (Important for tabs.)</param>
+        /// <param name="length">The length of the text so far.</param>
+        /// <param name="maxLen">The maximum length of the text so far. (Important for carriage return.)</param>
+        /// <param name="isPreviousEscape">If the previous character was an escape character.</param>
+        public static void GetCharDisplayLen(char character, int startingXPos, ref int length, ref int maxLen, ref bool isPreviousEscape)
+        {
+            if (character.Equals('\t'))
+            {
+                length += 8 - (startingXPos + length) % 8;
+            }
+            else if (character.Equals('\r'))
+            {
+                maxLen = Math.Max(length, maxLen);
+                length = 0 - startingXPos;
+            }
+            else if (character.Equals('\b'))
+            {
+                length--;
+            }
+            else if (character.Equals('\u001b'))
+            {
+                isPreviousEscape = true;
+            }
+            else if (!character.Equals('\0'))
+            {
+                if (isPreviousEscape)
+                {
+                    isPreviousEscape = false;
+                }
+                else
+                {
+                    length++;
+                }
+            }
         }
 
         /// <summary>
@@ -277,46 +292,6 @@ namespace ConsoleUI
         /// </summary>
         [GeneratedRegex("\\x1B\\[[^@-~]*[@-~]")]
         private static partial Regex AnsiEscapeCodeRegex();
-
-        /// <summary>
-        /// Calculates the length of a character in a text, as it will be displayed on the screen.
-        /// </summary>
-        /// <param name="character">The character.</param>
-        /// <param name="startingXPos">The X position, where the text will be displayed on the terminal. (Important for tabs.)</param>
-        /// <param name="length">The length of the text so far.</param>
-        /// <param name="maxLen">The maximum length of the text so far. (Important for carriage return.)</param>
-        /// <param name="isPreviousEscape">If the previous character was an escape character.</param>
-        public static void GetCharDisplayLen(char character, int startingXPos, ref int length, ref int maxLen, ref bool isPreviousEscape)
-        {
-            if (character.Equals('\t'))
-            {
-                length += 8 - (startingXPos + length) % 8;
-            }
-            else if (character.Equals('\r'))
-            {
-                maxLen = Math.Max(length, maxLen);
-                length = 0 - startingXPos;
-            }
-            else if (character.Equals('\b'))
-            {
-                length--;
-            }
-            else if (character.Equals('\u001b'))
-            {
-                isPreviousEscape = true;
-            }
-            else if (!character.Equals('\0'))
-            {
-                if (isPreviousEscape)
-                {
-                    isPreviousEscape = false;
-                }
-                else
-                {
-                    length++;
-                }
-            }
-        }
         #endregion
     }
 }
